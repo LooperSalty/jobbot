@@ -15,6 +15,9 @@ htmlcov/
 .env
 .env.*
 !.env.example
+# Google Classroom (backend API) : client OAuth et jeton d'accès
+config/google_oauth_client.json
+data/classroom_token.json
 
 # --- Données personnelles : ne JAMAIS publier
 # Profil maître (identité, téléphone, e-mail, expériences, prétentions salariales) et profil extrait d'un CV.
@@ -38,3 +41,6 @@ Lettre*
 # ...sauf les exemples fictifs des tests
 !tests/fixtures/**/*.eml
 !tests/fixtures/**/*.pdf
+
+# --- Infos serveur (accès, IP, identifiants) : privé
+serveur.md

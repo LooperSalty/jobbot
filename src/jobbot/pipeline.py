@@ -1,4 +1,7 @@
-"""Daily run: collect → score → prepare → apply → discover → enrich → spontaneous → inbox → followup.
+"""Daily run: classroom → collect → score → prepare → apply → discover → enrich → spontaneous → inbox → followup.
+
+``classroom`` (first, the school's offers are the most valuable) runs one check of the Google Classroom
+stream whatever the time (``classroom.active_hours`` only limits the frequent scheduled watcher).
 
 Every step is isolated (an exception is recorded as a French error string and the next step runs); the run
 ends with a notification summary, then the weekly report when it is due (``reports.weekly_report_day``).
@@ -18,6 +21,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 from jobbot.apply.service import ApplyReport, dedup_reason, set_job_status
+from jobbot.classroom.watch import ClassroomReport
 from jobbot.context import AppContext
 from jobbot.followup import FollowupReport
 from jobbot.mail.messages import InboxReport
@@ -33,7 +37,7 @@ from jobbot.textutil import truncate
 log = logging.getLogger(__name__)
 
 STEPS: tuple[str, ...] = (
-    "collect", "score", "prepare", "apply", "discover", "enrich", "spontaneous", "inbox", "followup",
+    "classroom", "collect", "score", "prepare", "apply", "discover", "enrich", "spontaneous", "inbox", "followup",
 )
 PREPARE_LIMIT = 10  # tailored CV + letter per run (LLM time), best match scores first
 PREPARE_MAX_FAILURES = 3  # a job whose documents keep failing leaves the SHORTLISTED queue (status FAILED)
@@ -61,6 +65,7 @@ class DailyReport(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
+    classroom: ClassroomReport | str | None = None
     collect: CollectReport | str | None = None
     score: MatchReport | str | None = None
     prepare: PrepareReport | str | None = None
@@ -87,6 +92,8 @@ def _describe(step: str, report: Any) -> str:
     if report is None or isinstance(report, str):
         return ""
     texts: dict[str, Callable[[Any], str]] = {
+        "classroom": lambda r: (f"école : {r.offers} offre(s), {r.applied + r.simulated} candidature(s)"
+                                if r.offers or r.applied or r.simulated else ""),
         "collect": lambda r: f"{r.new} nouvelle(s) offre(s)",
         "score": lambda r: f"{r.shortlisted} retenue(s)",
         "prepare": lambda r: f"{r.prepared} dossier(s) prêt(s)",
@@ -205,6 +212,12 @@ class _Shared:
 # --------------------------------------------------------------------------- steps
 
 
+def _classroom(ctx: AppContext, shared: _Shared) -> ClassroomReport:
+    from jobbot.classroom.watch import run_classroom
+
+    return run_classroom(ctx, respect_hours=False)
+
+
 def _collect(ctx: AppContext, shared: _Shared) -> CollectReport:
     from jobbot.sources.registry import collect_jobs
 
@@ -274,7 +287,7 @@ def _followup(ctx: AppContext, shared: _Shared) -> FollowupReport:
 
 
 STEP_FUNCTIONS: dict[str, Callable[[AppContext, _Shared], Any]] = {
-    "collect": _collect, "score": _score, "prepare": _prepare, "apply": _apply, "discover": _discover,
+    "classroom": _classroom, "collect": _collect, "score": _score, "prepare": _prepare, "apply": _apply, "discover": _discover,
     "enrich": _enrich, "spontaneous": _spontaneous, "inbox": _inbox, "followup": _followup,
 }
 

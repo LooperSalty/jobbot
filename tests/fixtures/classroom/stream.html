@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<!-- Fictitious Google Classroom stream (obfuscated class names like the real UI; posts found by permalink). -->
+<html lang="fr">
+<head><meta charset="utf-8"><title>Promo Dev 2026</title>
+<style>.spacer { height: 1600px; } .x9Q { margin: 8px; padding: 8px; border: 1px solid #ccc; }</style></head>
+<body>
+<div class="nav"><a href="https://classroom.google.com/h">Classroom</a> <span>Flux</span> <span>Travaux et devoirs</span>
+  <span>Personnes</span></div>
+<div role="main">
+  <div class="hdr">Promo Dev 2026 — Mastère Développement</div>
+  <div class="kQ3" id="stream">
+    <div class="x9Q">
+      <div><span class="aut">Mme Claire Exemple</span>
+        <a class="dt" href="https://classroom.google.com/c/MTIzNDU2Nzg5MDEy/p/NTU1MDAwMTExMjIy">12 sept.</a>
+        <span>more_vert</span></div>
+      <div class="txt">Deux offres d'alternance de nos entreprises partenaires. Acme Logiciels (Metz) recherche un
+        développeur full-stack…</div>
+      <a href="https://docs.google.com/document/d/1AbCdEfGhIjKlMnOpQrStUvWx/edit?usp=drive_link"
+         aria-label="Pièce jointe : Fiche de poste Acme">Fiche de poste Acme</a>
+      <div>2 commentaires ajoutés au cours</div>
+    </div>
+    <div class="x9Q">
+      <div><span class="aut">M. Paul Exemple</span>
+        <a class="dt" href="https://classroom.google.com/c/MTIzNDU2Nzg5MDEy/p/NTU1MDAwMTExMjMz">10 sept.</a></div>
+      <div class="txt">Rappel : réunion d'information sur les soutenances jeudi à 14h en salle 12.</div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+</div>
+<script>
+  let added = false;
+  window.addEventListener('scroll', () => {
+    if (added) return;
+    added = true;
+    const post = document.createElement('div');
+    post.className = 'x9Q';
+    post.innerHTML = '<div><span class="aut">Mme Claire Exemple</span> '
+      + '<a class="dt" href="https://classroom.google.com/c/MTIzNDU2Nzg5MDEy/p/NTU1MDAwMTExMjQ0">2 sept.</a></div>'
+      + '<div class="txt">Ancienne publication : offre de stage chez Gamma Web, voir le lien. '
+      + '<a href="https://www.google.com/url?q=https://jobs.gamma-web.example/stage-dev&amp;sa=D">Postuler</a></div>';
+    document.getElementById('stream').appendChild(post);
+  });
+</script>
+</body>
+</html>

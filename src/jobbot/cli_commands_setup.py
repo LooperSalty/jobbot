@@ -21,7 +21,7 @@ NEXT_STEPS = (
     "\n[bold]Étapes suivantes[/]\n"
     "  1. jobbot setup            (réglages : zone, contrats, quotas, mot de passe Gmail…)\n"
     "  2. jobbot doctor           (vérifie l'installation)\n"
-    "  3. jobbot login linkedin   (et hellowork : connexion manuelle, une seule fois)\n"
+    "  3. jobbot login linkedin   (puis hellowork et classroom : connexion manuelle, une seule fois)\n"
     "  4. jobbot --dry-run run    (essai à blanc)\n"
     "  5. jobbot dashboard        (valider les candidatures en mode review)"
 )
@@ -32,6 +32,7 @@ class Site(str, Enum):
     linkedin = "linkedin"
     hellowork = "hellowork"
     wttj = "wttj"
+    classroom = "classroom"
 
 
 class ExportFormat(str, Enum):
@@ -153,14 +154,29 @@ def _llm_only(state: State) -> Any:
 
 
 def login(
-    ctx: typer.Context, site: Annotated[Site, typer.Argument(help="linkedin, hellowork ou wttj")],
+    ctx: typer.Context, site: Annotated[Site, typer.Argument(help="linkedin, hellowork, wttj ou classroom")],
     timeout: Annotated[int, typer.Option("--timeout", help="Attente maximale (secondes).")] = 600,
 ) -> None:
     """Ouvre le site dans le navigateur de jobbot : connecte-toi à la main (jamais automatisé)."""
     from jobbot.apply.browser import login as browser_login
 
     state = state_of(ctx)
-    if browser_login(state.app, site.value, timeout_s=timeout):
+    if site is Site.classroom and state.app.settings.classroom.backend == "api":
+        from jobbot.classroom.api import authorize
+
+        ok, message = authorize(state.app)
+        if not ok:
+            fail(state.console, message)
+        state.console.print(f"[green]{escape(message)}[/]")
+        return
+    try:
+        connected = browser_login(state.app, site.value, timeout_s=timeout)
+    except Exception as exc:  # no display (server), browser missing, profile in use…
+        log.exception("Fenêtre de connexion impossible")
+        fail(state.console, f"Impossible d'ouvrir la fenêtre de connexion ({exc}). Il faut un écran : connecte-toi "
+                            "depuis un poste avec affichage.")
+        return
+    if connected:
         state.console.print(f"[green]Connecté à {site.value}[/] : la session est gardée dans le profil navigateur.")
         return
     fail(state.console, f"Connexion à {site.value} non détectée.")
@@ -219,7 +235,7 @@ def schedule_install(
     morning: Annotated[str, typer.Option("--matin", help="Heure du lancement complet (HH:MM).")] = "09:30",
     evening: Annotated[str, typer.Option("--soir", help="Heure boîte mail + relances (HH:MM).")] = "18:00",
 ) -> None:
-    """Crée les tâches planifiées Windows (jobbot-matin, jobbot-soir)."""
+    """Crée les tâches planifiées Windows (jobbot-matin, jobbot-soir, jobbot-classroom)."""
     state = state_of(ctx)
     bad = [t for t in (morning, evening) if not _TIME_RE.match(t)]
     if bad:

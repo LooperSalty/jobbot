@@ -19,6 +19,7 @@ from typing import Any, Literal
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 
+from jobbot.classroom.models import save_course_urls
 from jobbot.config import ConfigError, Profile, Settings
 
 SETTINGS_FILE = Path("config/settings.yaml")
@@ -304,6 +305,7 @@ SEC_OUTREACH = "Candidatures spontanées"
 SEC_FOLLOWUP = "Relances"
 SEC_NOTIFY = "Notifications"
 SEC_ACCOUNTS = "Comptes"
+SEC_CLASSROOM = "Offres de l'école (Classroom)"
 
 SETUP_QUESTIONS: tuple[Question, ...] = (
     # --- Recherche
@@ -367,6 +369,15 @@ SETUP_QUESTIONS: tuple[Question, ...] = (
     Question("LBA_API_TOKEN", "La Bonne Alternance — jeton API (optionnel)", "secret", SEC_ACCOUNTS),
     Question("HUNTER_API_KEY", "Hunter.io — clé API (optionnel)", "secret", SEC_ACCOUNTS),
     Question("BRAVE_API_KEY", "Brave Search — clé API (optionnel)", "secret", SEC_ACCOUNTS),
+    # --- Offres de l'école (Google Classroom)
+    Question("classroom.enabled", "Surveiller les offres publiées par l'école sur Google Classroom ?", "bool",
+             SEC_CLASSROOM),
+    Question("classroom.auto_apply", "Postuler tout de suite aux offres adaptées de l'école (même en rodage) ?",
+             "bool", SEC_CLASSROOM, help="Toujours soumis au score, aux quotas, à la liste noire et au contrôle du CV."),
+    Question("classroom.poll_minutes", "Vérifier le flux Classroom toutes les … minutes", "int", SEC_CLASSROOM),
+    Question("CLASSROOM_COURSE_URLS", "Lien(s) du cours Classroom (séparés par des virgules)", "secret",
+             SEC_CLASSROOM, help="https://classroom.google.com/c/… puis « jobbot login classroom ».",
+             setter=save_course_urls),
 )
 
 
@@ -383,7 +394,7 @@ def apply_answer(root: Path, q: Question, value: Any) -> None:
     """Persist one wizard answer (validated). Empty secret answers keep the existing secret."""
     if q.kind == "secret":
         if value:
-            set_secret(root, q.key, str(value))
+            (q.setter or (lambda r, v: set_secret(r, q.key, str(v))))(root, value)
         return
     if q.kind == "choice" and value not in q.choices:
         raise ConfigError(f"{q.label} : choisir parmi {', '.join(q.choices)}")

@@ -17,6 +17,7 @@ from typer.core import TyperGroup
 
 from jobbot import cli_commands_run as run_cmds
 from jobbot import cli_commands_setup as setup_cmds
+from jobbot.cli_classroom import classroom_app
 from jobbot.cli_support import State, configure_stdio, fail, resolve_root, setup_logging, state_of, teardown_logging
 
 log = logging.getLogger(__name__)
@@ -40,7 +41,8 @@ app = typer.Typer(name="jobbot", help=HELP, no_args_is_help=True, add_completion
                   rich_markup_mode="rich", pretty_exceptions_enable=False)
 config_app = typer.Typer(help="Lire ou modifier les réglages (settings.yaml, profile.yaml, .env).",
                          no_args_is_help=True)
-schedule_app = typer.Typer(help="Tâches planifiées Windows : « run » à 9 h 30, boîte mail + relances à 18 h.",
+schedule_app = typer.Typer(help="Tâches planifiées Windows : « run » à 9 h 30, boîte mail + relances à 18 h, "
+                                "flux Classroom de l'école toutes les classroom.poll_minutes minutes.",
                            no_args_is_help=True)
 
 
@@ -181,6 +183,7 @@ schedule_app.command("remove")(setup_cmds.schedule_remove)
 schedule_app.command("show")(setup_cmds.schedule_show)
 app.add_typer(config_app, name="config")
 app.add_typer(schedule_app, name="schedule")
+app.add_typer(classroom_app, name="classroom")
 
 
 if __name__ == "__main__":  # python -m jobbot.cli

@@ -12,7 +12,7 @@ from jobbot.cli_support import dry_banner, fail, print_report, state_of
 
 CHANNELS = ("linkedin", "hellowork", "lba", "email", "external")
 STEP_TITLES = {
-    "collect": "Collecte des offres", "score": "Tri des offres", "prepare": "CV et lettres",
+    "classroom": "Offres de l'école (Classroom)", "collect": "Collecte des offres", "score": "Tri des offres", "prepare": "CV et lettres",
     "apply": "Candidatures", "discover": "Entreprises découvertes", "enrich": "Recherche de contacts",
     "spontaneous": "Candidatures spontanées", "inbox": "Boîte mail", "followup": "Relances",
 }

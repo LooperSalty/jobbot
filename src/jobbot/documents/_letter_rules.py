@@ -26,6 +26,7 @@ from jobbot.documents._format import display_url, has_started, month_label
 from jobbot.documents._truth import TruthBase
 from jobbot.matching import lexicon
 from jobbot.matching._text import display_title
+from jobbot.matching.relayed import is_relayed
 from jobbot.models import Company, JobOffer, KeywordHit
 
 GREETING = "Madame, Monsieur,"
@@ -193,6 +194,23 @@ def _programme(inp: LetterInput) -> str:
     return f"{lead} {title} à {alt.school}, en alternance{months}{rhythm}."
 
 
+def relay_sentence(inp: LetterInput) -> str:
+    """« J'ai pris connaissance de votre offre par l'intermédiaire de <école>. » for an offer relayed by the
+    candidate's school (Google Classroom); the school name comes from the profile only."""
+    if inp.job is None or not is_relayed(inp.job):
+        return ""
+    school = (inp.profile.alternance.school if inp.profile.alternance else "").strip()
+    return f"J'ai pris connaissance de votre offre par l'intermédiaire de {school or 'mon école'}."
+
+
+def with_relay(paragraphs: list[str], inp: LetterInput) -> list[str]:
+    """Paragraphs with the school-relay sentence opening the first one (once)."""
+    sentence = relay_sentence(inp)
+    if not sentence or not paragraphs or "par l'intermédiaire de" in paragraphs[0]:
+        return paragraphs
+    return [f"{sentence} {paragraphs[0]}", *paragraphs[1:]]
+
+
 def _where(inp: LetterInput) -> str:
     return f"au sein de {inp.company_name}" if inp.company_name else "au sein de votre entreprise"
 
@@ -281,7 +299,7 @@ def _us(inp: LetterInput) -> str:
 
 
 def rule_paragraphs(inp: LetterInput) -> list[str]:
-    return [_intro(inp), _you(inp), _me(inp), _us(inp)]
+    return with_relay([_intro(inp), _you(inp), _me(inp), _us(inp)], inp)
 
 
 # --------------------------------------------------------------------------- e-mail
@@ -313,7 +331,7 @@ def build_email_body(inp: LetterInput, pitch: str) -> str:
     contact = " · ".join(x for x in (identity.phone, identity.email) if x)
     blocks = [
         GREETING,
-        " ".join(x for x in (opening, pitch, aid) if x),
+        " ".join(x for x in (opening, relay_sentence(inp), pitch, aid) if x),
         "Vous trouverez ci-joint mon CV et ma lettre de motivation. Je me tiens à votre disposition pour un échange.",
         "\n".join(x for x in ("Bien cordialement,", identity.full_name, contact, display_url(identity.linkedin)) if x),
     ]

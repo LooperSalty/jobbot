@@ -242,6 +242,9 @@ def config_set(root: Path, key: str, raw: str) -> str:
     from jobbot.preferences import apply_answer, set_secret, set_value
 
     q = question(key)
+    if q is not None and q.kind == "secret" and q.setter is not None:
+        apply_answer(root, q, raw)  # validated secret (e.g. CLASSROOM_COURSE_URLS)
+        return f"{key} enregistré dans .env (valeur masquée)."
     if (q is not None and q.kind == "secret") or key.isupper():
         set_secret(root, key, raw)
         return f"{key} enregistré dans .env (valeur masquée)."

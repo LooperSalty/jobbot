@@ -313,3 +313,67 @@ above are kept; additions:
   `tech`), used by the dashboard timeline and companies table (`dashboard.data.company_row`: chosen address = the
   review contact, else `selection.sort_contacts` order; kind, person, guessed flag, people count, description).
 - **CLI**: `jobbot run` prints the weekly report line (summary + file) when `DailyReport.weekly` is set.
+
+## v3 — Offers relayed by the school (Google Classroom, `classroom/`)
+
+The school posts apprenticeship offers in a Google Classroom course (private URL(s) in `.env`
+`CLASSROOM_COURSE_URLS`, comma-separated). A frequent watcher applies at once to the adapted ones.
+
+- **Config**: `Secrets.classroom_course_urls`; `Settings.classroom: ClassroomSettings` (`enabled`, `backend:
+  browser|api`, `poll_minutes` 1–1439, `active_hours` "HH:MM-HH:MM" (`config.parse_active_hours`), `auto_apply`,
+  `min_score` (None → `thresholds.auto_apply_min_score`), `headless`, `browser_profile`
+  (`data/browser-profile-classroom`, never the LinkedIn/HelloWork profile), `max_posts`, `school_bonus`). Wizard
+  section « Offres de l'école (Classroom) » (`enabled`, `auto_apply`, `poll_minutes`, secret `CLASSROOM_COURSE_URLS`
+  validated by its `Question.setter` — `apply_answer` now honours a setter on secrets; `config set` too).
+- `classroom/models.py`: `Course`, `Attachment`, `ClassroomPost`, `CourseFetch`, `LinkContent`, `Wants`; ids from
+  URLs (`/c/<b64>`, `/p|sa|a|m/<b64>` → `p-<numeric>`…, `decode_id`/`encode_id`), `parse_course_urls` → (courses,
+  invalid count), `stream_fingerprint` (dates / comment counts ignored), `text_hash`.
+- `classroom/dom.py` (pure + JS): posts found by permalink (card = largest ancestor holding no other post),
+  heuristic split + `h-<hash>` ids without permalinks, `login_wall`, `no_access`, `parse_post_text` (author / date /
+  body, nav tabs, icon ligatures and comments dropped), `parse_date_text`, `classify_links` (Google redirects
+  unwrapped; Docs/Slides/Sheets/Drive → `Attachment`; forms and other sites → links), `build_post`.
+- `classroom/browser.py` (default backend): `open_classroom_browser(ctx, *, headless)` is the **only** place that
+  creates a Classroom browser context (watcher and `jobbot login classroom`; `apply.browser.open_browser` gained
+  `profile_dir` / `launch_options`, `GOOGLE_LAUNCH` drops the automation flags so the human can sign in) — extend it
+  for a future session import (`storage_state`). `fetch_course` (never raises): stream → scroll → open wanted posts
+  (« Voir plus » clicked) → Google files via `ContextDownloader` (`context.request`, shares cookies; Docs
+  `export?format=txt`, Drive `uc?export=download`). `BrowserBackend`: headless first, one headful retry on a login
+  wall only when `display_available()` (Linux: `DISPLAY`/`WAYLAND_DISPLAY`); a failed retry keeps `login_required`.
+  No OS-specific code in `classroom/` (runs on Windows and on a headless Linux server).
+- `classroom/api.py` (optional, `pip install -e .[classroom]`): `courses.announcements.list` +
+  `courses.courseWorkMaterials.list` (`orderBy=updateTime desc`), Drive API export/download; OAuth desktop flow
+  (`google-auth-oauthlib` imported lazily, French `ClassroomAuthError`), client `config/google_oauth_client.json`,
+  token `data/classroom_token.json` (both gitignored); `authorize(ctx)` behind `jobbot login classroom`.
+- `classroom/content.py`: `Downloader` protocol, bytes → text (PDF via pypdf, DOCX, HTML, text; 8 MB cap);
+  `link_contents` — board URLs (`alerts.match_offer_url`) read through their source with the new
+  `registry.fetch_details_only(ctx, job)` (never stored), other pages via httpx + `html_to_text`.
+- `classroom/extract.py`: `PostExtraction{is_offer_post, offers[ExtractedOffer]}` via `llm.complete_json(fast=True)`,
+  then `ground()` drops e-mails / links absent from the texts and blanks unknown companies; fallback on `LLMError`
+  (offer wording + regex e-mails/URLs, first line as title).
+- `classroom/mapping.py`: `to_job` → `JobOffer(source="classroom", external_id=f"{post_id}-{n}")`, `raw` = `post_id,
+  course_id, post_url, post_text, apply_instructions, deadline, target_level, relayed_by_school, apply_via_school,
+  school_bonus, board…`. Route: EMAIL (valid address, school's included) > board in-site (LinkedIn Easy Apply /
+  HelloWork / LBA: `raw["board"] = {source, external_id, url, raw}`, title/company from the board for dedup) >
+  EXTERNAL. `apply/board.py: board_view(job)` gives appliers the board's own view (called in `apply.service`).
+- `matching/relayed.py` (used by `match_job`): relayed offers skip `school_offer_reason`, get `raw["school_bonus"]`
+  (« Offre relayée par l'école (+5 points) »), are filtered on a target level well below the programme (RNCP level
+  of `profile.alternance`, BTS/Bac+2, CAP, Bac for a Bac+5), a passed deadline or an expired linked board offer.
+  `match.score_one(ctx, job)` scores one job like `score_new_jobs`.
+- Documents: `_letter_rules.relay_sentence` / `with_relay` — letter paragraph 1 and application e-mail start with
+  « J'ai pris connaissance de votre offre par l'intermédiaire de <profile.alternance.school> » (code-inserted).
+- `classroom/process.py`: `review_reason` (auto_apply off, `mode: review`, score < threshold, truth warnings →
+  PENDING_REVIEW; the warm-up is ignored), `process_offer` (score_one → dedup → `prepare_documents` → `submit`),
+  `submit` (APPROVED « Validée automatiquement » then `apply_to_jobs(job_ids=[id])`: single job, no long pause;
+  exhausted quota → `deferred`), `retry_approved` (≤ `MAX_ATTEMPTS`), `notify_outcome` (one notification per offer).
+- `classroom/state.py`: kv `classroom:posts:<course>` (post → stream fingerprint / text hash / failures, 500 kept),
+  `classroom:last_check` (doctor), `classroom:login_notified_at` (alert ≤ every 6 h), lock `data/classroom.lock`,
+  `in_active_hours`.
+- `classroom/watch.py`: `ClassroomReport`, `run_classroom(ctx, *, respect_hours=True, backend=None)` (disabled /
+  unconfigured / outside hours / busy → returns at once; retries, fetch, per-post extraction, per-offer processing;
+  a post is processed again only when its text changed — then offers filtered before are re-scored; failing posts
+  retried 3 times). `classroom/preview.py`: `preview_classroom` (read-only, `jobbot classroom test`).
+- Pipeline: step `classroom` first in `STEPS` (`run_classroom(respect_hours=False)`), `DailyReport.classroom`.
+- CLI (`cli_classroom.py`): `jobbot classroom watch [--once] [--interval N]`, `jobbot classroom test [-n N]`,
+  `jobbot login classroom` (browser, or OAuth when `backend: api`). `jobbot schedule install|remove|show` also
+  manages the Windows task `jobbot-classroom` (`schtasks /SC MINUTE /MO <poll_minutes>`, `pythonw -m jobbot.cli
+  --root … classroom watch --once`). `jobbot doctor`: course link ✓/✗ (never shown) + last check.

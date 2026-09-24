@@ -18,7 +18,7 @@ from rapidfuzz import fuzz
 
 from jobbot import clock
 from jobbot.config import Profile
-from jobbot.matching import filters, lexicon, target_rules
+from jobbot.matching import filters, lexicon, relayed, target_rules
 from jobbot.matching._text import GENDER_RX, family_of, norm, normalize_title
 from jobbot.matching.geo import geocode, is_place
 from jobbot.matching.location import job_coordinates, job_department
@@ -89,6 +89,9 @@ def _match(job: JobOffer, profile: Profile, skills: ProfileSkills) -> tuple[floa
     score = sum(WEIGHTS[name] * part.score for name, part in parts.items())
     reasons = [part.reason for part in parts.values() if part.reason]
     score, extra = _adjust(job, profile, contract, years, text, score, title)
+    bonus = relayed.school_bonus(job)
+    if bonus:
+        score, extra = score + bonus, [relayed.BONUS_REASON.format(bonus=bonus), *extra]
     return round(max(0.0, min(100.0, score)), 1), reasons + extra
 
 
@@ -98,7 +101,8 @@ def _match(job: JobOffer, profile: Profile, skills: ProfileSkills) -> tuple[floa
 def _blocking_reason(
     job: JobOffer, profile: Profile, contract: ContractType, years: int | None, text: str
 ) -> str | None:
-    reason = filters.sales_title_reason(job) or filters.school_offer_reason(job)
+    school = relayed.blocking_reason(job, profile) if relayed.is_relayed(job) else filters.school_offer_reason(job)
+    reason = filters.sales_title_reason(job) or school  # a school-relayed post names the school: not a fake offer
     reason = reason or _excluded_title(job, profile) or _excluded_description(job, profile)
     reason = reason or target_rules.contract_reason(job, profile, contract)
     if reason:
@@ -283,6 +287,13 @@ def score_new_jobs(ctx: AppContext) -> MatchReport:
     log.info("Scoring : %d offre(s) notée(s), %d retenue(s), %d écartée(s), %d doublon(s)",
              report.scored, report.shortlisted, report.filtered_out, counts["skipped"])
     return report
+
+
+def score_one(ctx: AppContext, job: JobOffer) -> JobOffer:
+    """Score and store one job exactly like ``score_new_jobs`` (location, duplicates, threshold); returns the
+    stored version (status SHORTLISTED, FILTERED_OUT or SKIPPED)."""
+    _score_and_store(ctx, job, profile_skills(ctx.profile), ctx.settings.thresholds.min_match_score)
+    return ctx.repo.get_job(job.id) or job
 
 
 def _score_and_store(ctx: AppContext, job: JobOffer, skills: ProfileSkills, threshold: float) -> str:

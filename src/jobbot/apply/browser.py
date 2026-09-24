@@ -10,9 +10,10 @@ import logging
 import re
 import time
 from collections.abc import Iterator, Sequence
-from contextlib import contextmanager
+from contextlib import AbstractContextManager, contextmanager
 from pathlib import Path
 from typing import Any, Literal
+from urllib.parse import urlparse
 
 from playwright.sync_api import BrowserContext, Locator, Page, Playwright, sync_playwright
 from playwright.sync_api import Error as PlaywrightError
@@ -24,13 +25,20 @@ from jobbot.textutil import slugify, truncate
 
 log = logging.getLogger(__name__)
 
-Site = Literal["linkedin", "hellowork", "wttj"]
+Site = Literal["linkedin", "hellowork", "wttj", "classroom"]
 
 LOGIN_URLS: dict[str, str] = {
     "linkedin": "https://www.linkedin.com/login",
     "hellowork": "https://www.hellowork.com/fr-fr/candidat/connexion-inscription.html#connexion",
     "wttj": "https://www.welcometothejungle.com/fr/signin",
+    "classroom": "https://classroom.google.com/",
 }
+# Google refuses sign-in in browsers flagged as automated: the human logs in himself in a window without the
+# automation flags (nothing is typed or clicked by jobbot). Used for the separate Classroom profile only.
+GOOGLE_LAUNCH: dict[str, Any] = {
+    "ignore_default_args": ["--enable-automation"], "args": ["--disable-blink-features=AutomationControlled"],
+}
+GOOGLE_SESSION_COOKIE = r"^(SID|__Secure-1PSID|__Secure-3PSID|SAPISID)$"
 LOGIN_POLL_S = 2.0
 VIEWPORT = {"width": 1366, "height": 900}
 
@@ -70,10 +78,11 @@ _monotonic = time.monotonic
 # --------------------------------------------------------------------------- session
 
 
-def _launch(pw: Playwright, user_dir: Path, channel: str | None, headless: bool) -> BrowserContext:
+def _launch(pw: Playwright, user_dir: Path, channel: str | None, headless: bool,
+            extra: dict[str, Any] | None = None) -> BrowserContext:
     kwargs: dict[str, Any] = dict(
         user_data_dir=str(user_dir), headless=headless, locale="fr-FR", timezone_id="Europe/Paris",
-        viewport=VIEWPORT, accept_downloads=True,
+        viewport=VIEWPORT, accept_downloads=True, **(extra or {}),
     )
     if channel:
         try:
@@ -85,15 +94,17 @@ def _launch(pw: Playwright, user_dir: Path, channel: str | None, headless: bool)
 
 
 @contextmanager
-def open_browser(ctx: AppContext, *, headless: bool | None = None) -> Iterator[BrowserContext]:
-    """Persistent browser context (profile in ``settings.paths.browser_profile``), closed on exit."""
-    user_dir = ctx.path(ctx.settings.paths.browser_profile + "/.keep").parent
+def open_browser(ctx: AppContext, *, headless: bool | None = None, profile_dir: str | None = None,
+                 launch_options: dict[str, Any] | None = None) -> Iterator[BrowserContext]:
+    """Persistent browser context (profile in ``settings.paths.browser_profile``, or ``profile_dir`` for a
+    separate session such as Classroom), closed on exit."""
+    user_dir = ctx.path((profile_dir or ctx.settings.paths.browser_profile) + "/.keep").parent
     user_dir.mkdir(parents=True, exist_ok=True)
     head = ctx.settings.headless if headless is None else headless
     pw = sync_playwright().start()
     context: BrowserContext | None = None
     try:
-        context = _launch(pw, user_dir, ctx.settings.browser_channel, head)
+        context = _launch(pw, user_dir, ctx.settings.browser_channel, head, launch_options)
         yield context
     finally:
         if context is not None:
@@ -104,11 +115,20 @@ def open_browser(ctx: AppContext, *, headless: bool | None = None) -> Iterator[B
         pw.stop()
 
 
+def _login_browser(ctx: AppContext, site: Site) -> AbstractContextManager[BrowserContext]:
+    """Visible window on the site's profile: the separate Classroom profile comes from its single helper."""
+    if site == "classroom":
+        from jobbot.classroom.browser import open_classroom_browser
+
+        return open_classroom_browser(ctx, headless=False)
+    return open_browser(ctx, headless=False)
+
+
 def login(ctx: AppContext, site: Site, timeout_s: int = 600) -> bool:
     """Open the site's login page in a visible window and wait until the human is logged in."""
     if site not in LOGIN_URLS:
         raise ValueError(f"Site inconnu : {site} (attendu : {', '.join(LOGIN_URLS)})")
-    with open_browser(ctx, headless=False) as context:
+    with _login_browser(ctx, site) as context:
         page = context.pages[0] if context.pages else context.new_page()
         try:
             page.goto(LOGIN_URLS[site], wait_until="domcontentloaded")
@@ -138,6 +158,8 @@ def is_logged_in(page: Page, site: Site) -> bool:
             return _hellowork_logged_in(page)
         if site == "wttj":
             return _wttj_logged_in(page)
+        if site == "classroom":
+            return _classroom_logged_in(page)
     except PlaywrightError as exc:
         log.debug("Vérification de session %s impossible : %s", site, exc)
         return False
@@ -171,6 +193,13 @@ def _wttj_logged_in(page: Page) -> bool:
     if _has_cookie(page, "https://www.welcometothejungle.com", r"session|auth|token"):
         return True
     return page.locator("a[href*='/me/'], a[href$='/me'], [data-testid*='user-menu' i]").count() > 0
+
+
+def _classroom_logged_in(page: Page) -> bool:
+    """On classroom.google.com itself (not the account chooser / marketing page) with a Google session."""
+    if urlparse(page.url).hostname != "classroom.google.com":
+        return False
+    return _has_cookie(page, "https://classroom.google.com", GOOGLE_SESSION_COOKIE)
 
 
 def human_pause(pacer: Pacer) -> None:

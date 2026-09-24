@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+from datetime import time
 from pathlib import Path
 from typing import Literal
 
@@ -231,6 +233,39 @@ class ReportSettings(Frozen):
     weekly_email: bool = False  # also e-mail the weekly report to the candidate himself (SMTP required)
 
 
+_HOURS_RE = re.compile(r"^\s*([01]?\d|2[0-3]):([0-5]\d)\s*-\s*([01]?\d|2[0-3]):([0-5]\d)\s*$")
+
+
+def parse_active_hours(spec: str) -> tuple[time, time]:
+    """'07:30-21:00' → (07:30, 21:00). ValueError (French) when malformed."""
+    match = _HOURS_RE.match(spec or "")
+    if not match:
+        raise ValueError(f"Plage horaire invalide « {spec} » (format HH:MM-HH:MM, ex. 07:30-21:00)")
+    h1, m1, h2, m2 = (int(g) for g in match.groups())
+    return time(h1, m1), time(h2, m2)
+
+
+class ClassroomSettings(Frozen):
+    """Offers relayed by the school in Google Classroom: watched often, applied to immediately."""
+
+    enabled: bool = True
+    backend: Literal["browser", "api"] = "browser"  # browser: logged-in profile (no setup); api: OAuth (optional)
+    poll_minutes: int = Field(15, ge=1, le=1439)  # period of the scheduled « classroom watch --once » (≤ 1 day)
+    active_hours: str = "07:30-21:00"  # outside this window the watcher exits at once
+    auto_apply: bool = True  # apply right away, even during the warm-up review period
+    min_score: float | None = Field(None, ge=0, le=100)  # None → thresholds.auto_apply_min_score
+    headless: bool = True  # headful retry once when Google asks to log in
+    browser_profile: str = "data/browser-profile-classroom"  # never shared with the LinkedIn/HelloWork profile
+    max_posts: int = Field(30, ge=1, le=200)
+    school_bonus: float = Field(5.0, ge=0, le=30)  # added to the match score of a school-relayed offer
+
+    @field_validator("active_hours")
+    @classmethod
+    def _valid_hours(cls, value: str) -> str:
+        parse_active_hours(value)
+        return value.strip()
+
+
 class Paths(Frozen):
     data_dir: str = "data"
     output_dir: str = "output"
@@ -255,6 +290,7 @@ class Settings(Frozen):
     search: SearchSettings = Field(default_factory=SearchSettings)
     outreach: OutreachSettings = Field(default_factory=OutreachSettings)
     reports: ReportSettings = Field(default_factory=ReportSettings)
+    classroom: ClassroomSettings = Field(default_factory=ClassroomSettings)
     paths: Paths = Field(default_factory=Paths)
     notify_jarvis: bool = False  # speak notifications through the local Jarvis TTS
     jarvis_script: str | None = None  # path to jarvis_notify.py (called as: python <script> --type tell "<msg>")
@@ -277,10 +313,11 @@ class Secrets(BaseSettings):
     smtp_password: str | None = None  # Gmail "mot de passe d'application"
     imap_host: str = "imap.gmail.com"
     imap_port: int = 993
+    classroom_course_urls: str | None = None  # school's Google Classroom course(s), comma-separated (private)
 
     @field_validator(
         "france_travail_client_id", "france_travail_client_secret", "lba_api_token", "hunter_api_key",
-        "brave_api_key", "anthropic_api_key", "smtp_user", "smtp_password", mode="before",
+        "brave_api_key", "anthropic_api_key", "smtp_user", "smtp_password", "classroom_course_urls", mode="before",
     )
     @classmethod
     def _blank_or_comment_is_absent(cls, value: object) -> object:

@@ -17,6 +17,7 @@ avant envoi.
 
 | Étape | Ce qui se passe |
 |---|---|
+| **Offres de l'école** (`classroom watch`) | Le flux Google Classroom de ton école est relu toutes les 15 minutes : chaque nouvelle offre adaptée reçoit tout de suite un CV et une lettre ciblés, et la candidature part aussitôt (voir § 3.6). |
 | **Collecte** (`search`) | Offres de La Bonne Alternance, France Travail, LinkedIn (sans connexion), HelloWork, Indeed, Welcome to the Jungle, Free-Work et APEC, à Metz, Nancy, **au Luxembourg** et en télétravail. Les doublons entre sites sont détectés. |
 | **Tri** (`score`) | Chaque offre reçoit une note de 0 à 100 avec ses raisons (intitulé, compétences, distance, contrat, pays, expérience demandée, salaire). Les fausses alternances d'écoles et les postes commerciaux sont écartés. |
 | **CV + lettre** (`prepare`) | CV d'une page et lettre adaptés aux mots-clés de l'offre, avec un **score ATS expliqué** (mots-clés présents ou manquants). Tout est tiré de `config/profile.yaml` : **rien n'est inventé**. |
@@ -66,7 +67,7 @@ jobbot init     # crée data/, output/, .env (copie de .env.example), config/pro
 jobbot setup    # assistant : zone, contrats, quotas, relances, notifications, comptes
 ```
 
-L'assistant pose une quarantaine de questions, en six sections :
+L'assistant pose une quarantaine de questions, en sept sections :
 
 | Section | Ce qu'on y règle |
 |---|---|
@@ -76,6 +77,7 @@ L'assistant pose une quarantaine de questions, en six sections :
 | **Relances** | Délais des deux relances et leur nombre. |
 | **Notifications** | Annonces vocales Jarvis, rapport de la semaine (et son envoi par e-mail), fiche d'entretien automatique. |
 | **Comptes** | Mot de passe d'application Gmail, identifiants France Travail, clés La Bonne Alternance / Hunter / Brave. |
+| **Offres de l'école (Classroom)** | Surveillance du Classroom de l'école oui/non, candidature immédiate oui/non, fréquence de vérification, lien du cours. |
 
 **Entrée** garde la valeur affichée entre parenthèses. Les mots de passe sont saisis masqués ; laisse vide pour garder
 celui qui est déjà enregistré. Tu peux refaire une seule section, par exemple `jobbot setup --section Comptes`. Tant
@@ -110,6 +112,7 @@ sont gardés, et l'ancienne version est sauvegardée en `.bak`) : une valeur ref
 | `FRANCE_TRAVAIL_CLIENT_ID`, `FRANCE_TRAVAIL_CLIENT_SECRET` | Offres France Travail | https://francetravail.io → Espace développeur → créer une application → s'abonner à l'API « Offres d'emploi v2 ». |
 | `LBA_API_TOKEN` | Optionnel : API officielle de La Bonne Alternance, en plus du site | Compte gratuit sur https://api.apprentissage.beta.gouv.fr. Il n'est **pas** nécessaire pour postuler via La Bonne Alternance. |
 | `HUNTER_API_KEY`, `BRAVE_API_KEY` | Optionnel : vérifier des adresses e-mail, trouver le site d'une entreprise | hunter.io, brave.com/search/api |
+| `CLASSROOM_COURSE_URLS` | Optionnel : le(s) cours Google Classroom où ton école publie des offres (liens séparés par des virgules) | Ouvre le cours dans ton navigateur et copie l'adresse `https://classroom.google.com/c/…` (voir § 3.6). |
 
 Sans une clé, la fonction concernée est désactivée avec un message ; le reste continue.
 
@@ -166,6 +169,69 @@ Une fenêtre Chrome s'ouvre et tu te connectes **toi-même**. jobbot ne tape jam
 captcha et ne saisit aucun code reçu. La session est gardée dans `data/browser-profile/`. Si LinkedIn demande plus tard
 une vérification, jobbot s'arrête, fait une capture d'écran et te demande de relancer `jobbot login`.
 
+### 3.6 Offres de l'école (Google Classroom)
+
+Ton école publie des offres d'alternance dans un cours Google Classroom ? jobbot relit le flux du cours toutes les
+15 minutes et postule **tout de suite** aux offres adaptées, pour que tu sois parmi les premiers candidats.
+
+**Mise en place (une fois)**
+
+```powershell
+jobbot setup --section classroom   # active la surveillance, colle le lien du cours (https://classroom.google.com/c/…)
+jobbot login classroom             # une fenêtre Chrome s'ouvre : connecte-toi à ton compte Google de l'école
+jobbot classroom test              # lit les dernières publications et montre ce que jobbot ferait (n'envoie rien)
+jobbot schedule install            # ajoute la tâche « jobbot-classroom » (toutes les classroom.poll_minutes minutes)
+```
+
+- Le lien du cours est gardé dans `.env` (`CLASSROOM_COURSE_URLS`, plusieurs liens séparés par des virgules) et
+  n'est jamais affiché (`jobbot doctor` indique seulement ✓ / ✗).
+- La connexion Google se fait **à la main**, dans un profil de navigateur séparé (`data/browser-profile-classroom/`,
+  jamais celui de LinkedIn / HelloWork). jobbot ne tape ni mot de passe ni code de validation. Si Google redemande
+  la connexion, tu reçois une notification « reconnecte-toi : jobbot login classroom ».
+- Sur une machine sans écran, la lecture du flux se fait en mode invisible ; la connexion initiale doit être faite
+  sur un poste avec écran.
+
+**Comment ça marche**
+
+1. Chaque nouvelle publication (ou publication modifiée) est lue en entier : texte (« Voir plus » compris), liens,
+   pièces jointes Google Docs / Drive (PDF, Word). Les liens vers HelloWork, LinkedIn, La Bonne Alternance, Indeed,
+   Welcome to the Jungle, France Travail… sont lus par la source correspondante pour avoir l'annonce complète.
+2. L'IA repère les offres (une publication peut en contenir plusieurs) ; rappels, réunions et informations
+   générales sont ignorés. Une adresse e-mail ou un lien absent du texte n'est jamais inventé.
+3. Chaque offre est notée comme les autres, avec trois différences : le filtre « fausse offre d'école » ne
+   s'applique pas, l'offre reçoit un bonus (« offre relayée par l'école », `classroom.school_bonus`, +5), et une
+   offre qui ne vise que des niveaux inférieurs à ta formation (BTS / Bac+2, CAP…) ou dont la date limite est
+   passée est écartée avec la raison.
+4. Offre adaptée : CV et lettre ciblés — la lettre et l'e-mail précisent « J'ai pris connaissance de votre offre par
+   l'intermédiaire de <ton école> » — puis candidature immédiate : par e-mail si une adresse est donnée (y compris
+   celle de l'école quand elle centralise les CV), sinon par LinkedIn / HelloWork / La Bonne Alternance si le lien y
+   mène, sinon « à faire à la main » avec le lien.
+5. Une notification te dit pour chaque offre : candidature envoyée, à valider, à faire toi-même (avec le lien) ou
+   écartée (raison courte). Une publication n'est traitée qu'une fois.
+
+**Réglages** (`jobbot config set classroom.<clé> <valeur>`)
+
+| Clé | Par défaut | Effet |
+|---|---|---|
+| `classroom.enabled` | `true` | Surveillance active. |
+| `classroom.auto_apply` | `true` | Postuler sans attendre, **même pendant les jours de rodage**. Restent obligatoires : le score minimum, les quotas, la liste noire, « pas deux candidatures à la même entreprise en 60 jours » et le contrôle de sincérité du CV. `mode: review` (choix explicite) fait tout passer « à valider ». |
+| `classroom.min_score` | vide | Score minimum pour postuler seul (vide = `thresholds.auto_apply_min_score`). |
+| `classroom.poll_minutes` | 15 | Fréquence de la tâche planifiée (relance `jobbot schedule install` après un changement). |
+| `classroom.active_hours` | `07:30-21:00` | En dehors de cette plage, la vérification s'arrête tout de suite. |
+| `classroom.school_bonus` | 5 | Points ajoutés au score d'une offre relayée par l'école. |
+| `classroom.max_posts` | 30 | Publications lues dans le flux à chaque passage. |
+| `classroom.backend` | `browser` | `api` : API Google Classroom officielle (optionnelle, voir ci-dessous). |
+
+Commandes : `jobbot classroom watch` (surveillance continue, Ctrl+C pour arrêter ; `--once` : un seul passage ;
+`--interval 5` : toutes les 5 minutes), `jobbot classroom test [-n 10]` (aperçu, ne postule jamais). `jobbot run`
+commence aussi par une vérification du Classroom.
+
+**Mode API (optionnel).** Si tu préfères l'API officielle au navigateur : crée dans Google Cloud un identifiant OAuth
+« Application de bureau » avec les API Classroom et Drive activées, enregistre son JSON sous
+`config/google_oauth_client.json`, installe `google-auth-oauthlib` (`.venv\Scripts\pip install -e ".[classroom]"`),
+puis `jobbot config set classroom.backend api` et `jobbot login classroom` (autorisation dans le navigateur ; le
+jeton va dans `data/classroom_token.json`). Ces deux fichiers sont ignorés par git.
+
 ---
 
 ## 4. Premier lancement : la checklist
@@ -200,10 +266,13 @@ jobbot export              # Excel (ou --format csv) de tout le suivi
 Pour que jobbot tourne tout seul chaque jour :
 
 ```powershell
-jobbot schedule install    # 09:30 : jobbot run · 18:00 : lecture des réponses + relances
+jobbot schedule install    # 09:30 : jobbot run · 18:00 : réponses + relances · Classroom toutes les 15 min
 jobbot schedule show
 jobbot schedule remove
 ```
+
+La tâche `jobbot-classroom` (si `classroom.enabled`) lance `jobbot classroom watch --once` toutes les
+`classroom.poll_minutes` minutes, sans fenêtre ; son journal est dans `data\logs\jobbot.log`.
 
 Le script `scripts\install_task.ps1` fait la même chose ; il accepte `-Matin 08:45 -Soir 18:30` et `-Supprimer`. Les
 tâches tournent quand ta session Windows est ouverte, parce que LinkedIn et HelloWork ont besoin du navigateur. Si le PC
@@ -217,7 +286,8 @@ d'entretien est écrite dès qu'une invitation est lue.
 |---|---|
 | `init` · `doctor [--smtp]` · `setup [--section X]` | Installation, diagnostic, assistant |
 | `config show [section]` · `config get <clé>` · `config set <clé> <valeur>` | Réglages |
-| `import-cv <pdf>` · `login linkedin\|hellowork\|wttj` | Profil depuis un CV, connexion manuelle |
+| `import-cv <pdf>` · `login linkedin\|hellowork\|wttj\|classroom` | Profil depuis un CV, connexion manuelle |
+| `classroom watch [--once] [--interval N]` · `classroom test [-n 10]` | Offres de l'école (Google Classroom) : surveillance et candidature immédiate, aperçu sans envoi |
 | `search [-s source]` · `score` · `prepare [-n 10] [-j id]` | Collecte, tri, CV et lettres |
 | `ats <id> [--cv autre.pdf]` | Explique le score ATS : mots-clés présents ou manquants, alertes |
 | `apply [-c canal] [-n N] [-j id]` | Candidatures. Canaux : `linkedin`, `hellowork`, `lba`, `email`, `external`. `-j id` vaut validation. |
@@ -227,7 +297,7 @@ d'entretien est écrite dès qu'une invitation est lue.
 | `inbox` · `followup` | Réponses et relances |
 | `prep <id candidature>` | Fiche de préparation d'entretien (régénérée si elle existe) |
 | `report [--precedente] [--date AAAA-MM-JJ] [--email]` | Rapport de la semaine ; `--email` te l'envoie aussi par e-mail |
-| `run [-s étape]` | Journée complète, ou seulement certaines étapes : `collect`, `score`, `prepare`, `apply`, `discover`, `enrich`, `spontaneous`, `inbox`, `followup` |
+| `run [-s étape]` | Journée complète, ou seulement certaines étapes : `classroom`, `collect`, `score`, `prepare`, `apply`, `discover`, `enrich`, `spontaneous`, `inbox`, `followup` |
 | `status` · `export` · `dashboard` · `schedule install\|remove\|show` | Suivi |
 
 Options communes : `--dry-run` (simulation), `-v` (journal détaillé), `--root <dossier>`.
@@ -397,6 +467,8 @@ d'entreprises de 50 salariés ou plus passent en dernier.
 | Gmail `550 5.4.5` / `5.7.1` | Limite ou blocage anti-spam : les envois s'arrêtent pour la journée. Baisse les quotas. |
 | France Travail : source désactivée | Clés absentes ou API « Offres d'emploi v2 » non souscrite sur francetravail.io. |
 | Une offre est restée « Échec » | `jobbot apply -j <id>` la retente. `jobbot reject <id>` l'écarte. |
+| « Google demande de te reconnecter à Classroom » | `jobbot login classroom` et connecte-toi à la main. `jobbot doctor` montre le résultat de la dernière vérification. |
+| `classroom test` : « pas une offre » partout | Normal pour des rappels ou des informations. Sinon vérifie le lien du cours (`jobbot setup --section classroom`) et que le compte connecté est bien inscrit au cours. |
 | La tâche planifiée ne tourne pas | `jobbot schedule show`, puis regarde `data\logs\tache-*.log`. La session Windows doit être ouverte. |
 | Caractères bizarres dans la console | Utilise Windows Terminal : jobbot remplace les caractères non affichables au lieu de planter. |
 | Le tableau de bord ne s'ouvre pas | `.venv\Scripts\pip install -e ".[dashboard]"`, ou change de port : `jobbot dashboard --port 8600`. |
@@ -415,6 +487,7 @@ Le journal détaillé est dans `data/logs/jobbot.log`. Pour plus de détails dan
 | `.env` | Secrets : mot de passe Gmail, clés d'API. **Ne jamais le partager.** |
 | `data/jobbot.db` | Offres, entreprises, candidatures, historique, liste noire |
 | `data/browser-profile/` | Sessions LinkedIn / HelloWork. **Ne jamais le partager.** |
+| `data/browser-profile-classroom/` | Session Google (Classroom de l'école), séparée. **Ne jamais la partager.** |
 | `data/logs/` | Journaux et captures d'écran (`screens/`) |
 | `output/<date>/<entreprise>-<poste>/` | CV (PDF + DOCX) et lettre de chaque candidature (`…-candidature-spontanee/` pour une spontanée) |
 | `output/entretiens/` | Fiches de préparation d'entretien (Markdown) |

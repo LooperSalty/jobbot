@@ -21,6 +21,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from jobbot import clock
 from jobbot.apply.base import Applier, ApplyResult
+from jobbot.apply.board import board_view  # relayed offers (Classroom) reach the appliers as their board's offer
 from jobbot.context import AppContext
 from jobbot.models import Application, ApplicationEvent, ApplyMethod, JobOffer, JobStatus, TailoredDocuments
 from jobbot.pacing import Pacer
@@ -277,7 +278,7 @@ def _get_applier(ctx: AppContext, job: JobOffer, channel: str,
     if applier is None:
         detail = (f"Envoi d'e-mails non configuré (SMTP) : écris toi-même à {job.contact_email}."
                   if channel == "email" else f"Canal {channel} indisponible : candidature à faire à la main.")
-    elif not applier.can_apply(job):
+    elif not applier.can_apply(board_view(job)):
         detail = f"Candidature automatique ({channel}) impossible pour cette offre : à faire à la main."
     else:
         return applier, "", ""
@@ -287,7 +288,7 @@ def _get_applier(ctx: AppContext, job: JobOffer, channel: str,
 
 def _attempt(applier: Applier, job: JobOffer, docs: TailoredDocuments) -> ApplyResult:
     try:
-        return applier.apply(job, docs)
+        return applier.apply(board_view(job), docs)
     except Exception as exc:  # appliers should not raise; stay safe anyway
         log.exception("Candidature %s en échec", job.id)
         return ApplyResult(ok=False, status=JobStatus.FAILED, method=job.apply_method,

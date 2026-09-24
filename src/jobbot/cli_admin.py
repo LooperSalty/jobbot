@@ -239,6 +239,27 @@ def check_database(ctx: Any) -> Check:
     return Check("Base de données", "ok", f"{jobs} offre(s), {apps} candidature(s)")
 
 
+def check_classroom(ctx: Any) -> list[Check]:
+    """Course link configured (✓/✗, never shown) and session state (last check recorded by the watcher)."""
+    from jobbot.classroom.models import parse_course_urls
+    from jobbot.classroom.state import last_check
+
+    cfg = ctx.settings.classroom
+    if not cfg.enabled:
+        return [Check("Classroom (offres de l'école)", "ok", "surveillance désactivée (classroom.enabled)")]
+    courses, invalid = parse_course_urls(getattr(ctx.secrets, "classroom_course_urls", None))
+    link = f"✓ {len(courses)} cours configuré(s)" + (f", {invalid} lien(s) invalide(s)" if invalid else "")
+    checks = [Check("Classroom : lien du cours", "ok" if courses and not invalid else "warn",
+                    link if courses else "✗ CLASSROOM_COURSE_URLS absent (jobbot setup --section classroom)")]
+    last = last_check(ctx.repo)
+    if last is None:
+        state = f"inconnue (jamais vérifiée) — backend {cfg.backend}, connexion : jobbot login classroom"
+        return [*checks, Check("Classroom : session", "warn" if courses else "ok", state)]
+    when = str(last.get("at") or "")[:16].replace("T", " ")
+    level: Level = "ok" if last.get("ok") else "warn"  # a lost session never blocks the other features
+    return [*checks, Check("Classroom : session", level, f"dernière vérification {when} UTC : {last.get('detail')}")]
+
+
 def check_gmail_app_password(secrets: Any) -> Check | None:
     """Offline format check: a Gmail app password is 16 letters (spaces ignored). Never shows the value."""
     password = (getattr(secrets, "smtp_password", None) or "").replace(" ", "").strip()
@@ -293,6 +314,7 @@ def run_doctor(state: Any, *, smtp: bool = False, smtp_factory: Callable[..., An
             checks.append(gmail)
         checks.extend(check_sources(ctx))
         checks.append(check_database(ctx))
+        checks.extend(check_classroom(ctx))
         if smtp:
             checks.append(check_smtp(ctx.secrets, smtp_factory))
     return checks

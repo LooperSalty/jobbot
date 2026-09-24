@@ -65,7 +65,9 @@ FIELD_FR = {
     "applied": "Envoyées", "needs_manual": "À finir à la main", "pending_review": "À valider",
     "found": "Trouvées", "processed": "Traitées", "with_email": "Avec e-mail", "without_email": "Sans e-mail",
     "sent": "Envoyées", "scanned": "Messages lus", "matched": "Rattachés à une candidature",
-    "manual": "À faire à la main", "closed": "Closes",
+    "manual": "À faire à la main", "closed": "Closes", "posts": "Publications lues",
+    "new_posts": "Publications analysées", "offers": "Offres extraites", "simulated": "Simulées (--dry-run)",
+    "deferred": "Reportées (nouvel essai)",
 }
 LIST_FIELDS = ("details", "updates", "errors")
 

@@ -26,6 +26,7 @@ from jobbot.models import ApplicationStatus, JobOffer, JobStatus
 log = logging.getLogger(__name__)
 
 TASKS = {"jobbot-matin": ("09:30", "run"), "jobbot-soir": ("18:00", "evening")}
+CLASSROOM_TASK = "jobbot-classroom"  # « jobbot classroom watch --once » every classroom.poll_minutes minutes
 SCHTASKS_TIMEOUT_S = 30
 DASHBOARD_APP = Path(__file__).resolve().parent / "dashboard" / "app.py"
 QUOTA_CHANNELS = ("linkedin", "hellowork", "lba", "email", "spontaneous", "followup")
@@ -260,17 +261,64 @@ def run_command(cmd: list[str]) -> subprocess.CompletedProcess[str]:
                           timeout=SCHTASKS_TIMEOUT_S, check=False)
 
 
-def schedule_commands(root: Path, action: str, times: dict[str, str] | None = None) -> list[list[str]]:
-    """install/remove → scripts/install_task.ps1 (Register-ScheduledTask, catch-up when the PC was off);
-    show → schtasks /Query."""
+def _classroom_schedule(root: Path) -> tuple[bool, int]:
+    """(watcher enabled, minutes between two checks) from settings.yaml (defaults when unreadable)."""
+    from jobbot.config import ClassroomSettings, load_settings
+
+    try:
+        cfg = load_settings(root).classroom
+    except Exception as exc:  # invalid settings: « jobbot doctor » reports it
+        log.warning("Réglages illisibles (%s) : tâche Classroom avec les valeurs par défaut.", exc)
+        cfg = ClassroomSettings()
+    return cfg.enabled, cfg.poll_minutes
+
+
+def classroom_python(root: Path) -> Path:
+    """pythonw.exe of the project venv (no console window every few minutes), else the current Python."""
+    venv = root / ".venv" / "Scripts"
+    candidates = (venv / "pythonw.exe", Path(sys.executable).with_name("pythonw.exe"), venv / "python.exe")
+    return next((c for c in candidates if c.exists()), Path(sys.executable))
+
+
+def classroom_task_command(root: Path) -> str:
+    return f'"{classroom_python(root)}" -m jobbot.cli --root "{root}" classroom watch --once'
+
+
+def classroom_commands(root: Path, action: str) -> list[list[str]]:
+    """schtasks commands of the « jobbot-classroom » task (every classroom.poll_minutes minutes)."""
     if action == "show":
-        return [["schtasks", "/Query", "/FO", "LIST", "/TN", name] for name in TASKS]
+        return [["schtasks", "/Query", "/FO", "LIST", "/TN", CLASSROOM_TASK]]
+    if action == "remove":
+        return [["schtasks", "/Delete", "/F", "/TN", CLASSROOM_TASK]]
+    enabled, minutes = _classroom_schedule(root)
+    if not enabled:
+        return []
+    return [["schtasks", "/Create", "/F", "/TN", CLASSROOM_TASK, "/SC", "MINUTE", "/MO", str(minutes),
+             "/TR", classroom_task_command(root)]]
+
+
+def schedule_commands(root: Path, action: str, times: dict[str, str] | None = None) -> list[list[str]]:
+    """install/remove → scripts/install_task.ps1 (Register-ScheduledTask, catch-up when the PC was off) + the
+    Classroom watcher task (schtasks /SC MINUTE); show → schtasks /Query."""
+    if action == "show":
+        return [*(["schtasks", "/Query", "/FO", "LIST", "/TN", name] for name in TASKS),
+                *classroom_commands(root, "show")]
     script = ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
               str(root / "scripts" / "install_task.ps1")]
     if action == "remove":
-        return [[*script, "-Supprimer"]]
+        return [*classroom_commands(root, "remove"), [*script, "-Supprimer"]]
     at = {name: (times or {}).get(name, default) for name, (default, _) in TASKS.items()}
-    return [[*script, "-Matin", at["jobbot-matin"], "-Soir", at["jobbot-soir"]]]
+    return [[*script, "-Matin", at["jobbot-matin"], "-Soir", at["jobbot-soir"]], *classroom_commands(root, action)]
+
+
+def _result_line(action: str, name: str, cmd: list[str], proc: subprocess.CompletedProcess[str]) -> str:
+    if action == "show" and proc.returncode != 0:  # schtasks: « le fichier spécifié est introuvable »
+        return f"{name} : non installée (lance « jobbot schedule install »)"
+    if "/Delete" in cmd and proc.returncode != 0:
+        return f"{name} : absente"
+    text = (proc.stdout or proc.stderr or "").strip()
+    state = "OK" if proc.returncode == 0 else f"échec (code {proc.returncode})"
+    return f"{name} : {state}" + (f"\n{text}" if text else "")
 
 
 def run_schedule(root: Path, action: str, *, dry_run: bool, times: dict[str, str] | None = None) -> list[str]:
@@ -286,12 +334,7 @@ def run_schedule(root: Path, action: str, *, dry_run: bool, times: dict[str, str
         except (OSError, subprocess.SubprocessError) as exc:
             lines.append(f"{name} : schtasks indisponible ({exc})")
             continue
-        text = (proc.stdout or proc.stderr or "").strip()
-        if action == "show" and proc.returncode != 0:  # schtasks: « le fichier spécifié est introuvable »
-            lines.append(f"{name} : non installée (lance « jobbot schedule install »)")
-            continue
-        state = "OK" if proc.returncode == 0 else f"échec (code {proc.returncode})"
-        lines.append(f"{name} : {state}" + (f"\n{text}" if text else ""))
+        lines.append(_result_line(action, name, cmd, proc))
     return lines
 
 

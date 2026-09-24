@@ -287,6 +287,19 @@ def _detail_source(ctx: AppContext, name: str) -> JobSource | None:
     return sources[key]
 
 
+def fetch_details_only(ctx: AppContext, job: JobOffer) -> JobOffer | None:
+    """The owning source's full version of ``job``, never persisted (None when unavailable or failing).
+    Used to read a board offer linked from elsewhere (e.g. a post of the school in Google Classroom)."""
+    source = _detail_source(ctx, job.source)
+    if source is None:
+        return None
+    try:
+        return source.fetch_details(job)
+    except Exception as exc:  # a board down must never break the caller
+        log.warning("Offre %s (%s) illisible : %s", job.external_id, job.source, exc)
+        return None
+
+
 def ensure_details(ctx: AppContext, job: JobOffer) -> JobOffer:
     """Complete a short description through the owning source, persist and return the new job."""
     if len(job.description or "") >= DETAILS_MIN_CHARS:

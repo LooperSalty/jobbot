@@ -27,8 +27,10 @@ from jobbot.documents._letter_rules import (
     build_subject,
     email_subject,
     make_letter_input,
+    relay_sentence,
     rule_paragraphs,
     rule_pitch,
+    with_relay,
 )
 from jobbot.documents._truth import number_claims, unsupported_degrees, unsupported_numbers, unsupported_skills
 from jobbot.documents.models import CoverLetter
@@ -66,12 +68,15 @@ class _LetterDraft(BaseModel):
 
 def _intro_rule(inp: LetterInput) -> str:
     alt = inp.profile.alternance
+    relay = (f" (la phrase « {relay_sentence(inp)} » est ajoutée automatiquement au début : ne la répète pas et "
+             "ne dis pas ailleurs où l'offre a été trouvée)") if relay_sentence(inp) else ""
     if inp.alternance and alt is not None:
-        return (f"1. Alternance (2-3 phrases) : le candidat prépare le titre « {alt.degree} » à {alt.school}, "
-                f"en alternance sur {alt.duration_months} mois au rythme {alt.rhythm}, début {alt.start_date} ; "
-                f"il souhaite effectuer cette alternance au sein de {inp.company_name or 'l’entreprise'} "
-                f"({title_in_sentence(inp.role)}) ; il est disponible immédiatement.")
-    return ("1. Candidature (2 phrases) : dernier diplôme, poste visé, disponibilité immédiate, mobilité "
+        return (f"1. Alternance (2-3 phrases){relay} : le candidat prépare le titre « {alt.degree} » à "
+                f"{alt.school}, en alternance sur {alt.duration_months} mois au rythme {alt.rhythm}, début "
+                f"{alt.start_date} ; il souhaite effectuer cette alternance au sein de "
+                f"{inp.company_name or 'l’entreprise'} ({title_in_sentence(inp.role)}) ; il est disponible "
+                "immédiatement.")
+    return (f"1. Candidature (2 phrases){relay} : dernier diplôme, poste visé, disponibilité immédiate, mobilité "
             "(villes du profil).")
 
 
@@ -228,7 +233,7 @@ def write_cover_letter(
     """French cover letter for ``job`` (or a spontaneous one for ``company`` when ``job`` is None)."""
     inp = make_letter_input(profile, job, company, keywords)
     paragraphs, pitch = _llm_body(inp, llm) if llm is not None else (None, "")
-    paragraphs = rule_paragraphs(inp) if paragraphs is None else _with_aid(paragraphs, inp)
+    paragraphs = rule_paragraphs(inp) if paragraphs is None else with_relay(_with_aid(paragraphs, inp), inp)
     subject = build_subject(inp)
     return CoverLetter(
         subject=subject,

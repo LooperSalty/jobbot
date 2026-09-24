@@ -67,7 +67,8 @@ def fake_llm() -> FakeLLM:
 
 @pytest.fixture
 def ctx(project_root: Path, fake_llm: FakeLLM, monkeypatch: pytest.MonkeyPatch) -> AppContext:
-    for var in ("SMTP_USER", "SMTP_PASSWORD", "FRANCE_TRAVAIL_CLIENT_ID", "LBA_API_TOKEN", "HUNTER_API_KEY"):
+    for var in ("SMTP_USER", "SMTP_PASSWORD", "FRANCE_TRAVAIL_CLIENT_ID", "LBA_API_TOKEN", "HUNTER_API_KEY",
+                "CLASSROOM_COURSE_URLS"):
         monkeypatch.delenv(var, raising=False)
     c = AppContext.build(project_root, dry_run=True, llm=fake_llm)
     yield c
