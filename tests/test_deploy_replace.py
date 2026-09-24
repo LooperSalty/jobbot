@@ -162,6 +162,32 @@ def test_server_side_crontab_filter(tmp_path):
     assert SECRET not in "\n".join(run("show")) and "--token=***" in run("show")[1]
 
 
+def test_cron_d_files_are_discovered_disabled_purged_and_restored():
+    discovery = rs.discovery_root_script("ancienne", ("ancienne",), ("searxng",), 3000)
+    assert "/etc/cron.d/*" in discovery and "CRONMATCH\\tcron.d $b" in discovery
+    clean = rs.cron_clean_script("ancienne", ("ancienne",), ("searxng",))
+    assert f'mv -f -- "$f" "$f{rs.CRON_D_DISABLED}"' in clean and "name_hit" in clean
+    assert rs.CRON_D_DISABLED in rs.purge_script("ancienne", [], [], [], ["/etc/cron.d/ancienne-nuit"])
+    manifest = {"paths": ["/etc/cron.d/ancienne-nuit"], "units": [], "containers": []}
+    assert f'rm -f -- "/$p{rs.CRON_D_DISABLED}"' in rs.restore_root_script("ancienne", "a.tar.gz", manifest)
+    disc = parse_discovery("PATH\t/etc/cron.d/ancienne-nuit\n"
+                           "CRONMATCH\tcron.d ancienne-nuit\t0 1 * * * root /usr/local/bin/ancienne-menage.sh\n")
+    assert "/etc/cron.d/ancienne-nuit" in disc.paths
+    assert disc.crontabs["cron.d ancienne-nuit"] == ("0 1 * * * root /usr/local/bin/ancienne-menage.sh",)
+
+
+@pytest.mark.skipif(_awk() is None, reason="awk absent (le filtre tourne sur le serveur)")
+def test_cron_d_name_filter_respects_the_keep_list():
+    program = '{ l = tolower($0); exit !(l ~ RX && !(KX != "" && l ~ KX)) }'
+
+    def hit(name: str) -> bool:
+        args = [_awk(), "-v", "RX=ancienne", "-v", "KX=searxng", program]
+        return subprocess.run(args, input=name + "\n", text=True, capture_output=True).returncode == 0
+
+    assert hit("ancienne-morning-brief") and hit("ANCIENNE-nightly-jobs")
+    assert not hit("ancienne-searxng-update") and not hit("logrotate")
+
+
 def test_redaction_and_description():
     for text in (f"curl -H 'Authorization: Bearer {SECRET}' https://u:p@h/x", f"DB_PASSWORD=hunter2 X_TOKEN=abc",
                  f"--token={SECRET}"):

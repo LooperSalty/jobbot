@@ -70,7 +70,24 @@ function mask(s,    i, n, f, out, eq) {
 
 CRON_FUNCTION = """
 cron_filter() { awk -v H="$H" -v RX="$RX" -v KX="$KX" -v MODE="$1" '@@AWK@@'; }
+name_hit() { printf '%s\\n' "$1" | awk -v RX="$RX" -v KX="$KX" '{ l = tolower($0); exit !(l ~ RX && !(KX != "" && l ~ KX)) }'; }
 """.replace("@@AWK@@", CRON_AWK.strip())
+
+# /etc/cron.d files of the old application (cron ignores names containing a dot: renaming disables them).
+CRON_D_DISABLED = ".disabled-by-jobbot"
+CRON_D_DISCOVERY = r"""for f in /etc/cron.d/*; do
+  b=$(basename "$f"); [ -f "$f" ] && ! [ -L "$f" ] || continue; case "$b" in *.*) continue ;; esac
+  name_hit "$b" || continue
+  printf 'PATH\t%s\n' "$f"; cron_filter show < "$f" | sed "s|^|CRONMATCH\tcron.d $b\t|"
+done
+"""
+CRON_D_DISABLE = r"""for f in /etc/cron.d/*; do
+  b=$(basename "$f"); [ -f "$f" ] && ! [ -L "$f" ] || continue; case "$b" in *.*) continue ;; esac
+  name_hit "$b" || continue
+  n=$(cron_filter match < "$f" | wc -l)
+  mv -f -- "$f" "$f@@SUFFIX@@" && printf 'CRONREMOVED\tcron.d %s\t%s\n' "$b" "$n"
+done
+""".replace("@@SUFFIX@@", CRON_D_DISABLED)
 
 PM2_FUNCTION = r"""
 pm2_list() {
@@ -140,7 +157,7 @@ if command -v docker >/dev/null 2>&1; then
 fi
 crontab -l 2>/dev/null | cron_filter show | sed 's/^/CRONMATCH\troot\t/'
 crontab -u "$U" -l 2>/dev/null | cron_filter show | sed 's/^/CRONMATCH\tuser\t/'
-""" + LISTEN_BLOCK + r"""
+""" + CRON_D_DISCOVERY + LISTEN_BLOCK + r"""
 [ -n "$H" ] && find "$H" -mindepth 1 -maxdepth 1 \( @@NAMES@@ \) ! -name '*[[:cntrl:]]*' 2>/dev/null | sed 's/^/PATH\t/'
 find /usr/local/bin /opt /srv -mindepth 1 -maxdepth 1 \( @@NAMES@@ \) ! -name '*[[:cntrl:]]*' 2>/dev/null | sed 's/^/PATH\t/'
 ls -1 "$H/@@BACKUPS@@"/@@PREFIX@@*.tar.gz 2>/dev/null | sed 's/^/BACKUP\t/'
@@ -248,8 +265,7 @@ clean_cron() {
 }
 clean_cron root
 clean_cron user -u "$U"
-exit 0
-"""
+""" + CRON_D_DISABLE + "exit 0\n"
 
 
 def cron_clean_script(user: str, stop: tuple[str, ...], keep: tuple[str, ...]) -> str:
@@ -283,7 +299,7 @@ for f in @@SYSTEMUNITS@@; do [ -n "$f" ] && rm -f -- "$f" && printf 'REMOVED\t%s
 for f in @@USERUNITS@@; do [ -n "$f" ] && runuser -u "$U" -- rm -f -- "$f" && printf 'REMOVED\t%s\n' "$f"; done
 systemctl daemon-reload
 for c in @@CONTAINERS@@; do [ -n "$c" ] && docker rm -f "$c" >/dev/null 2>&1 && printf 'REMOVED\tdocker %s\n' "$c"; done
-for p in @@PATHS@@; do purge_path "$p"; done
+for p in @@PATHS@@; do purge_path "$p"; case "$p" in /etc/cron.d/*) purge_path "$p@@CROND@@" ;; esac; done
 exit 0
 """
 
@@ -293,7 +309,7 @@ def purge_script(user: str, system_units: list[str], user_units: list[str], cont
     """Root: delete unit files, containers and folders of the old application (never the home, .ssh, backups,
     jobbot, a parent of the home, or a path reached through a symbolic link)."""
     body = _header(user, (), ()) + PURGE_BODY
-    return _fill(body, BACKUPS=BACKUP_DIR, SYSTEMUNITS=_words(system_units) or '""',
+    return _fill(body, BACKUPS=BACKUP_DIR, CROND=CRON_D_DISABLED, SYSTEMUNITS=_words(system_units) or '""',
                  USERUNITS=_words(user_units) or '""', CONTAINERS=_words(containers) or '""',
                  PATHS=_words(paths) or '""')
 
@@ -319,7 +335,7 @@ STAGE=$(mktemp -d)
 trap 'rm -rf "$STAGE"' EXIT
 tar -xzf "$A" -C "$STAGE" meta
 for p in @@PATHS@@; do
-  if [ -n "$p" ] && [ ! -e "/$p" ] && [ ! -L "/$p" ]; then tar -xzf "$A" -C / "$p" && printf 'RESTORED\t/%s\n' "$p"; fi
+  if [ -n "$p" ] && [ ! -e "/$p" ] && [ ! -L "/$p" ]; then tar -xzf "$A" -C / "$p" && printf 'RESTORED\t/%s\n' "$p" && rm -f -- "/$p@@CROND@@"; fi
 done
 restore_system_unit() {
   if [ ! -e "$2" ] && [ -f "$STAGE/meta/units/system/$1" ]; then cp "$STAGE/meta/units/system/$1" "$2" && printf 'RESTORED\t%s\n' "$2"; fi
@@ -378,7 +394,7 @@ def restore_root_script(user: str, archive_name: str, manifest: dict) -> str:
     stop = tuple(manifest.get("stop_patterns") or STOP_PATTERNS)  # never empty: an empty regex matches all
     keep = tuple(manifest.get("keep_patterns") or KEEP_PATTERNS)
     body = _header(user, stop, keep) + CRON_FUNCTION + RESTORE_BODY
-    return _fill(body, BACKUPS=BACKUP_DIR, ARCHIVE=archive_name,
+    return _fill(body, BACKUPS=BACKUP_DIR, ARCHIVE=archive_name, CROND=CRON_D_DISABLED,
                  PATHS=_words(p.lstrip("/") for p in manifest.get("paths", [])) or '""',
                  UNITFILES=_restore_units(units, str(manifest.get("home") or "")),
                  ENABLE=_words(u["name"] for u in system if u.get("enabled") == "enabled") or '""',
