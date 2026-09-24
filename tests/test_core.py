@@ -208,3 +208,19 @@ def test_context_builds_from_project_root(ctx):
     assert ctx.profile.identity.first_name == "Jean"
     assert ctx.settings.mode in {"auto", "review"}
     assert ctx.output_dir.exists()
+
+
+def test_find_cli_falls_back_to_native_installer_folder(tmp_path, monkeypatch):
+    import sys
+
+    from jobbot.llm import find_cli
+
+    bin_dir = tmp_path / ".local" / "bin"
+    bin_dir.mkdir(parents=True)
+    exe = bin_dir / ("claude.exe" if sys.platform == "win32" else "claude")
+    exe.write_text("", encoding="utf-8")
+    exe.chmod(0o755)
+    monkeypatch.setattr("jobbot.llm.Path.home", lambda: tmp_path)
+    monkeypatch.setenv("PATH", str(tmp_path / "vide"))
+    assert find_cli("claude") is not None
+    assert find_cli("introuvable-xyz") is None

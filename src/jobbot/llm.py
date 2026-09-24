@@ -15,6 +15,7 @@ import re
 import shutil
 import subprocess
 from collections.abc import Callable
+from pathlib import Path
 from typing import Protocol, TypeVar
 
 from pydantic import BaseModel, ValidationError
@@ -83,6 +84,15 @@ class _JsonMixin:
                 raise LLMError(f"Réponse JSON invalide après réparation: {exc}") from exc
 
 
+def find_cli(name: str) -> str | None:
+    """``claude`` on PATH, else in the native installer's folder (~/.local/bin): cron, systemd services and
+    plain SSH sessions often run with a minimal PATH that does not include it."""
+    exe = shutil.which(name)
+    if exe is not None or os.sep in name or "/" in name:
+        return exe
+    return shutil.which(name, path=str(Path.home() / ".local" / "bin"))
+
+
 class ClaudeCLIClient(_JsonMixin):
     """Runs ``claude -p`` with tools, MCP servers, settings and session persistence disabled.
 
@@ -92,7 +102,7 @@ class ClaudeCLIClient(_JsonMixin):
 
     def __init__(self, settings: LLMSettings, oauth_token: str | None = None):
         self.settings = settings
-        exe = shutil.which(settings.cli_path)
+        exe = find_cli(settings.cli_path)
         if exe is None:
             raise LLMError(
                 f"Commande '{settings.cli_path}' introuvable. Installe Claude Code ou passe llm.provider à 'anthropic'."

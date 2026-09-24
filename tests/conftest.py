@@ -38,7 +38,10 @@ def project_root(tmp_path: Path) -> Path:
     """A throw-away copy of the project config (fictitious profile + settings), no .env."""
     (tmp_path / "config").mkdir()
     shutil.copy(PROFILE_FIXTURE, tmp_path / "config" / "profile.yaml")
-    shutil.copy(PROJECT_ROOT / "config" / "settings.yaml", tmp_path / "config" / "settings.yaml")
+    # The owner's live state (wizard done, warm-up start date) must never change test behaviour.
+    live = (PROJECT_ROOT / "config" / "settings.yaml").read_text(encoding="utf-8").splitlines(keepends=True)
+    kept = [line for line in live if not line.startswith(("setup_date:", "setup_completed:"))]
+    (tmp_path / "config" / "settings.yaml").write_text("".join(kept), encoding="utf-8")
     (tmp_path / "pyproject.toml").write_text("[project]\nname='x'\n", encoding="utf-8")
     return tmp_path
 

@@ -166,7 +166,9 @@ def check_config(root: Path) -> tuple[list[Check], Settings | None]:
 def check_llm(settings: Settings, secrets: Any) -> Check:
     provider = settings.llm.provider
     if provider == "claude_cli":
-        path = shutil.which(settings.llm.cli_path)
+        from jobbot.llm import find_cli
+
+        path = find_cli(settings.llm.cli_path)
         return Check("LLM (Claude Code)", "ok" if path else "warn",
                      f"trouvé : {path}" if path else "commande « claude » introuvable : modèles de secours utilisés")
     if provider == "anthropic":
