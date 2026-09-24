@@ -1,4 +1,5 @@
-"""User notifications: log line + Windows toast (best effort) + optional Jarvis TTS. Never raises."""
+"""User notifications: log line + Windows toast (best effort) + optional Jarvis TTS + optional ntfy push and
+e-mail to yourself (``notify_remote``, for a headless server). Never raises."""
 
 from __future__ import annotations
 
@@ -95,15 +96,34 @@ def _jarvis(ctx: AppContext, message: str) -> None:
         log.debug("Jarvis injoignable : %s", exc)
 
 
-def notify(ctx: AppContext, title: str, message: str) -> None:
-    """Tell the user something important happened (reply, interview...). Best effort, never raises."""
+def _remote(ctx: AppContext, title: str, message: str, level: str) -> None:
+    """Server-friendly channels (ntfy push, Telegram, e-mail to yourself), each isolated."""
+    from jobbot.notify_remote import send_email_notice, send_ntfy, send_telegram
+
+    for send in (lambda: send_ntfy(ctx.settings, title, message, level, dry_run=ctx.dry_run),
+                 lambda: send_telegram(ctx.settings, ctx.secrets, title, message, level, dry_run=ctx.dry_run),
+                 lambda: send_email_notice(ctx, title, message, level)):
+        try:
+            send()
+        except Exception:  # one channel never blocks the others
+            log.debug("Canal de notification en échec", exc_info=True)
+
+
+def notify(ctx: AppContext, title: str, message: str, *, level: str = "info") -> None:
+    """Tell the user something happened. ``level``: ``info`` (summaries), ``important`` (reply, school offer to
+    handle, prep sheet) or ``urgent`` (interview, session to renew) — e-mail only for important/urgent.
+    Log line + Windows toast + Jarvis + ntfy + e-mail (see ``notify_remote``). Best effort, never raises."""
     try:
+        from jobbot.notify_remote import normalize_level
+
+        lvl = normalize_level(level)
         clean_title = _clean(title, MAX_TITLE_CHARS) or "jobbot"
         clean_message = _clean(message, MAX_MESSAGE_CHARS)
-        log.info("Notification : %s — %s", clean_title, clean_message)
+        log.info("Notification (%s) : %s — %s", lvl, clean_title, clean_message)
         if not _side_effects_enabled():
             return
         _toast(clean_title, clean_message)
         _jarvis(ctx, clean_message)
+        _remote(ctx, clean_title, clean_message, lvl)
     except Exception:  # a notification must never break the pipeline
         log.debug("Notification échouée", exc_info=True)

@@ -25,6 +25,8 @@ data/classroom_token.json
 config/profile.yaml
 config/profile.imported.yaml
 config/*.bak
+# Réglages propres à une machine (serveur) et paramètres de déploiement : jamais versionnés
+config/*.local.yaml
 # Base de données (candidatures, entreprises, e-mails envoyés), profil navigateur connecté, logs, captures
 data/
 # CV, lettres de motivation, fiches entretien, rapports, exports, brouillons d'e-mails

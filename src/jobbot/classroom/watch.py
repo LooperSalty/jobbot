@@ -158,7 +158,7 @@ def _course(ctx: AppContext, fetch: CourseFetch, seen: dict[str, dict[str, Any]]
         if login_alert_due(ctx.repo):
             from jobbot.notify import notify
 
-            notify(ctx, "Classroom : reconnecte-toi", LOGIN_MESSAGE)
+            notify(ctx, "Classroom : reconnecte-toi", LOGIN_MESSAGE, level="urgent")
         return seen
     if fetch.error:
         tally.errors.append(f"Classroom : {fetch.error}")

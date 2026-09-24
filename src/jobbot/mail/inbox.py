@@ -254,7 +254,8 @@ def _human_reply(ctx: AppContext, app: Application, msg: InboundMessage, cls: Re
     label = _LABEL.get(category, "Réponse")
     _event(ctx, app, _EVENT_KIND.get(category, "reply"), f"{label} ({msg.from_addr}) : {cls.summary}")
     if category in _NOTIFY_CATEGORIES:
-        notify(ctx, f"{label} — {app.company_name or msg.from_addr}", cls.summary)
+        level = "urgent" if category == "interview" else "important"
+        notify(ctx, f"{label} — {app.company_name or msg.from_addr}", cls.summary, level=level)
     prep = _interview_prep(ctx, app, msg) if category == "interview" else ""
     return f"{_label(app)} : {label.lower()} — {cls.summary}{prep}"
 
@@ -290,7 +291,8 @@ def _handle_notice(
         ctx.repo.update_application(app.model_copy(update=update))
     _event(ctx, app, notice.event_kind, f"{notice.detail} — {msg.subject}")
     if notice.status in (_S.INTERVIEW, _S.RESPONSE):
-        notify(ctx, f"{notice.detail} — {app.company_name}", msg.subject)
+        level = "urgent" if notice.status == _S.INTERVIEW else "important"
+        notify(ctx, f"{notice.detail} — {app.company_name}", msg.subject, level=level)
     prep = _interview_prep(ctx, app, msg) if notice.status == _S.INTERVIEW else ""
     return _Outcome(True, f"{_label(app)} : {notice.detail}{prep}{_junk_note(msg)}")
 

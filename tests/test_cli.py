@@ -77,9 +77,9 @@ def test_setup_section_reasks_on_invalid_value(run_cli, project_root):
 
 def test_setup_full_with_secret_and_changes(run_cli, project_root):
     shutil.copy(PROJECT_ROOT / ".env.example", project_root / ".env.example")
-    # Recherche (12) → defaults; Automatisation: mode review, warm-up 5, rest default; …; Comptes: SMTP password;
-    # Offres de l'école (Classroom, 4) → defaults.
-    answers = ("\n" * 12 + "review\n5\n" + "\n" * 6 + "\n" * 5 + "\n" * 3 + "\n" * 4 + "abcd efgh ijkl mnop\n"
+    # Recherche (12) → defaults; Automatisation: mode review, warm-up 5, rest default; …; Notifications (7);
+    # Comptes: SMTP password; Offres de l'école (Classroom, 4) → defaults.
+    answers = ("\n" * 12 + "review\n5\n" + "\n" * 6 + "\n" * 5 + "\n" * 3 + "\n" * 7 + "abcd efgh ijkl mnop\n"
                + "\n" * 5 + "\n" * 4)
     out = _ok(run_cli("setup", input=answers))
     assert "abcd" not in out
@@ -263,7 +263,7 @@ def test_run_command(run_cli, monkeypatch):
 
 
 def test_run_rejects_unknown_step(run_cli, monkeypatch):
-    monkeypatch.setattr("jobbot.notify.notify", lambda *a: None)
+    monkeypatch.setattr("jobbot.notify.notify", lambda *a, **k: None)
     res = run_cli("run", "--step", "nope")
     assert res.exit_code == 1 and "inconnue" in res.output
 

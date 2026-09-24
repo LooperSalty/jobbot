@@ -61,8 +61,8 @@ def job_with_app(ctx, make_job, **job_overrides):
 @pytest.fixture
 def notes(monkeypatch) -> list[tuple[str, str]]:
     calls: list[tuple[str, str]] = []
-    monkeypatch.setattr(interview, "notify", lambda c, title, message: calls.append((title, message)))
-    monkeypatch.setattr(weekly, "notify", lambda c, title, message: calls.append((title, message)))
+    monkeypatch.setattr(interview, "notify", lambda c, title, message, level="info": calls.append((title, message)))
+    monkeypatch.setattr(weekly, "notify", lambda c, title, message, level="info": calls.append((title, message)))
     return calls
 
 
@@ -210,7 +210,7 @@ def test_inbox_interview_reply_writes_prep_sheet(ctx, make_job, notes, monkeypat
     from jobbot.mail import inbox
 
     fakes = _imap_fakes()
-    monkeypatch.setattr(inbox, "notify", lambda *a: None)
+    monkeypatch.setattr(inbox, "notify", lambda *a, **k: None)
     mail_ctx = dataclasses.replace(ctx, secrets=Secrets(_env_file=None, smtp_user=fakes.ME,
                                                         smtp_password="abcd efgh ijkl mnop"))
     first = "<179016435516.26396.1.jobbot@gmail.com>"
@@ -340,8 +340,8 @@ def test_pipeline_runs_weekly_after_the_daily_summary(ctx, monkeypatch):
     sunday, _, _ = last_full_week()
     monkeypatch.setattr(weekly, "_today", lambda: sunday + timedelta(days=1))
     order: list[str] = []
-    monkeypatch.setattr("jobbot.notify.notify", lambda c, title, msg: order.append(title))
-    monkeypatch.setattr(weekly, "notify", lambda c, title, msg: order.append(title))
+    monkeypatch.setattr("jobbot.notify.notify", lambda c, title, msg, level="info": order.append(title))
+    monkeypatch.setattr(weekly, "notify", lambda c, title, msg, level="info": order.append(title))
     report = pipeline.run_daily(ctx, steps=[])
     assert isinstance(report.weekly, weekly.WeeklyReport) and report.summary() == "Rien à signaler."
     assert order[0].startswith("jobbot — bilan") and "hebdomadaire" in order[1]

@@ -108,7 +108,8 @@ code against the signature here — do not re-implement it.
 
 ### followup & notifications
 - `followup.py`: `def compute_next_followup(app: Application, cfg: FollowupSettings, *, after: datetime | None = None) -> datetime | None`; `def write_followup(profile: Profile, app: Application, llm: LLMClient | None, *, number: int) -> tuple[str, str]` (subject, body; short, polite, French; template fallback); `class FollowupReport(frozen)`: `sent: int, manual: int, closed: int, details: list[str]`; `def run_followups(ctx: AppContext, mailer: Mailer | None) -> FollowupReport` — due applications: with `email_to` → send in-thread (`in_reply_to` = last thread id), update `followup_count`, `email_thread_ids`, `next_followup_at`, status FOLLOWED_UP; without email → event `manual_followup` (listed in dashboard); past `give_up_after_days` → NO_RESPONSE.
-- `notify.py`: `def notify(ctx: AppContext, title: str, message: str) -> None` — log + Windows toast (PowerShell, best effort, never raises) + optional Jarvis TTS when `settings.notify_jarvis` and `settings.jarvis_script` exists: `subprocess.run([sys.executable, jarvis_script, "--type", "tell", message], timeout=15)`.
+- `notify.py`: `def notify(ctx: AppContext, title: str, message: str, *, level: str = "info") -> None` (levels and
+  server channels: see v4 below) — log + Windows toast (PowerShell, best effort, never raises) + optional Jarvis TTS when `settings.notify_jarvis` and `settings.jarvis_script` exists: `subprocess.run([sys.executable, jarvis_script, "--type", "tell", message], timeout=15)`.
 
 ### outreach/ — spontaneous applications
 - `outreach/companies.py`: `class DiscoverReport(frozen)`: `found: int, new: int, errors: list[str]`; `def search_companies(naf_code: str, department: str, *, min_headcount_code: str | None, client=None, max_pages: int = 5) -> list[Company]` (recherche-entreprises.api.gouv.fr; active companies only; leaders' names from `dirigeants`); `def discover_companies(ctx: AppContext, *, naf_codes: list[str] | None = None, departments: list[str] | None = None, limit: int = 300) -> DiscoverReport` (+ LBA recruiters when available; skips blacklisted/excluded; distance filter from profile locations when coordinates exist).
@@ -377,3 +378,61 @@ The school posts apprenticeship offers in a Google Classroom course (private URL
   `jobbot login classroom` (browser, or OAuth when `backend: api`). `jobbot schedule install|remove|show` also
   manages the Windows task `jobbot-classroom` (`schtasks /SC MINUTE /MO <poll_minutes>`, `pythonw -m jobbot.cli
   --root … classroom watch --once`). `jobbot doctor`: course link ✓/✗ (never shown) + last check.
+
+## v4 — Linux server (headless) & one-command deployment
+
+- **Settings override**: `config.settings_data(root, include_local=True)` deep-merges the gitignored
+  `config/settings.local.yaml` over `config/settings.yaml` (`config.deep_merge`, pure); `load_settings(root,
+  include_local=True)`. `preferences` reads the effective value; `set_*` write `settings.yaml` unless the key is
+  already set in the local file (`config_files.settings_target`, it is then updated there). YAML round-trip, `.env`
+  helpers and targeting moved to `config_files.py` (re-exported by `preferences`); `OutreachSettings`,
+  `ReportSettings`, `ClassroomSettings`, `parse_active_hours`, `Frozen` moved to `config_sections.py` (re-exported by
+  `config`). The `settings` test fixture ignores a local file.
+- **New settings / secrets**: `notify_email`, `notify_email_max_per_day` (10), `notify_ntfy_topic` (validated topic),
+  `notify_telegram`, `notify_telegram_all`, `search_engine_url` (SearXNG base URL); `Secrets.claude_code_oauth_token`
+  (passed as `CLAUDE_CODE_OAUTH_TOKEN` to the `claude -p` subprocess by `ClaudeCLIClient(settings, oauth_token)`),
+  `telegram_bot_token`, `telegram_chat_id`. Wizard « Notifications »: `notify_email`, `notify_ntfy_topic`,
+  `notify_telegram`.
+- **Notifications** (`notify.notify(ctx, title, message, *, level="info")`, levels `info | important | urgent`):
+  log + toast + Jarvis as before, then `notify_remote`: ntfy (`POST https://ntfy.sh/<topic>`, title/priority/tags
+  as query params), Telegram (`sendMessage`, important/urgent unless `notify_telegram_all`; token never logged, httpx
+  request logs redacted), e-mail to `profile.identity.email` (important/urgent, action_log `notify/email`, cap per
+  day, `OutgoingEmail(kind="notification")`, dry-run → `.eml`). Each channel isolated, none raises; ntfy/Telegram
+  skipped in dry-run. Levels used: inbox interview → urgent, positive/other reply → important; Classroom applied /
+  to validate / manual / failed → important; Classroom login lost → urgent; prep sheet → important; pipeline
+  `_alert_expired_session` (apply details containing « jobbot login ») → urgent, once a day (kv
+  `notify:login_alert:<date>`).
+- **Sessions** (`sessions.py`, CLI `cli_session.py`: `jobbot session export [site|all]`, `jobbot session import
+  [path]`): Playwright `storage_state` reduced to the site's domains (`SITE_DOMAINS`) → `data/sessions/<site>.json`
+  (0600). `apply.browser.open_browser(..., import_sessions=True)` imports a file newer than kv
+  `session_imported:<site>` (`context.add_cookies`, that site's cookies only) for the sites of the opened profile
+  (`sites_for_profile`: main profile → linkedin/hellowork/wttj, Classroom profile → classroom), so
+  `classroom.browser.open_classroom_browser(ctx, headless=, import_session=True)` (still the single Classroom
+  factory) benefits too. Export marks the kv so the PC never re-imports its own export.
+- **Scheduling on Linux** (`cron.py`): `jobbot schedule install|remove|show` manage the user crontab lines marked
+  `# jobbot:run|soir|classroom` (other lines untouched, rewritten only when changed); line = `cd <root> && PATH=…
+  flock -n /tmp/jobbot-<name>.lock [xvfb-run -a] <root>/.venv/bin/jobbot <cmd> >> <root>/data/logs/cron.log 2>&1`.
+  `cron.scheduler_kind()` picks Windows (unchanged `install_task.ps1` + schtasks) or cron.
+- **Dashboard**: `jobbot dashboard --host 127.0.0.1 --port 8501` (`cli_tools.dashboard_host` refuses 0.0.0.0 / ::),
+  `--server.headless true` on Linux.
+- **Doctor on Linux** (`server_checks.py`): xvfb-run, crontab lines, `data/sessions` freshness (30 days), presence of
+  `config/settings.local.yaml`, time zone.
+- **SearXNG** (`outreach/_searxng.py`): `searxng_search(client, base_url, query)` (JSON, 1-2 s politeness delay, never
+  raises); `domains.find_domain_verified(..., search_url=)` tries it before Brave / DuckDuckGo;
+  `people.find_people_detailed(..., search_url=)` takes result titles from it first. Geocoding moved to
+  `outreach/_geocode.py` (re-exported by `domains`).
+- **Deployment kit** (`scripts/deploy_server.py` → `scripts/deploy/`, stdlib + PyYAML): `config.py` (.env keys,
+  `filter_env`, `config/deploy.local.yaml`), `runner.py` (every command through an injectable executor: `probe` =
+  read-only, also in dry-run; `run` = printed only in dry-run; ssh `BatchMode=yes`, `ConnectTimeout=15`, remote
+  scripts base64-encoded as `bash -c` argument; exit 255 → French SSH help), `templates.py` (remote scripts, hook,
+  systemd unit, server settings), `steps_setup.py` / `steps_app.py` (steps 1-11), `replace_plan.py` (pure discovery
+  parsing / STOP-KEEP plan / backup and purge lists / redaction), `replace_scripts.py` + `replace_steps.py` (backup →
+  stop → crontab → port; purge after an existing backup and a fresh one; restore from the manifest), `cli.py` (step
+  selection, exit codes 0/2/3). The `.env` reaches the server as `.env.pc` merged there (server-only keys such as
+  Telegram kept, no secret travels back to the PC). Trust boundary: root never executes or blindly reads / writes
+  what the project account controls (its discovery output is limited to units / pm2 lines in the « user » scope,
+  its files are handled through `runuser`, Chromium's apt packages are validated names from Playwright's
+  `--dry-run`); crontab lines are filtered on the server by an awk program (`CRON_AWK`) and only masked previews
+  reach the PC; the purge list excludes any folder holding a kept service. Tests: `tests/test_deploy_kit.py`,
+  `tests/test_deploy_replace.py` with `tests/fixtures/deploy/fakes.py` (fake executor, placeholders only).
+- `scripts/dashboard_serveur.ps1`: SSH tunnel `8501 → 127.0.0.1:8501` of `PROJECT_SSH_HOST_ALIAS`, opens the browser.

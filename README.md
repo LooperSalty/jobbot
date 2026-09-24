@@ -35,6 +35,8 @@ Tout est enregistré dans une base locale (`data/jobbot.db`) et visible dans le 
 ## 2. Installation (Windows, une seule fois)
 
 Il te faut Python 3.12, Google Chrome et, pour les textes rédigés par l'IA, Claude Code (commande `claude`).
+Pour faire tourner jobbot jour et nuit sur un petit serveur Linux sans écran, installe-le d'abord sur le PC, puis
+suis le § 12 (déploiement en une commande).
 
 ```powershell
 cd C:\chemin\vers\jobbot
@@ -75,7 +77,7 @@ L'assistant pose une quarantaine de questions, en sept sections :
 | **Automatisation** | Mode `review` ou `auto`, jours de rodage, seuils de score, quotas LinkedIn / HelloWork / La Bonne Alternance / e-mail. |
 | **Candidatures spontanées** | Quota par jour, écrire ou non à des personnes nommées, chercher les RH et responsables techniques, adresses devinées autorisées ou non et leur maximum par jour. |
 | **Relances** | Délais des deux relances et leur nombre. |
-| **Notifications** | Annonces vocales Jarvis, rapport de la semaine (et son envoi par e-mail), fiche d'entretien automatique. |
+| **Notifications** | Annonces vocales Jarvis, rapport de la semaine (et son envoi par e-mail), fiche d'entretien automatique, notifications importantes par e-mail, sur le téléphone (ntfy) ou par Telegram (voir § 12.6). |
 | **Comptes** | Mot de passe d'application Gmail, identifiants France Travail, clés La Bonne Alternance / Hunter / Brave. |
 | **Offres de l'école (Classroom)** | Surveillance du Classroom de l'école oui/non, candidature immédiate oui/non, fréquence de vérification, lien du cours. |
 
@@ -104,6 +106,13 @@ Les réglages sont vérifiés avant d'être écrits dans `config/settings.yaml` 
 sont gardés, et l'ancienne version est sauvegardée en `.bak`) : une valeur refusée (`reports.weekly_report_day 9`,
 `mode yolo`…) affiche une erreur en français et rien n'est modifié. Les secrets vont dans `.env`.
 
+**Réglages propres à une machine.** Un fichier optionnel `config/settings.local.yaml` (ignoré par git) est fusionné
+par-dessus `config/settings.yaml`, clé par clé : c'est là qu'un serveur met `headless: true`,
+`browser_channel: null`, ses notifications ou son fournisseur d'IA, sans toucher au fichier versionné.
+`jobbot config set` écrit dans `settings.yaml`, sauf si la clé existe déjà dans `settings.local.yaml` : elle y est
+alors modifiée (sinon le changement n'aurait aucun effet, le fichier local étant prioritaire).
+`jobbot config get` affiche toujours la valeur effective.
+
 ### 3.2 Les clés du fichier `.env`
 
 | Clé | À quoi elle sert | Où l'obtenir |
@@ -113,6 +122,9 @@ sont gardés, et l'ancienne version est sauvegardée en `.bak`) : une valeur ref
 | `LBA_API_TOKEN` | Optionnel : API officielle de La Bonne Alternance, en plus du site | Compte gratuit sur https://api.apprentissage.beta.gouv.fr. Il n'est **pas** nécessaire pour postuler via La Bonne Alternance. |
 | `HUNTER_API_KEY`, `BRAVE_API_KEY` | Optionnel : vérifier des adresses e-mail, trouver le site d'une entreprise | hunter.io, brave.com/search/api |
 | `CLASSROOM_COURSE_URLS` | Optionnel : le(s) cours Google Classroom où ton école publie des offres (liens séparés par des virgules) | Ouvre le cours dans ton navigateur et copie l'adresse `https://classroom.google.com/c/…` (voir § 3.6). |
+| `CLAUDE_CODE_OAUTH_TOKEN` | Optionnel : l'IA de ton abonnement Claude sur un serveur sans écran | Sur le PC : `claude setup-token` (voir § 12.2). |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Optionnel : notifications Telegram | Jeton donné par @BotFather et identifiant de ta conversation avec le bot. |
+| `SERVER_ROOT_HOST_ALIAS`, `PROJECT_SSH_HOST_ALIAS`, `PROJECT_USER`, `SERVER_IP_TAILSCALE` | Déploiement sur un serveur Linux (jamais copiées sur le serveur) | Voir § 12.1. |
 
 Sans une clé, la fonction concernée est désactivée avec un message ; le reste continue.
 
@@ -274,6 +286,10 @@ jobbot schedule remove
 La tâche `jobbot-classroom` (si `classroom.enabled`) lance `jobbot classroom watch --once` toutes les
 `classroom.poll_minutes` minutes, sans fenêtre ; son journal est dans `data\logs\jobbot.log`.
 
+Sous Linux (serveur), les mêmes commandes gèrent ta **crontab** : trois lignes marquées `# jobbot:run`,
+`# jobbot:soir` et `# jobbot:classroom` (les autres lignes ne sont jamais touchées), chacune protégée par
+`flock` contre les doubles lancements, sortie dans `data/logs/cron.log` (voir § 12.7).
+
 Le script `scripts\install_task.ps1` fait la même chose ; il accepte `-Matin 08:45 -Soir 18:30` et `-Supprimer`. Les
 tâches tournent quand ta session Windows est ouverte, parce que LinkedIn et HelloWork ont besoin du navigateur. Si le PC
 était éteint à l'heure prévue, elles démarrent dès que possible. La sortie de chaque lancement est dans
@@ -287,6 +303,7 @@ d'entretien est écrite dès qu'une invitation est lue.
 | `init` · `doctor [--smtp]` · `setup [--section X]` | Installation, diagnostic, assistant |
 | `config show [section]` · `config get <clé>` · `config set <clé> <valeur>` | Réglages |
 | `import-cv <pdf>` · `login linkedin\|hellowork\|wttj\|classroom` | Profil depuis un CV, connexion manuelle |
+| `session export [site\|all]` · `session import [chemin]` | Sessions de connexion : export depuis le PC, import sur un serveur sans écran (§ 12) |
 | `classroom watch [--once] [--interval N]` · `classroom test [-n 10]` | Offres de l'école (Google Classroom) : surveillance et candidature immédiate, aperçu sans envoi |
 | `search [-s source]` · `score` · `prepare [-n 10] [-j id]` | Collecte, tri, CV et lettres |
 | `ats <id> [--cv autre.pdf]` | Explique le score ATS : mots-clés présents ou manquants, alertes |
@@ -298,7 +315,7 @@ d'entretien est écrite dès qu'une invitation est lue.
 | `prep <id candidature>` | Fiche de préparation d'entretien (régénérée si elle existe) |
 | `report [--precedente] [--date AAAA-MM-JJ] [--email]` | Rapport de la semaine ; `--email` te l'envoie aussi par e-mail |
 | `run [-s étape]` | Journée complète, ou seulement certaines étapes : `classroom`, `collect`, `score`, `prepare`, `apply`, `discover`, `enrich`, `spontaneous`, `inbox`, `followup` |
-| `status` · `export` · `dashboard` · `schedule install\|remove\|show` | Suivi |
+| `status` · `export` · `dashboard [--host IP] [--port N]` · `schedule install\|remove\|show` | Suivi |
 
 Options communes : `--dry-run` (simulation), `-v` (journal détaillé), `--root <dossier>`.
 
@@ -342,7 +359,9 @@ jours suivants, une seule fois par semaine. Le rapport contient :
 
 ## 7. Le tableau de bord
 
-`jobbot dashboard` ouvre http://localhost:8501. Les pages :
+`jobbot dashboard` ouvre http://localhost:8501 (`--port 8600` pour un autre port). Il écoute sur `127.0.0.1` :
+`--host` permet de le mettre sur l'IP d'un VPN, jamais sur `0.0.0.0` (refusé : le tableau de bord n'a pas de mot de
+passe). Sur un serveur, voir § 12.5. Les pages :
 
 - **Vue d'ensemble** : chiffres clés (offres, candidatures, réponses, entretiens, relances dues), offres par statut,
   derniers événements.
@@ -472,6 +491,8 @@ d'entreprises de 50 salariés ou plus passent en dernier.
 | La tâche planifiée ne tourne pas | `jobbot schedule show`, puis regarde `data\logs\tache-*.log`. La session Windows doit être ouverte. |
 | Caractères bizarres dans la console | Utilise Windows Terminal : jobbot remplace les caractères non affichables au lieu de planter. |
 | Le tableau de bord ne s'ouvre pas | `.venv\Scripts\pip install -e ".[dashboard]"`, ou change de port : `jobbot dashboard --port 8600`. |
+| Serveur : « Connexion SSH impossible » | Voir § 12.8 (serveur allumé et joignable, alias du `~/.ssh/config`, clé autorisée avec `ssh-copy-id`). |
+| Notification « Session à renouveler » | Une session LinkedIn / HelloWork a expiré : `jobbot login …` sur le PC, `jobbot session export all`, puis `python scripts/deploy_server.py --only private`. |
 
 Le journal détaillé est dans `data/logs/jobbot.log`. Pour plus de détails dans la console, ajoute `-v`.
 
@@ -484,6 +505,9 @@ Le journal détaillé est dans `data/logs/jobbot.log`. Pour plus de détails dan
 | `config/profile.yaml` | Ton profil (source de vérité). Ignoré par git : **ne jamais le publier.** |
 | `config/profile.example.yaml` | Modèle de profil fictif (Jean DUPONT), copié par `jobbot init` |
 | `config/settings.yaml` | Réglages : mode, quotas, seuils, relances, sources |
+| `config/settings.local.yaml` | Réglages propres à cette machine (serveur), prioritaires. Ignoré par git. |
+| `config/deploy.local.yaml` | Détails de ton serveur pour le déploiement (§ 12.1). Ignoré par git. |
+| `data/sessions/` | Sessions exportées (`jobbot session export`). **Ne jamais les partager.** |
 | `.env` | Secrets : mot de passe Gmail, clés d'API. **Ne jamais le partager.** |
 | `data/jobbot.db` | Offres, entreprises, candidatures, historique, liste noire |
 | `data/browser-profile/` | Sessions LinkedIn / HelloWork. **Ne jamais le partager.** |
@@ -498,3 +522,157 @@ Pour développer : `.venv\Scripts\python -m pytest -q -m "not live"`. Les tests 
 (ils lisent le profil fictif `tests/fixtures/profile.yaml`) ; ceux qui interrogent les vrais sites sont marqués
 `live`. L'architecture et le contrat des modules sont décrits dans
 `docs/ARCHITECTURE.md`, et les recherches (sites, limites, droit) dans `docs/research/`.
+
+---
+
+## 12. Installation sur un serveur Linux (Debian)
+
+jobbot peut tourner jour et nuit sur un petit serveur Debian sans écran : collecte, candidatures, Classroom,
+boîte mail et relances continuent quand le PC est éteint. Tout se pilote **depuis le PC Windows**, en une
+commande, dès que l'accès SSH par clé fonctionne.
+
+### 12.1 Ce qu'il faut
+
+- Un serveur Debian (12 ou 13) joignable en SSH depuis le PC, et deux **alias** dans ton `~/.ssh/config`
+  (authentification par clé, jamais de mot de passe) : un pour `root`, un pour le compte ordinaire qui fera
+  tourner jobbot.
+- Dans le `.env` du PC (noms déjà présents dans `.env.example`) :
+
+| Clé | Rôle |
+|---|---|
+| `SERVER_ROOT_HOST_ALIAS` | Alias SSH de root : paquets système, bibliothèques de Chromium, fuseau horaire, démarrage des services. |
+| `PROJECT_SSH_HOST_ALIAS` | Alias SSH du compte qui fait tourner jobbot. |
+| `PROJECT_USER` | Nom de ce compte (jamais root). |
+| `SERVER_IP_TAILSCALE` | Optionnel : IP du serveur sur ton VPN, seulement avec `--dashboard-vpn`. |
+| `CLAUDE_CODE_OAUTH_TOKEN` | L'IA de ton abonnement Claude sur le serveur (voir § 12.2). |
+
+  Ces clés d'accès ne partent **jamais** sur le serveur : le déploiement y copie un `.env` filtré, sans commentaire,
+  sans aucune clé `SERVER_*`, `PROJECT_*`, `WEBHOOK_*`, ni clé contenant `ROOT` ou `PASSWORD` (sauf
+  `SMTP_PASSWORD`). Les clés ajoutées directement sur le serveur y sont conservées.
+- Optionnel : `config/deploy.local.yaml` (ignoré par git) pour ce qui est propre à ton serveur :
+
+```yaml
+settings_local:            # imposé dans config/settings.local.yaml du serveur
+  search_engine_url: http://127.0.0.1:8888      # une instance SearXNG locale (format JSON activé)
+telegram:                  # fichiers lus en root SUR le serveur : les valeurs ne passent jamais par le PC
+  token_file: /chemin/vers/jeton-du-bot
+  chat_id_file: /chemin/vers/id-conversation
+openclaw:                  # remplacement de l'ancienne application (§ 12.4)
+  backup_extra: [scripts, .env]                 # chemins (relatifs au dossier du compte) à sauvegarder en plus
+  keep: [mon-service]                            # services à ne jamais arrêter
+```
+
+### 12.2 Sur le PC d'abord : les connexions
+
+Le serveur n'a pas d'écran : les connexions manuelles se font sur le PC, puis leurs cookies sont envoyés.
+
+```powershell
+jobbot login linkedin
+jobbot login hellowork
+jobbot login classroom
+jobbot session export all      # data/sessions/<site>.json (secrets : jamais partagés, ignorés par git)
+claude setup-token             # abonnement Claude : copie le jeton dans .env → CLAUDE_CODE_OAUTH_TOKEN=…
+```
+
+Sur le serveur, chaque ouverture du navigateur importe automatiquement une session plus récente que la dernière
+importée (seulement les cookies du site concerné). `jobbot session import <dossier>` fait la même copie à la main.
+
+### 12.3 Déployer
+
+```powershell
+.venv\Scripts\python scripts\deploy_server.py --dry-run   # le plan et les commandes : rien n'est modifié
+.venv\Scripts\python scripts\deploy_server.py             # installation complète
+```
+
+| Étape | Ce qui est fait |
+|---|---|
+| 1 `check` | Connexion aux deux comptes, système, architecture, Python, espace disque, port du tableau de bord. |
+| 2 `system` | (root) `git curl xvfb ca-certificates cron`, fuseau horaire Europe/Paris (heures de cron). |
+| 3 `toolchain` | `uv`, Python 3.12, Claude Code (installateur officiel, sinon `npm` en root). |
+| 4 `code` | Dépôt `~/jobbot.git` + copie `~/jobbot`, remote git `serveur`, `git push` (un hook met ensuite `~/jobbot` à jour à chaque `git push serveur`). Seul le dernier commit part. |
+| 5 `deps` | `.venv` (`uv`), `pip install -e ".[dashboard]"`, Chromium de Playwright et ses bibliothèques (root). |
+| 6 `private` | Profil, `.env` filtré, sessions exportées, `config/settings.local.yaml` (`headless: true`, `browser_channel: null`, `notify_email: true`) — envoyés seulement s'ils ont changé (sha256), droits 600. Jeton Telegram lu en root sur le serveur si configuré. |
+| 7 `llm` | Petit appel à Claude sur le serveur ; en cas d'échec, les deux solutions sont affichées. |
+| 8 `init` | `jobbot init` puis `jobbot doctor` (le tableau est affiché). |
+| 9 `schedule` | `jobbot schedule install` : lignes cron (09:30, 18:00, Classroom). |
+| 10 `dashboard` | Service systemd utilisateur `jobbot-dashboard` (démarré avec le serveur). |
+| 11 `summary` | Résumé et prochaines actions. |
+
+Chaque étape peut être relancée sans risque. `--only <étape>` en lance une seule (ex. `--only private` après un
+nouvel export de sessions) ; `--update` = code, dépendances, fichiers privés, cron (et redémarrage du tableau de
+bord). Mise à jour la plus rapide du code seul : `git push serveur`.
+
+### 12.4 Remplacer l'ancienne application du serveur
+
+Si une ancienne application tourne sur le serveur, `--replace-openclaw` l'arrête proprement avant l'installation
+(jamais pendant un `--update`) :
+
+```powershell
+.venv\Scripts\python scripts\deploy_server.py --replace-openclaw --dry-run   # listes ARRÊTER / CONSERVER, rien ne change
+.venv\Scripts\python scripts\deploy_server.py --replace-openclaw             # installation complète avec remplacement
+```
+
+- **Découverte automatique** : services systemd (système et du compte), minuteries, conteneurs docker, processus
+  pm2, lignes crontab et processus qui écoutent sur son port (lu dans `WEBHOOK_BASE_URL`, 3000 par défaut). Les
+  services de la liste « à conserver » (SearXNG, surveillance du serveur, synchronisation de fichiers, jobbot et
+  `keep` de `config/deploy.local.yaml`) ne sont jamais arrêtés.
+- **Sauvegarde d'abord** : `~/backups/openclaw-<date>.tar.gz` dans le dossier du compte projet (propriétaire root,
+  droits 600) avec ses dossiers, fichiers de services, crontabs, `docker inspect` et état pm2. Sans sauvegarde,
+  rien n'est arrêté.
+- **Puis arrêt réversible** : services arrêtés et désactivés, conteneurs arrêtés (sans redémarrage automatique),
+  processus pm2 retirés, seules ses lignes crontab retirées, port vérifié. Rien n'est supprimé : ni le compte, ni ses
+  clés SSH, ni ses dossiers.
+- **Revenir en arrière** : `--restore-openclaw` (dernière sauvegarde, ou `--restore-openclaw openclaw-AAAAMMJJ-HHMMSS.tar.gz`)
+  remet dossiers, services, conteneurs, pm2 et lignes crontab.
+- **Supprimer pour de bon** (optionnel, séparé) : `--purge-openclaw` supprime ses dossiers et fichiers de services ;
+  refusé tant qu'aucune sauvegarde n'existe, et une nouvelle sauvegarde est faite juste avant. Un dossier qui
+  contient un service conservé (ex. SearXNG) n'est jamais supprimé, pas plus que le dossier personnel, `.ssh`,
+  `backups` ou jobbot. Les sauvegardes, elles, sont gardées.
+- Les lignes crontab sont filtrées sur le serveur : leur contenu ne passe jamais par le PC (seul un aperçu masqué
+  est affiché).
+
+### 12.5 Le tableau de bord à distance
+
+Sur le serveur, le tableau de bord écoute seulement sur `127.0.0.1:8501` : il n'est jamais exposé au réseau.
+Depuis le PC :
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\dashboard_serveur.ps1   # tunnel SSH, puis http://localhost:8501
+```
+
+Avec un VPN (Tailscale) : `--dashboard-vpn` le met sur l'IP VPN du serveur (`SERVER_IP_TAILSCALE`), jamais sur
+`0.0.0.0`.
+
+### 12.6 Être prévenu quand le serveur travaille seul
+
+Chaque notification a un niveau : `info` (bilans), `important` (réponse, offre de l'école à traiter, fiche
+d'entretien) ou `urgent` (entretien, session à renouveler).
+
+| Réglage | Effet |
+|---|---|
+| `notify_email: true` | Les notifications importantes et urgentes t'arrivent par e-mail (« [jobbot] … », au plus `notify_email_max_per_day` par jour, 10 par défaut). Activé par le déploiement. |
+| `notify_telegram: true` | Par ton bot Telegram (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`) ; `notify_telegram_all: true` pour recevoir aussi les bilans. |
+| `notify_ntfy_topic: <sujet>` | Sur le téléphone avec l'application ntfy (sujet long et difficile à deviner). |
+
+En `--dry-run`, rien n'est envoyé (les e-mails sont écrits dans `output/outbox`).
+
+### 12.7 Sur le serveur
+
+- Les heures de cron suivent l'heure du serveur (réglée sur Europe/Paris par le déploiement). Journal des tâches :
+  `~/jobbot/data/logs/cron.log` ; journal détaillé : `data/logs/jobbot.log`.
+- `jobbot doctor` ajoute sous Linux : écran virtuel (`xvfb-run`), lignes cron, sessions importées (âge),
+  `config/settings.local.yaml`, fuseau horaire.
+- Sur le serveur, change tes réglages dans `config/settings.local.yaml` (`jobbot config set` y écrit quand la clé y
+  est déjà) : `config/settings.yaml` est remplacé par la version du PC à chaque déploiement.
+- Moteur de recherche : avec `search_engine_url` (SearXNG), la recherche des sites d'entreprises et des personnes
+  l'utilise avant Brave et DuckDuckGo, sans l'attente de 25 s.
+
+### 12.8 Dépannage du serveur
+
+| Problème | Solution |
+|---|---|
+| « Connexion SSH impossible avec l'alias … » | Le serveur est-il allumé et joignable (même réseau, VPN actif) ? Essaie `ssh <alias>`. Vérifie l'alias dans `~/.ssh/config`, puis autorise ta clé : `ssh-copy-id -i ~/.ssh/<clé>.pub <compte>@<serveur>` (sous Windows : `type $env:USERPROFILE\.ssh\<clé>.pub \| ssh <compte>@<serveur> "cat >> ~/.ssh/authorized_keys"`). Le script n'utilise jamais de mot de passe. |
+| « IA indisponible » (étape 7) | Abonnement : `claude setup-token` sur le PC, jeton dans `CLAUDE_CODE_OAUTH_TOKEN`, puis `--only private`. Ou clé API payante : `ANTHROPIC_API_KEY` + `llm: {provider: anthropic}` dans `settings_local` de `config/deploy.local.yaml`. |
+| Session LinkedIn / HelloWork / Google expirée | `jobbot login …` sur le PC, `jobbot session export all`, `--only private`. |
+| Le tableau de bord ne répond pas | `ssh <alias> systemctl --user status jobbot-dashboard`, puis relance `scripts\dashboard_serveur.ps1`. |
+| Les tâches ne tournent pas | `ssh <alias> "cd jobbot && .venv/bin/jobbot schedule show"` et `data/logs/cron.log`. |

@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import logging
 import re
-import sys
 from enum import Enum
 from pathlib import Path
 from typing import Annotated, Any
@@ -213,15 +212,19 @@ def export(
         state.console.print(f"Exporté : {escape(str(path))}")
 
 
-def dashboard(ctx: typer.Context,
-              port: Annotated[int, typer.Option("--port", help="Port local du tableau de bord.")] = 8501) -> None:
-    """Ouvre le tableau de bord (Streamlit) dans le navigateur."""
+def dashboard(
+    ctx: typer.Context,
+    port: Annotated[int, typer.Option("--port", min=1, max=65535, help="Port du tableau de bord.")] = 8501,
+    host: Annotated[str, typer.Option("--host", help="Adresse d'écoute : 127.0.0.1 (défaut, tunnel SSH) ou l'IP "
+                                                     "du VPN ; jamais 0.0.0.0.")] = "127.0.0.1",
+) -> None:
+    """Ouvre le tableau de bord (Streamlit) dans le navigateur (sur un serveur : service, sans navigateur)."""
     from jobbot.cli_tools import launch_dashboard
 
     state = state_of(ctx)
     try:
-        code = launch_dashboard(state.root, port)
-    except RuntimeError as exc:
+        code = launch_dashboard(state.root, port, host=host)
+    except (RuntimeError, ValueError) as exc:
         fail(state.console, str(exc))
     if code:
         raise typer.Exit(code)
@@ -235,7 +238,7 @@ def schedule_install(
     morning: Annotated[str, typer.Option("--matin", help="Heure du lancement complet (HH:MM).")] = "09:30",
     evening: Annotated[str, typer.Option("--soir", help="Heure boîte mail + relances (HH:MM).")] = "18:00",
 ) -> None:
-    """Crée les tâches planifiées Windows (jobbot-matin, jobbot-soir, jobbot-classroom)."""
+    """Crée les tâches planifiées (Windows : jobbot-matin, jobbot-soir, jobbot-classroom ; Linux : crontab)."""
     state = state_of(ctx)
     bad = [t for t in (morning, evening) if not _TIME_RE.match(t)]
     if bad:
@@ -254,9 +257,20 @@ def schedule_show(ctx: typer.Context) -> None:
 
 
 def _schedule(state: State, action: str, times: dict[str, str] | None = None) -> None:
+    """Windows: Task Scheduler (install_task.ps1 + schtasks); Linux: jobbot lines of the user's crontab."""
     from jobbot.cli_tools import run_schedule
+    from jobbot.cron import run_cron, scheduler_kind
 
-    if sys.platform != "win32" and not state.dry_run:
-        fail(state.console, "Les tâches planifiées ne sont gérées que sous Windows (schtasks).")
-    for line in run_schedule(state.root, action, dry_run=state.dry_run, times=times):
+    kind = scheduler_kind()
+    if kind == "cron":
+        cron_times = {"run": (times or {}).get("jobbot-matin", ""), "soir": (times or {}).get("jobbot-soir", "")}
+        lines = run_cron(state.root, action, dry_run=state.dry_run, times=cron_times)
+    elif kind == "windows" or state.dry_run:
+        lines = run_schedule(state.root, action, dry_run=state.dry_run, times=times)
+    else:
+        fail(state.console, "Tâches planifiées gérées sous Windows (Planificateur) et Linux (cron) seulement.")
+        return
+    for line in lines:
         state.console.print(escape(line))
+    if kind == "cron" and any(line.startswith(("Crontab : échec", "crontab introuvable")) for line in lines):
+        raise typer.Exit(1)

@@ -341,13 +341,35 @@ def run_schedule(root: Path, action: str, *, dry_run: bool, times: dict[str, str
 # --------------------------------------------------------------------------- dashboard
 
 
-def launch_dashboard(root: Path, port: int) -> int:
-    """Run ``streamlit run dashboard/app.py`` (blocking until Ctrl+C). Returns the exit code."""
+def dashboard_host(host: str) -> str:
+    """Validated listen address: localhost or one IP address, never every interface (no login on the dashboard)."""
+    import ipaddress
+
+    value = (host or "").strip()
+    if value == "localhost":
+        return value
+    try:
+        address = ipaddress.ip_address(value)
+    except ValueError as exc:
+        raise ValueError(f"Adresse d'écoute invalide : « {host} » (ex. 127.0.0.1 ou l'IP du VPN)") from exc
+    if address.is_unspecified:
+        raise ValueError(f"{value} exposerait le tableau de bord (sans mot de passe) à tout le réseau : utilise "
+                         "127.0.0.1 (tunnel SSH) ou l'IP du VPN.")
+    return value
+
+
+def launch_dashboard(root: Path, port: int, *, host: str = "127.0.0.1", headless: bool | None = None) -> int:
+    """Run ``streamlit run dashboard/app.py`` on ``host:port`` (blocking until Ctrl+C). Returns the exit code.
+    ``headless`` (default: on Linux) → no browser opened, no first-run prompt (server / systemd service)."""
     if importlib.util.find_spec("streamlit") is None:
         raise RuntimeError("Streamlit n'est pas installé : .venv\\Scripts\\pip install -e .[dashboard]")
+    address = dashboard_host(host)
+    server_mode = sys.platform.startswith("linux") if headless is None else headless
     env = {**os.environ, "JOBBOT_ROOT": str(root)}
     cmd = [sys.executable, "-m", "streamlit", "run", str(DASHBOARD_APP), "--server.port", str(port),
-           "--browser.gatherUsageStats", "false"]
+           "--server.address", address, "--browser.gatherUsageStats", "false"]
+    if server_mode:
+        cmd += ["--server.headless", "true"]
     try:
         return subprocess.run(cmd, env=env, check=False).returncode
     except KeyboardInterrupt:

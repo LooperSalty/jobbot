@@ -8,8 +8,9 @@ Google asking to log in while headless → one headful retry when a display exis
 screen); still asked → ``login_required`` (the watcher notifies « jobbot login classroom »).
 
 Portable (Windows desktop and headless Linux server): no OS-specific call here. Every Classroom browser
-context — watcher and ``jobbot login classroom`` — is created by ``open_classroom_browser`` only, the single
-place to extend (e.g. importing a session exported from a desktop browser as a Playwright ``storage_state``).
+context — watcher, ``jobbot login classroom`` and ``jobbot session export`` — is created by
+``open_classroom_browser`` only; a session exported on a desktop (``jobbot session export classroom``, Playwright
+``storage_state``) is imported there when newer (``jobbot.sessions``).
 """
 
 from __future__ import annotations
@@ -44,13 +45,16 @@ MAX_SEE_MORE = 5
 
 
 @contextmanager
-def open_classroom_browser(ctx: Any, *, headless: bool) -> Iterator[BrowserContext]:
+def open_classroom_browser(ctx: Any, *, headless: bool, import_session: bool = True) -> Iterator[BrowserContext]:
     """THE Classroom browser context: persistent profile ``classroom.browser_profile`` (never the LinkedIn /
-    HelloWork one), Google-friendly launch flags. Single creation point, used by the watcher and the login."""
+    HelloWork one), Google-friendly launch flags. Single creation point, used by the watcher, the login and
+    ``jobbot session export`` (``import_session=False``). A Google session exported on a desktop
+    (``data/sessions/classroom.json``) is imported by ``open_browser`` when newer."""
     from jobbot.apply.browser import GOOGLE_LAUNCH, open_browser
 
+    extra: dict[str, Any] = {} if import_session else {"import_sessions": False}
     with open_browser(ctx, headless=headless, profile_dir=ctx.settings.classroom.browser_profile,
-                      launch_options=GOOGLE_LAUNCH) as context:
+                      launch_options=GOOGLE_LAUNCH, **extra) as context:
         yield context
 
 

@@ -41,6 +41,9 @@ ENV_KEYS = (
     ("LBA_API_TOKEN", "lba_api_token", "ok", "optionnel : API officielle La Bonne Alternance"),
     ("HUNTER_API_KEY", "hunter_api_key", "ok", "optionnel : vérification d'adresses"),
     ("BRAVE_API_KEY", "brave_api_key", "ok", "optionnel : recherche de sites"),
+    ("CLAUDE_CODE_OAUTH_TOKEN", "claude_code_oauth_token", "ok", "optionnel : abonnement Claude sur un serveur "
+                                                                 "(claude setup-token)"),
+    ("TELEGRAM_BOT_TOKEN", "telegram_bot_token", "ok", "optionnel : notifications Telegram"),
 )
 CHROME_PATHS = (
     ("PROGRAMFILES", r"Google\Chrome\Application\chrome.exe"),
@@ -315,9 +318,17 @@ def run_doctor(state: Any, *, smtp: bool = False, smtp_factory: Callable[..., An
         checks.extend(check_sources(ctx))
         checks.append(check_database(ctx))
         checks.extend(check_classroom(ctx))
+        checks.extend(_server_checks(state.root, settings, ctx))
         if smtp:
             checks.append(check_smtp(ctx.secrets, smtp_factory))
     return checks
+
+
+def _server_checks(root: Path, settings: Settings, ctx: Any) -> list[Check]:
+    """Linux (headless server): xvfb-run, crontab lines, imported sessions, settings.local.yaml, time zone."""
+    from jobbot import server_checks
+
+    return server_checks.linux_checks(root, settings, ctx.repo) if server_checks.is_linux() else []
 
 
 def doctor_table(checks: list[Check]) -> Table:

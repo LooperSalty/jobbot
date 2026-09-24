@@ -72,7 +72,7 @@ def test_run_daily_end_to_end_dry_run(ctx, make_job, monkeypatch):
     email = FakeApplier("email", [applied(ApplyMethod.EMAIL, email_to="rh@acme-logiciels.fr", mid="<x1@gmail.com>")])
     install_appliers(monkeypatch, {"email": email})
     notified: list[tuple[str, str]] = []
-    monkeypatch.setattr("jobbot.notify.notify", lambda c, title, msg: notified.append((title, msg)))
+    monkeypatch.setattr("jobbot.notify.notify", lambda c, title, msg, level="info": notified.append((title, msg)))
     history: list[JobStatus] = []
     _track_status(monkeypatch, job.id, ctx, history)
 
@@ -105,7 +105,7 @@ def test_steps_are_isolated_and_ordered(ctx, monkeypatch):
 
     monkeypatch.setitem(pipeline.STEP_FUNCTIONS, "collect", boom)
     monkeypatch.setitem(pipeline.STEP_FUNCTIONS, "spontaneous", fine("spontaneous"))
-    monkeypatch.setattr("jobbot.notify.notify", lambda *a: None)
+    monkeypatch.setattr("jobbot.notify.notify", lambda *a, **k: None)
     report = pipeline.run_daily(ctx, steps=["spontaneous", "collect"])
     assert calls == ["collect", "spontaneous"]
     assert report.collect == "Erreur : source en panne" and report.spontaneous.sent == 2 and report.apply is None
@@ -116,7 +116,7 @@ def test_steps_are_isolated_and_ordered(ctx, monkeypatch):
 
 
 def test_lock_prevents_parallel_runs(ctx, monkeypatch):
-    monkeypatch.setattr("jobbot.notify.notify", lambda *a: None)
+    monkeypatch.setattr("jobbot.notify.notify", lambda *a, **k: None)
     lock = ctx.root / "data" / pipeline.LOCK_FILE
     lock.parent.mkdir(parents=True, exist_ok=True)
     lock.write_text("123", encoding="utf-8")
@@ -234,7 +234,7 @@ def test_spontaneous_step_uses_effective_mode(ctx, monkeypatch):
         return CampaignReport(sent=0, skipped=0, failed=0)
 
     monkeypatch.setattr(spontaneous, "run_spontaneous_campaign", campaign)
-    monkeypatch.setattr("jobbot.notify.notify", lambda *a: None)
+    monkeypatch.setattr("jobbot.notify.notify", lambda *a, **k: None)
     warm = with_settings(ctx, setup_date=date.today().isoformat(), warmup_days=5)
     pipeline.run_daily(warm, steps=["spontaneous"])
     pipeline.run_daily(ctx, steps=["spontaneous"])

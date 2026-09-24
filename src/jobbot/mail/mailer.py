@@ -63,7 +63,8 @@ class OutgoingEmail(BaseModel):
     attachments: list[str] = Field(default_factory=list)
     in_reply_to: str | None = None
     references: list[str] = Field(default_factory=list)
-    kind: Literal["application", "spontaneous", "followup", "report"]  # report = weekly report sent to oneself
+    # report = weekly report sent to oneself; notification = important notification e-mailed to oneself
+    kind: Literal["application", "spontaneous", "followup", "report", "notification"]
     application_id: int | None = None
 
 

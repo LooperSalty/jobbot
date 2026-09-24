@@ -32,7 +32,7 @@ NOON = datetime(2026, 9, 24, 12, 0, tzinfo=clock.PARIS)
 def notes(monkeypatch):
     """Captured notifications; no geocoding, no board fetch, no Chromium."""
     sent: list[tuple[str, str]] = []
-    monkeypatch.setattr("jobbot.notify.notify", lambda c, title, message: sent.append((title, message)))
+    monkeypatch.setattr("jobbot.notify.notify", lambda c, title, message, level="info": sent.append((title, message)))
     monkeypatch.setattr("jobbot.matching.match.geocode", lambda query, client=None: None)
     monkeypatch.setattr("jobbot.sources.registry.fetch_details_only", lambda c, job: None)
     fast_documents(monkeypatch)

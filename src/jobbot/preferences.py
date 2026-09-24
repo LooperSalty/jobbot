@@ -1,31 +1,34 @@
 """User preferences: first-run wizard definition + safe edits of config files.
 
 - Edits keep the YAML comments (ruamel round-trip), are validated against the pydantic models before
-  being written, and are atomic (temp file + replace, previous version kept as ``.bak``).
+  being written, and are atomic (temp file + replace, previous version kept as ``.bak``) — see ``config_files``.
+- Settings keys go to ``config/settings.yaml``; a key already set in the gitignored
+  ``config/settings.local.yaml`` (it wins over settings.yaml) is updated there instead. Reads return the
+  effective value (settings.yaml + settings.local.yaml).
 - ``SETUP_QUESTIONS`` is the single definition used by ``jobbot setup`` (CLI) and the dashboard
   "Réglages" page, so both always ask the same things and write to the same place.
 """
 
 from __future__ import annotations
 
-import os
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import date, timedelta
-from io import StringIO
 from pathlib import Path
 from typing import Any, Literal
 
-from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 
 from jobbot.classroom.models import save_course_urls
-from jobbot.config import ConfigError, Profile, Settings
-
-SETTINGS_FILE = Path("config/settings.yaml")
-PROFILE_FILE = Path("config/profile.yaml")
-ENV_FILE = Path(".env")
-ENV_EXAMPLE = Path(".env.example")
+from jobbot.config import ConfigError, Profile, Settings, settings_data
+from jobbot.config_files import ENV_EXAMPLE, ENV_FILE, load_doc, save_doc, settings_target  # noqa: F401
+from jobbot.config_files import LOCAL_SETTINGS_PATH as LOCAL_SETTINGS_FILE  # noqa: F401
+from jobbot.config_files import PROFILE_PATH as PROFILE_FILE
+from jobbot.config_files import SETTINGS_PATH as SETTINGS_FILE  # noqa: F401
+from jobbot.config_files import dig as _dig
+from jobbot.config_files import plain as _plain
+from jobbot.config_files import secret_present, set_secret  # noqa: F401
+from jobbot.config_files import yaml_rt as _yaml
 
 LUXEMBOURG = {
     "city": "Luxembourg", "postal_code": "", "radius_km": 25, "latitude": 49.6116, "longitude": 6.1319,
@@ -38,48 +41,7 @@ CONTRACT_CHOICES = ("alternance", "cdi", "cdd", "stage", "freelance", "interim")
 Kind = Literal["bool", "int", "float", "str", "choice", "list", "secret"]
 
 
-# --------------------------------------------------------------------------- yaml round-trip
-
-
-def _yaml() -> YAML:
-    y = YAML()
-    y.preserve_quotes = True
-    y.width = 4096
-    y.indent(mapping=2, sequence=4, offset=2)
-    return y
-
-
-def _plain(node: Any) -> Any:
-    """ruamel containers/scalars → plain Python (for pydantic validation)."""
-    if isinstance(node, dict):
-        return {str(k): _plain(v) for k, v in node.items()}
-    if isinstance(node, list):
-        return [_plain(v) for v in node]
-    if isinstance(node, bool) or node is None:
-        return node
-    if isinstance(node, int):
-        return int(node)
-    if isinstance(node, float):
-        return float(node)
-    return str(node)
-
-
-def load_doc(path: Path) -> CommentedMap:
-    if not path.exists():
-        return CommentedMap()
-    doc = _yaml().load(path.read_text(encoding="utf-8"))
-    return doc if isinstance(doc, CommentedMap) else CommentedMap()
-
-
-def save_doc(path: Path, doc: CommentedMap) -> None:
-    buf = StringIO()
-    _yaml().dump(doc, buf)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(buf.getvalue(), encoding="utf-8", newline="\n")
-    if path.exists():
-        path.with_suffix(path.suffix + ".bak").write_bytes(path.read_bytes())
-    os.replace(tmp, path)
+# --------------------------------------------------------------------------- files
 
 
 def _file_for(key: str) -> tuple[Path, list[str]]:
@@ -101,17 +63,6 @@ def _validate(file: Path, doc: CommentedMap) -> None:
         raise ConfigError(f"Valeur refusée pour {file.as_posix()} :\n{exc}") from exc
 
 
-def _dig(doc: CommentedMap, parts: list[str], create: bool) -> tuple[CommentedMap, str]:
-    node = doc
-    for part in parts[:-1]:
-        if part not in node or not isinstance(node[part], dict):
-            if not create:
-                raise KeyError(part)
-            node[part] = CommentedMap()
-        node = node[part]
-    return node, parts[-1]
-
-
 # --------------------------------------------------------------------------- get / set
 
 
@@ -125,12 +76,12 @@ def parse_value(raw: Any) -> Any:
 
 
 def get_value(root: Path, key: str) -> Any:
-    """Current effective value (file value, else model default)."""
+    """Current effective value (file value — settings.local.yaml over settings.yaml —, else model default)."""
     file, parts = _file_for(key)
     if file == PROFILE_FILE:
         model: Any = Profile.model_validate(_plain(load_doc(root / file)))
     else:
-        model = Settings.model_validate(_plain(load_doc(root / file)))
+        model = Settings.model_validate(settings_data(root))
     value: Any = model
     for part in parts:
         value = value.get(part) if isinstance(value, dict) else getattr(value, part)
@@ -159,13 +110,15 @@ def _stage(root: Path, file: Path, changes: list[tuple[list[str], Any]]) -> Comm
 def set_many(root: Path, updates: dict[str, Any], *, parse: bool = True) -> None:
     """Apply several ``key: value`` updates; each file is validated then written once.
 
+    Settings keys go to settings.yaml, or to settings.local.yaml when that file already sets them.
     With ``parse`` (CLI input), strings are YAML-parsed ("12" → 12); if the typed value is refused,
     the raw string is tried instead (e.g. a salary stored as text).
     """
     by_file: dict[Path, list[tuple[list[str], Any, Any]]] = {}
     for key, value in updates.items():
         file, parts = _file_for(key)
-        by_file.setdefault(file, []).append((parts, parse_value(value) if parse else value, value))
+        target = settings_target(root, file, parts)
+        by_file.setdefault(target, []).append((parts, parse_value(value) if parse else value, value))
     staged: list[tuple[Path, CommentedMap]] = []
     for file, changes in by_file.items():
         try:
@@ -214,41 +167,6 @@ def set_location(root: Path, city: str, entry: dict | None) -> None:
         locs.append(CommentedMap(entry))
     _validate(PROFILE_FILE, doc)
     save_doc(root / PROFILE_FILE, doc)
-
-
-# --------------------------------------------------------------------------- secrets (.env)
-
-
-def _env_lines(root: Path) -> list[str]:
-    env = root / ENV_FILE
-    if env.exists():
-        return env.read_text(encoding="utf-8").splitlines()
-    example = root / ENV_EXAMPLE
-    return example.read_text(encoding="utf-8").splitlines() if example.exists() else []
-
-
-def secret_present(root: Path, name: str) -> bool:
-    for line in _env_lines(root) if (root / ENV_FILE).exists() else []:
-        k, _, v = line.partition("=")
-        if k.strip() == name and v.split("#")[0].strip():
-            return True
-    return False
-
-
-def set_secret(root: Path, name: str, value: str) -> None:
-    """Create/update ``NAME=value`` in .env (created from .env.example). The value is never logged."""
-    if "\n" in value or "\r" in value:
-        raise ConfigError("Valeur de secret invalide (retour à la ligne)")
-    lines, done = [], False
-    for line in _env_lines(root):
-        if line.split("=", 1)[0].strip() == name:
-            lines.append(f"{name}={value.strip()}")
-            done = True
-        else:
-            lines.append(line)
-    if not done:
-        lines.append(f"{name}={value.strip()}")
-    (root / ENV_FILE).write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
 
 
 # --------------------------------------------------------------------------- wizard definition
@@ -361,6 +279,15 @@ SETUP_QUESTIONS: tuple[Question, ...] = (
     Question("reports.weekly_email", "Recevoir aussi le rapport hebdomadaire par e-mail ?", "bool", SEC_NOTIFY),
     Question("reports.interview_prep", "Fiche de préparation automatique quand un entretien arrive ?", "bool",
              SEC_NOTIFY),
+    Question("notify_email", "Recevoir par e-mail les notifications importantes (entretien, réponse, reconnexion) ?",
+             "bool", SEC_NOTIFY, help="Utile sur un serveur sans écran ; objet « [jobbot] … », "
+                                      "notify_email_max_per_day par jour au plus (SMTP requis)."),
+    Question("notify_ntfy_topic", "Sujet ntfy pour les notifications sur le téléphone (vide = désactivé)", "str",
+             SEC_NOTIFY, help="Application ntfy : abonne-toi au même sujet. Choisis un nom long et difficile à "
+                              "deviner (lettres, chiffres, - et _) : quiconque le connaît lit les messages."),
+    Question("notify_telegram", "Notifications importantes par Telegram ?", "bool", SEC_NOTIFY,
+             help="Bot Telegram : TELEGRAM_BOT_TOKEN et TELEGRAM_CHAT_ID dans .env (le déploiement serveur les "
+                  "renseigne) ; notify_telegram_all: true pour recevoir aussi les bilans."),
     # --- Comptes (.env)
     Question("SMTP_PASSWORD", "Mot de passe d'application Gmail (16 caractères)", "secret", SEC_ACCOUNTS,
              help="myaccount.google.com/apppasswords (validation en 2 étapes requise)."),

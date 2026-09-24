@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
 import shutil
 import subprocess
@@ -83,9 +84,13 @@ class _JsonMixin:
 
 
 class ClaudeCLIClient(_JsonMixin):
-    """Runs ``claude -p`` with tools, MCP servers, settings and session persistence disabled."""
+    """Runs ``claude -p`` with tools, MCP servers, settings and session persistence disabled.
 
-    def __init__(self, settings: LLMSettings):
+    ``oauth_token`` (``CLAUDE_CODE_OAUTH_TOKEN`` of .env, made by ``claude setup-token``) is passed to the
+    subprocess: a headless server can use the Claude subscription from cron without an interactive login.
+    """
+
+    def __init__(self, settings: LLMSettings, oauth_token: str | None = None):
         self.settings = settings
         exe = shutil.which(settings.cli_path)
         if exe is None:
@@ -93,6 +98,7 @@ class ClaudeCLIClient(_JsonMixin):
                 f"Commande '{settings.cli_path}' introuvable. Installe Claude Code ou passe llm.provider à 'anthropic'."
             )
         self.exe = exe
+        self._env = {**os.environ, "CLAUDE_CODE_OAUTH_TOKEN": oauth_token} if oauth_token else None
 
     def complete(self, prompt: str, *, system: str | None = None, fast: bool = False) -> str:
         model = self.settings.fast_model if fast else self.settings.model
@@ -105,7 +111,7 @@ class ClaudeCLIClient(_JsonMixin):
         try:
             proc = subprocess.run(
                 cmd, input=prompt, capture_output=True, text=True, encoding="utf-8",
-                timeout=self.settings.timeout_s, check=False,
+                timeout=self.settings.timeout_s, check=False, env=self._env,
             )
         except subprocess.TimeoutExpired as exc:
             raise LLMError(f"claude -p a dépassé {self.settings.timeout_s}s") from exc
@@ -173,5 +179,5 @@ def build_llm(settings: LLMSettings, secrets: Secrets) -> LLMClient:
             raise LLMError("llm.provider=anthropic mais ANTHROPIC_API_KEY est absent du .env")
         return AnthropicClient(settings, secrets.anthropic_api_key)
     if settings.provider == "claude_cli":
-        return ClaudeCLIClient(settings)
+        return ClaudeCLIClient(settings, getattr(secrets, "claude_code_oauth_token", None))
     return DisabledLLM()

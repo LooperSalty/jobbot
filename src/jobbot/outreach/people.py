@@ -4,8 +4,9 @@ spontaneous applications.
 Sources, cheapest first: the company registry (``recherche-entreprises`` dirigeants, natural persons only, never
 the "Commissaire aux comptes"), the company's own team/about pages, Hunter ``domain-search`` (when a key is set;
 it also gives the domain's address pattern) and public search-result *titles* of professional profiles
-("Prénom Nom - Poste - Entreprise | LinkedIn") through Brave Search (key) or DuckDuckGo HTML (≥ 25 s between
-queries, stopped for the run on a bot-flag). Profile pages themselves are never fetched (LinkedIn ToS, CNIL
+("Prénom Nom - Poste - Entreprise | LinkedIn") through a self-hosted SearXNG (``settings.search_engine_url``),
+else Brave Search (key) or DuckDuckGo HTML (≥ 25 s between queries, stopped for the run on a bot-flag).
+Profile pages themselves are never fetched (LinkedIn ToS, CNIL
 KASPR decision): only the title shown by the search engine is read.
 
 People are ranked by ``settings.outreach.preferred_roles`` (HR/talent/recrutement > CTO/tech lead/directeur
@@ -41,6 +42,7 @@ from jobbot.outreach._people_parse import (
     role_category,
     split_name,
 )
+from jobbot.outreach._searxng import searxng_search
 from jobbot.textutil import normalize
 
 __all__ = [
@@ -305,11 +307,16 @@ def _ddg_titles(client: httpx.Client, query: str) -> list[str]:
     return [a.get_text(" ", strip=True) for a in BeautifulSoup(resp.text, "lxml").select("a.result__a")]
 
 
-def _search_titles(client: httpx.Client, company: Company, secrets: Secrets | None) -> list[str]:
+def _search_titles(client: httpx.Client, company: Company, secrets: Secrets | None,
+                   search_url: str | None = None) -> list[str]:
+    """Result titles: SearXNG first (self-hosted, ``settings.search_engine_url``), else Brave (key) / DuckDuckGo."""
     names = _domains.company_names(company)
     if not names:
         return []
     query = LINKEDIN_QUERY.format(name=names[0].replace('"', " ").strip())
+    titles = [title for _, title in searxng_search(client, search_url, query) if title]
+    if titles:
+        return titles
     key = secrets.brave_api_key if secrets is not None else None
     if key:
         return _brave_titles(client, query + BRAVE_ROLE_TERMS, key)
@@ -337,8 +344,10 @@ def find_people_detailed(
     preferred_roles: Sequence[str] | None = None,
     use_hunter: bool = True,
     use_search: bool = True,
+    search_url: str | None = None,
 ) -> PeopleSearch:
-    """Every source at once; ``pages`` (already crawled company pages) avoids fetching the site again."""
+    """Every source at once; ``pages`` (already crawled company pages) avoids fetching the site again;
+    ``search_url``: SearXNG base URL tried before Brave / DuckDuckGo."""
     own = client is None
     http = client or make_client()
     site = domain or _domains.normalize_domain(company.domain or company.website)
@@ -359,7 +368,7 @@ def find_people_detailed(
             people += hunter.people
         if use_search:
             used.append("search")
-            titles = _safe("moteur de recherche", lambda: _search_titles(http, company, secrets), [])
+            titles = _safe("moteur de recherche", lambda: _search_titles(http, company, secrets, search_url), [])
             people += people_from_titles(titles, _domains.company_names(company))
     finally:
         if own:

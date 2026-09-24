@@ -1,7 +1,8 @@
-"""Website domain discovery + ownership verification for a company, and address geocoding.
+"""Website domain discovery + ownership verification for a company (address geocoding: ``_geocode``).
 
 Candidates, in order: known website → Clearbit autocomplete → slug guessing (+ DNS) → Wikidata by SIREN →
-Brave Search (if key) → DuckDuckGo HTML (last resort, ≥ 25 s between queries, circuit breaker on bot-flag).
+SearXNG (``settings.search_engine_url``, self-hosted) → Brave Search (if key) → DuckDuckGo HTML (last resort,
+≥ 25 s between queries, circuit breaker on bot-flag).
 A candidate is accepted only when its homepage or legal notice shows the SIREN (or TVA FRxx+SIREN);
 otherwise a strong name match (+ postcode) is kept with a lower confidence.
 """
@@ -26,6 +27,8 @@ from rapidfuzz.utils import default_process
 from jobbot.config import Profile, Secrets
 from jobbot.http import HostThrottle, make_client, request_with_retry
 from jobbot.models import Company
+from jobbot.outreach._geocode import GEOCODE_URL, geocode_address  # noqa: F401
+from jobbot.outreach._searxng import searxng_search
 
 log = logging.getLogger(__name__)
 
@@ -33,7 +36,6 @@ CLEARBIT_URL = "https://autocomplete.clearbit.com/v1/companies/suggest"
 WIKIDATA_URL = "https://query.wikidata.org/sparql"
 BRAVE_URL = "https://api.search.brave.com/res/v1/web/search"
 DDG_URL = "https://html.duckduckgo.com/html/"
-GEOCODE_URL = "https://data.geopf.fr/geocodage/search"
 # Wikidata rejects generic user agents (HTTP 403): the contact (URL or e-mail) comes from the profile at runtime.
 _BOT_PURPOSE = "jobbot/0.1 (recherche d'emploi personnelle"
 BOT_UA = f"{_BOT_PURPOSE})"
@@ -313,7 +315,7 @@ def _ddg(client: httpx.Client, query: str) -> list[str]:
 
 
 def _providers(
-    company: Company, names: list[str], secrets: Secrets | None, contact: str | None
+    company: Company, names: list[str], secrets: Secrets | None, contact: str | None, search_url: str | None = None,
 ) -> list[tuple[str, bool, Callable]]:
     """(method, costly, fetch(client) -> domains). Costly ones are skipped once a name match exists."""
     query = f"{names[0]} {company.city}".strip()
@@ -325,6 +327,9 @@ def _providers(
         ("slug", False, lambda c: _slugs(c, names)),
         ("wikidata", False, lambda c: _wikidata(c, company.siren, user_agent)),
     ]
+    if search_url:
+        providers.append(("searxng", True,
+                          lambda c: _hosts_from_urls([u for u, _ in searxng_search(c, search_url, query)])))
     if secrets is not None and secrets.brave_api_key:
         key = secrets.brave_api_key
         providers.append(("brave", True, lambda c: _brave(c, query, key)))
@@ -337,16 +342,17 @@ def _providers(
 
 def find_domain_verified(
     company: Company, *, client: httpx.Client | None = None, secrets: Secrets | None = None,
-    contact: str | None = None,
+    contact: str | None = None, search_url: str | None = None,
 ) -> DomainMatch | None:
-    """Best verified domain with its confidence, or None. ``contact``: see :func:`profile_contact`."""
+    """Best verified domain with its confidence, or None. ``contact``: see :func:`profile_contact`;
+    ``search_url``: SearXNG base URL (``settings.search_engine_url``), tried before Brave / DuckDuckGo."""
     names = company_names(company)
     own = client is None
     http = client or make_client()
     tried: set[str] = set()
     best: DomainMatch | None = None
     try:
-        for method, costly, fetch in _providers(company, names, secrets, contact):
+        for method, costly, fetch in _providers(company, names, secrets, contact, search_url):
             if costly and best is not None:
                 break
             try:
@@ -371,34 +377,8 @@ def find_domain_verified(
 
 def find_domain(
     company: Company, *, client: httpx.Client | None = None, secrets: Secrets | None = None,
-    contact: str | None = None,
+    contact: str | None = None, search_url: str | None = None,
 ) -> str | None:
     """Verified website domain of ``company`` (SIREN on the site, else strong name match), or None."""
-    match = find_domain_verified(company, client=client, secrets=secrets, contact=contact)
+    match = find_domain_verified(company, client=client, secrets=secrets, contact=contact, search_url=search_url)
     return match.domain if match else None
-
-
-def geocode_address(
-    query: str, *, postcode: str | None = None, client: httpx.Client | None = None
-) -> tuple[float, float] | None:
-    """(lat, lon) via the Géoplateforme (IGN) geocoder — api-adresse.data.gouv.fr is sunset."""
-    if not query or not query.strip():
-        return None
-    params: dict[str, str | int] = {"q": query.strip()[:200], "limit": 1, "autocomplete": 0}
-    if postcode:
-        params["postcode"] = postcode
-    own = client is None
-    http = client or make_client()
-    try:
-        resp = request_with_retry(http, "GET", GEOCODE_URL, params=params, retries=2, backoff_s=1.0)
-        if resp.status_code != 200:
-            return None
-        features = resp.json().get("features") or []
-        lon, lat = features[0]["geometry"]["coordinates"][:2]  # GeoJSON order: [lon, lat]
-        return float(lat), float(lon)
-    except (httpx.HTTPError, ValueError, KeyError, IndexError, TypeError) as exc:
-        log.info("Géocodage impossible pour %r : %s", query, exc)
-        return None
-    finally:
-        if own:
-            http.close()

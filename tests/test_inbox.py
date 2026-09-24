@@ -58,7 +58,7 @@ def mail_ctx(ctx, secrets):
 @pytest.fixture
 def notified(monkeypatch) -> list:
     calls: list = []
-    monkeypatch.setattr(inbox_mod, "notify", lambda ctx, title, message: calls.append((title, message)))
+    monkeypatch.setattr(inbox_mod, "notify", lambda ctx, title, message, level="info": calls.append((title, message)))
     return calls
 
 

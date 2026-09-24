@@ -194,6 +194,7 @@ def _search_people(ctx: AppContext, company: Company, domain: str, contacts: lis
     return find_people_detailed(
         company, client=client, secrets=ctx.secrets, domain=domain, pages=pages if employee else [],
         preferred_roles=cfg.preferred_roles, use_hunter=use_hunter, use_search=employee and not has_recruitment,
+        search_url=ctx.settings.search_engine_url,
     )
 
 

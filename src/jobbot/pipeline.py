@@ -20,6 +20,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from jobbot import clock
 from jobbot.apply.service import ApplyReport, dedup_reason, set_job_status
 from jobbot.classroom.watch import ClassroomReport
 from jobbot.context import AppContext
@@ -45,6 +46,9 @@ ENRICH_LIMIT = 50
 LOCK_FILE = "jobbot.lock"
 LOCK_STALE_S = 6 * 3600
 MAX_ERROR_CHARS = 300
+LOGIN_ALERT_KV = "notify:login_alert:"  # + day: one « session à renouveler » notification per day
+LOGIN_HELP = ("reconnecte-toi avec « jobbot login … » ; sur un serveur sans écran : login sur le PC, "
+              "« jobbot session export all » puis « python scripts/deploy_server.py --only private ».")
 
 
 class PipelineBusy(RuntimeError):
@@ -237,7 +241,23 @@ def _prepare(ctx: AppContext, shared: _Shared) -> PrepareReport:
 def _apply(ctx: AppContext, shared: _Shared) -> ApplyReport:
     from jobbot.apply.service import apply_to_jobs
 
-    return apply_to_jobs(ctx)
+    report = apply_to_jobs(ctx)
+    _alert_expired_session(ctx, report)
+    return report
+
+
+def _alert_expired_session(ctx: AppContext, report: ApplyReport) -> None:
+    """A channel stopped for « jobbot login » (LinkedIn / HelloWork session lost): urgent notice, once a day."""
+    lines = [d for d in report.details if "jobbot login" in d]
+    if not lines:
+        return
+    key = f"{LOGIN_ALERT_KV}{clock.to_paris(clock.now()).date().isoformat()}"
+    if ctx.repo.kv_get(key):
+        return
+    ctx.repo.kv_set(key, "1")
+    from jobbot.notify import notify
+
+    notify(ctx, "Session à renouveler", f"{truncate(lines[0], 160)} — {LOGIN_HELP}", level="urgent")
 
 
 def _discover(ctx: AppContext, shared: _Shared) -> DiscoverReport:

@@ -50,7 +50,7 @@ def profile():
 
 @pytest.fixture
 def settings():
-    return load_settings(PROJECT_ROOT)
+    return load_settings(PROJECT_ROOT, include_local=False)  # a machine's settings.local.yaml never leaks in
 
 
 @pytest.fixture

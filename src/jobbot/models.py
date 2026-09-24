@@ -210,7 +210,7 @@ class SentEmail(Frozen):
     subject: str
     message_id: str
     in_reply_to: str | None = None
-    kind: str  # application | spontaneous | followup | report
+    kind: str  # application | spontaneous | followup | report | notification
     application_id: int | None = None
     sent_at: datetime
     dry_run: bool = False

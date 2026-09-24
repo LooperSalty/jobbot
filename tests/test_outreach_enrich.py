@@ -41,7 +41,7 @@ def _offline(monkeypatch):
     monkeypatch.setattr(socket, "getaddrinfo", refuse)
     monkeypatch.setattr(domains, "_SITE_THROTTLE", HostThrottle(0))
     monkeypatch.setattr("jobbot.http.time.sleep", lambda s: None)
-    monkeypatch.setattr(people, "_search_titles", lambda client, company, secrets: [])
+    monkeypatch.setattr(people, "_search_titles", lambda client, company, secrets, search_url=None: [])
     monkeypatch.setattr(people, "_fetch_registry_leaders", lambda siren, client: [])
     monkeypatch.setattr(_nominative, "has_mx", lambda domain: True)
 
@@ -75,7 +75,7 @@ def _with(ctx, *, hunter: bool = False, llm=None, **outreach):
 def _patch_site(monkeypatch, crawl: SiteCrawl | None, match: DomainMatch | None = None, mx: bool = True):
     match = match or DomainMatch(domain="bromaker.fr", confidence=1.0, method="clearbit", verified_by="siren")
     monkeypatch.setattr(domains, "find_domain_verified",
-                        lambda company, client=None, secrets=None, contact=None: match)
+                        lambda company, client=None, secrets=None, contact=None, search_url=None: match)
     monkeypatch.setattr(emails, "crawl_site", lambda domain, client=None, max_pages=8: crawl)
     monkeypatch.setattr(emails, "has_mx", lambda domain: mx)
     monkeypatch.setattr(_nominative, "has_mx", lambda domain: mx)
@@ -245,7 +245,7 @@ def test_enrich_company_finds_team_and_search_people(ctx, small_company, monkeyp
     )
     _patch_site(monkeypatch, crawl)
     _no_hunter(monkeypatch)
-    monkeypatch.setattr(people, "_search_titles", lambda client, company, secrets: [
+    monkeypatch.setattr(people, "_search_titles", lambda client, company, secrets, search_url=None: [
         "Claire Dubois - Chargée de recrutement - BROMAKER | LinkedIn"])
     llm = FakeLLM(lambda prompt, system, fast: SUMMARY if fast else "")
     out = enrich_company(_with(ctx, llm=llm), small_company)
@@ -297,7 +297,7 @@ def test_description_falls_back_to_meta_and_is_never_overwritten(ctx, small_comp
 
 
 def test_enrich_company_blacklisted_or_without_site(ctx, small_company, monkeypatch):
-    monkeypatch.setattr(domains, "find_domain_verified", lambda company, client=None, secrets=None, contact=None: None)
+    monkeypatch.setattr(domains, "find_domain_verified", lambda company, client=None, secrets=None, contact=None, search_url=None: None)
     out = enrich_company(ctx, small_company)
     assert out.status == "no_email" and out.raw["enrich_note"]
     ctx.repo.blacklist_add("bromaker")

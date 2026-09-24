@@ -53,7 +53,7 @@ def build_interview_prep(ctx: AppContext, application: Application, *,
     path = _write(ctx, facts, text)
     _remember(ctx, app, path, facts)
     when = facts.logistics.short() or "date à confirmer"
-    notify(ctx, f"Fiche d'entretien prête — {facts.company_name}", f"{when} — {path.name}")
+    notify(ctx, f"Fiche d'entretien prête — {facts.company_name}", f"{when} — {path.name}", level="important")
     log.info("Fiche d'entretien écrite : %s", path)
     return path
 

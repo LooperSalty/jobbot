@@ -42,3 +42,4 @@ search:
 
 notify_jarvis: false     # annonce vocale des réponses/entretiens via Jarvis
 jarvis_script:           # chemin de ton jarvis_notify.py, ex. "C:/chemin/vers/jarvis_notify.py" (vide = désactivé)
+setup_date: '2026-09-24'

@@ -93,11 +93,23 @@ def _launch(pw: Playwright, user_dir: Path, channel: str | None, headless: bool,
     return pw.chromium.launch_persistent_context(**kwargs)
 
 
+def _import_sessions(ctx: AppContext, context: BrowserContext, profile_dir: str | None) -> None:
+    """Cookies of a session exported on another machine (``jobbot session export``), when newer. Never raises."""
+    try:
+        from jobbot.sessions import import_sessions, sites_for_profile
+
+        import_sessions(ctx, context, sites_for_profile(ctx.settings, profile_dir))
+    except Exception as exc:  # a session file never prevents the browser from opening
+        log.warning("Import des sessions exportées impossible : %s", exc)
+
+
 @contextmanager
 def open_browser(ctx: AppContext, *, headless: bool | None = None, profile_dir: str | None = None,
-                 launch_options: dict[str, Any] | None = None) -> Iterator[BrowserContext]:
+                 launch_options: dict[str, Any] | None = None,
+                 import_sessions: bool = True) -> Iterator[BrowserContext]:
     """Persistent browser context (profile in ``settings.paths.browser_profile``, or ``profile_dir`` for a
-    separate session such as Classroom), closed on exit."""
+    separate session such as Classroom), closed on exit. A newer ``data/sessions/<site>.json`` of that profile's
+    sites is imported first (``import_sessions=False``: never, e.g. while exporting)."""
     user_dir = ctx.path((profile_dir or ctx.settings.paths.browser_profile) + "/.keep").parent
     user_dir.mkdir(parents=True, exist_ok=True)
     head = ctx.settings.headless if headless is None else headless
@@ -105,6 +117,8 @@ def open_browser(ctx: AppContext, *, headless: bool | None = None, profile_dir: 
     context: BrowserContext | None = None
     try:
         context = _launch(pw, user_dir, ctx.settings.browser_channel, head, launch_options)
+        if import_sessions:
+            _import_sessions(ctx, context, profile_dir)
         yield context
     finally:
         if context is not None:

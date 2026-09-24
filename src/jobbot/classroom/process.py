@@ -38,6 +38,9 @@ TITLES = {
     "filtered_out": "Classroom : offre écartée", "skipped": "Classroom : offre ignorée",
     "deferred": "Classroom : candidature reportée", "failed": "Classroom : échec de la candidature",
 }
+# notification level per outcome (e-mail / push only for what needs the user); the rest is « info »
+IMPORTANCE = {"applied": "important", "pending_review": "important", "needs_manual": "important",
+              "failed": "important"}
 
 
 KIND_FR = {
@@ -175,4 +178,4 @@ def notify_outcome(ctx: AppContext, job: JobOffer, outcome: Outcome) -> None:
         "deferred": f"{label(job)} — {reason}",
     }
     message = messages.get(outcome.kind, f"{label(job)} — {reason}")
-    notify(ctx, TITLES.get(outcome.kind, "Classroom"), message)
+    notify(ctx, TITLES.get(outcome.kind, "Classroom"), message, level=IMPORTANCE.get(outcome.kind, "info"))

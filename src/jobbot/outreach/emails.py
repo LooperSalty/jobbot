@@ -262,7 +262,8 @@ def enrich_company(ctx: AppContext, company: Company) -> Company:
         return company.model_copy(update={"status": "blacklisted"})
     with make_client() as client:
         match = _known_domain(company) or _domains.find_domain_verified(
-            company, client=client, secrets=ctx.secrets, contact=_domains.profile_contact(ctx.profile))
+            company, client=client, secrets=ctx.secrets, contact=_domains.profile_contact(ctx.profile),
+            search_url=ctx.settings.search_engine_url)
         if match is None:
             return _finish(company, rank_contacts(list(company.contacts)), {"enrich_note": "site web introuvable"}, cfg)
         crawl = crawl_site(match.domain, client=client)
