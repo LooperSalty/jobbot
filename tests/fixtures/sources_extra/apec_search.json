@@ -1,0 +1,157 @@
+{
+ "resultats": [
+  {
+   "id": 179469236,
+   "numeroOffre": "179469236W",
+   "intitule": "Développeur Foncier Est F/H",
+   "intituleSurbrillance": "Développeur Foncier Est F/H",
+   "nomCommercial": "ORTEC Group",
+   "lieuTexte": "Metz - 57",
+   "salaireTexte": "A négocier",
+   "texteOffre": "Obornes, représenté par la marque Oreve, est le premier réseau public de stations de recharge très haute-puissance adapté aux usages des flottes professionnelles électriques (VL, VU, PL?). Implanté prioritairement dans les zones d'activité, Obornes propose une solution performant...",
+   "urlLogo": "/media_entreprise/343675/logo_ORTEC_SERVICES_343675_857332.png",
+   "dateValidation": "2026-09-23T08:25:23.000+0000",
+   "datePublication": "2026-09-23T08:25:23.000+0000",
+   "indicateurOqa": false,
+   "latitude": "49.1082122",
+   "longitude": "6.1960061",
+   "localisable": true,
+   "score": 28.85978,
+   "offreConfidentielle": false,
+   "secteurActivite": 101564,
+   "secteurActiviteParent": 101778,
+   "clientReel": true,
+   "contractDuration": 0,
+   "typeContrat": 101888,
+   "origineCode": 101866,
+   "indicateurFaibleCandidature": false
+  },
+  {
+   "id": 179413515,
+   "numeroOffre": "179413515W",
+   "intitule": "Responsable commercial F/H",
+   "intituleSurbrillance": "Responsable commercial F/H",
+   "nomCommercial": "COHESIUM",
+   "lieuTexte": "Metz - 57",
+   "salaireTexte": "45 - 54 k€ brut annuel",
+   "texteOffre": "Sous la responsabilité de la Direction générale, vous exercerez les missions technico-commerciales suivantes qui vous permettront de commercialiser l’ensemble de la gamme de produits standards  Développer et fidéliser un portefeuille client.  Relancer les clients dormants ou inac...",
+   "dateValidation": "2026-09-18T08:31:20.000+0000",
+   "datePublication": "2026-09-18T08:31:20.000+0000",
+   "indicateurOqa": true,
+   "latitude": "49.1082122",
+   "longitude": "6.1960061",
+   "localisable": true,
+   "score": 1.0884589,
+   "offreConfidentielle": false,
+   "secteurActivite": 101609,
+   "secteurActiviteParent": 101772,
+   "clientReel": false,
+   "contractDuration": 0,
+   "typeContrat": 101888,
+   "origineCode": 101859,
+   "indicateurFaibleCandidature": false
+  },
+  {
+   "id": 179437996,
+   "numeroOffre": "179437996W",
+   "intitule": "Tech Lead / Architecte JAVA F/H",
+   "intituleSurbrillance": "Tech Lead / Architecte JAVA F/H",
+   "nomCommercial": "SIGNE +",
+   "lieuTexte": "Metz - 57",
+   "salaireTexte": "50 - 56 k€ brut annuel",
+   "texteOffre": "Vous renforcez les équipes de développement pour évoluer et maintenir des applications métiers backend en Java, exposant des services REST et reposant sur une base de données relationnelle, avec une attention particulière aux performances et à la qualité du code.  Vos principales...",
+   "urlLogo": "/media_entreprise/774365/logo_SIGNE_774365_1525041.png",
+   "dateValidation": "2026-09-17T15:35:20.000+0000",
+   "datePublication": "2026-09-17T15:35:20.000+0000",
+   "indicateurOqa": true,
+   "latitude": "49.1082122",
+   "longitude": "6.1960061",
+   "localisable": true,
+   "score": 2.4725032,
+   "offreConfidentielle": false,
+   "secteurActivite": 101569,
+   "secteurActiviteParent": 101753,
+   "clientReel": true,
+   "contractDuration": 0,
+   "typeContrat": 101888,
+   "origineCode": 101866,
+   "indicateurFaibleCandidature": false
+  },
+  {
+   "id": 179429390,
+   "numeroOffre": "179429390W",
+   "intitule": "Développeur Full Stack Java / Vue.js Senior F/H",
+   "intituleSurbrillance": "Développeur Full Stack Java / Vue.js Senior F/H",
+   "nomCommercial": "GESER BEST",
+   "lieuTexte": "Metz - 57",
+   "salaireTexte": "35 - 43 k€ brut annuel",
+   "texteOffre": "GESER BEST recherche un Développeur Full Stack Java / Vue H/F pour intervenir auprès d’un acteur majeur du secteur Retail , dans le cadre de projets liés aux solutions d’encaissement .  Vous interviendrez dans un environnement Build & Run et aurez notamment pour missions :  Analy...",
+   "dateValidation": "2026-09-17T13:26:47.000+0000",
+   "datePublication": "2026-09-17T13:26:47.000+0000",
+   "indicateurOqa": true,
+   "latitude": "49.1082122",
+   "longitude": "6.1960061",
+   "localisable": true,
+   "score": 22.429668,
+   "offreConfidentielle": false,
+   "secteurActivite": 101658,
+   "secteurActiviteParent": 101777,
+   "clientReel": true,
+   "contractDuration": 0,
+   "typeContrat": 101888,
+   "origineCode": 101866,
+   "indicateurFaibleCandidature": false
+  },
+  {
+   "id": 179412478,
+   "numeroOffre": "179412478W",
+   "intitule": "Manager QHSE F/H",
+   "intituleSurbrillance": "Manager QHSE F/H",
+   "nomCommercial": "RH PARTNERS LORRAINE",
+   "lieuTexte": "Metz - 57",
+   "salaireTexte": "A négocier",
+   "texteOffre": "Rattaché au Directeur du site, le futur Manager QHSE aura les missions suivantes :    Stratégie QHSE & gouvernance  Santé, sécurité & environnement  Qualité & satisfaction client  Système de management & certifications  Performance QHSE & amélioration continue  Management & proje...",
+   "dateValidation": "2026-09-14T06:47:49.000+0000",
+   "datePublication": "2026-09-14T06:47:49.000+0000",
+   "indicateurOqa": false,
+   "latitude": "49.1082122",
+   "longitude": "6.1960061",
+   "localisable": true,
+   "score": 1.5010006,
+   "offreConfidentielle": false,
+   "secteurActivite": 101235,
+   "secteurActiviteParent": 101774,
+   "clientReel": false,
+   "contractDuration": 0,
+   "typeContrat": 101888,
+   "origineCode": 101859,
+   "idNomTeletravail": 20766,
+   "indicateurFaibleCandidature": false
+  }
+ ],
+ "offreFilters": [
+  {
+   "offreFiltering": "CONTRACT_TYPE_FILTERING",
+   "offreFilterItems": [
+    {
+     "key": 101888,
+     "count": 12
+    }
+   ]
+  },
+  {
+   "offreFiltering": "REMOTE_WORK_FILTERING",
+   "offreFilterItems": [
+    {
+     "key": 20765,
+     "count": 2
+    },
+    {
+     "key": 20766,
+     "count": 2
+    }
+   ]
+  }
+ ],
+ "totalCount": 12
+}

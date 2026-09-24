@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Développeur Full-Stack (H/F) | Acme | LinkedIn</title>
+<!-- Local reproduction of the logged-in job page + Easy Apply modal (variant A, Ember), after
+     docs/research/linkedin.md §3.5. Scenarios via ?scenario=full|unknown|stuck|external|applied|closed|sdui|captcha|login -->
+<style>
+  body { font-family: sans-serif; }
+  .hidden { display: none !important; }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  [role=dialog] { position: fixed; top: 20px; left: 10%; width: 80%; max-height: 90vh; overflow: auto;
+                  background: #fff; border: 1px solid #999; padding: 12px; }
+  [role=alertdialog] { position: fixed; top: 200px; left: 30%; background: #eee; padding: 20px; z-index: 10; }
+  .artdeco-inline-feedback--error { color: #b00; }
+</style>
+</head>
+<body>
+<header class="global-nav"><input type="text" aria-label="Recherche" placeholder="Recherche"></header>
+<main id="main">
+  <div class="job-details-jobs-unified-top-card__container--two-pane">
+    <h1 class="job-details-jobs-unified-top-card__job-title">Développeur Full-Stack (H/F)</h1>
+    <div class="job-details-jobs-unified-top-card__company-name">Acme</div>
+    <div class="job-details-jobs-unified-top-card__tertiary-description-container">
+      <span class="tvm__text">Metz, Grand Est, France</span> · <span class="tvm__text">il y a 2 jours</span>
+    </div>
+    <div class="jobs-s-apply jobs-apply-button--top-card" id="apply-zone"></div>
+  </div>
+  <div class="jobs-box__html-content"><p>Stack : React, Node.js, PostgreSQL. Alternance 24 mois.</p></div>
+</main>
+<div id="modal-root"></div>
+
+<template id="tpl">
+<div data-test-modal role="dialog" class="artdeco-modal jobs-easy-apply-modal" aria-labelledby="jobs-apply-header">
+  <button data-test-modal-close-btn aria-label="Ignorer" type="button">×</button>
+  <h2 id="jobs-apply-header">Postuler chez Acme</h2>
+  <div class="jobs-easy-apply-modal__content">
+  <form>
+    <section data-step="1">
+      <h3>Coordonnées</h3>
+      <div class="fb-dash-form-element" data-test-form-element>
+        <label for="email-sel">Adresse e-mail</label>
+        <select id="email-sel" required><option>Sélectionner une option</option><option selected>jean.dupont@example.com</option></select>
+      </div>
+      <div class="fb-dash-form-element" data-test-form-element>
+        <label for="cc-sel">Indicatif du pays</label>
+        <select id="cc-sel" required><option>Sélectionner une option</option><option>Belgique (+32)</option>
+          <option>France (+33)</option><option>Suisse (+41)</option></select>
+      </div>
+      <div class="fb-dash-form-element" data-test-form-element>
+        <label for="phone"><span aria-hidden="true">Numéro de téléphone mobile</span><span class="visually-hidden">Numéro de téléphone mobile</span></label>
+        <input id="phone" type="text" required>
+      </div>
+      <footer><button type="button" aria-label="Passer à l’étape suivante" data-easy-apply-next-button>Suivant</button></footer>
+    </section>
+    <section data-step="2" class="hidden">
+      <h3>CV</h3>
+      <div class="fb-dash-form-element">
+        <div class="ui-attachment jobs-document-upload-redesign-card__container" aria-label="Sélectionné">
+          <h3 class="jobs-document-upload-redesign-card__file-name">CV_ancien.pdf</h3>
+          <input id="jobsDocumentCardToggle-ember1" type="radio" checked>
+          <label for="jobsDocumentCardToggle-ember1">Désélectionner le CV CV_ancien.pdf</label>
+        </div>
+        <label class="jobs-document-upload__upload-button" for="jobs-document-upload-file-input-upload-resume">
+          <span role="button" aria-label="Télécharger un CV. Formats DOC, DOCX, PDF. 5 Mo max.">Télécharger un CV</span></label>
+        <input id="jobs-document-upload-file-input-upload-resume" name="file" type="file" class="visually-hidden">
+      </div>
+      <footer><button type="button" aria-label="Passer à l’étape suivante" data-easy-apply-next-button>Suivant</button></footer>
+    </section>
+    <section data-step="3" class="hidden">
+      <h3>Questions supplémentaires</h3>
+      <div class="fb-dash-form-element" data-test-form-element>
+        <label for="q-react">Combien d'années d'expérience avez-vous avec React ?</label>
+        <input id="q-react" type="text" required data-integer>
+      </div>
+      <div class="fb-dash-form-element" data-test-form-element>
+        <label for="q-kotlin">Combien d'années d'expérience avez-vous en Kotlin ?</label>
+        <input id="q-kotlin" type="text" required data-integer>
+      </div>
+      <div class="fb-dash-form-element" data-test-form-element>
+        <label for="q-en">Quel est votre niveau d'anglais ?</label>
+        <select id="q-en" required><option>Sélectionner une option</option><option>Aucune</option><option>Notions</option>
+          <option>Professionnel</option><option>Bilingue ou langue maternelle</option></select>
+      </div>
+      <fieldset class="fb-dash-form-element" data-test-form-builder-radio-button-form-component="true">
+        <legend><span data-test-form-builder-radio-button-form-component__title>Êtes-vous légalement autorisé(e) à travailler en France ?</span></legend>
+        <input type="radio" name="auth" id="auth-yes" value="Oui" required><label for="auth-yes">Oui</label>
+        <input type="radio" name="auth" id="auth-no" value="Non"><label for="auth-no">Non</label>
+      </fieldset>
+      <fieldset class="fb-dash-form-element" data-test-form-builder-radio-button-form-component="true">
+        <legend>Avez-vous obtenu le diplôme suivant : Master ?</legend>
+        <input type="radio" name="master" id="m-yes" value="Oui" required><label for="m-yes">Oui</label>
+        <input type="radio" name="master" id="m-no" value="Non"><label for="m-no">Non</label>
+      </fieldset>
+      <div class="fb-dash-form-element" data-test-form-element>
+        <label for="q-city">Ville de résidence</label>
+        <input id="q-city" type="text" role="combobox" aria-autocomplete="list" required>
+        <div role="listbox" id="city-list" class="hidden"></div>
+      </div>
+      <div class="fb-dash-form-element" data-test-form-element>
+        <label for="q-why">Pourquoi souhaitez-vous rejoindre Acme ?</label>
+        <textarea id="q-why" required></textarea>
+      </div>
+      <div class="fb-dash-form-element" data-test-form-element>
+        <label for="q-salary">Prétentions salariales</label>
+        <input id="q-salary" type="text">
+      </div>
+      <div class="fb-dash-form-element" data-test-form-element>
+        <input type="checkbox" id="q-news"><label for="q-news">Je souhaite recevoir des offres similaires</label>
+      </div>
+      <div id="unknown-slot"></div>
+      <footer><button type="button" aria-label="Vérifiez votre candidature">Vérifier</button></footer>
+    </section>
+    <section data-step="4" class="hidden">
+      <h3>Vérifiez votre candidature</h3>
+      <p>Les informations ci-dessus seront envoyées à Acme.</p>
+      <footer>
+        <input id="follow-company-checkbox" type="checkbox" checked>
+        <label for="follow-company-checkbox">Suivre Acme pour rester informé(e)</label>
+        <button type="button" data-live-test-easy-apply-submit-button aria-label="Envoyer la candidature">Envoyer la candidature</button>
+      </footer>
+    </section>
+  </form>
+  </div>
+</div>
+</template>
+
+<script>
+const scenario = new URLSearchParams(location.search).get('scenario') || 'full';
+const post = (path, data) => fetch('/__test/' + path, {method: 'POST', body: JSON.stringify(data || {})});
+const CITIES = ['Metzervisse, Grand Est, France', 'Metz, Grand Est, France', 'Montigny-lès-Metz, Grand Est, France'];
+
+function values(modal) {
+  const v = {};
+  modal.querySelectorAll('input, select, textarea').forEach((el) => {
+    const k = el.id || el.name;
+    if (el.type === 'radio') { if (el.checked && el.name) v[el.name] = el.value; }
+    else if (el.type === 'checkbox') v[k] = el.checked;
+    else if (el.type === 'file') v[k] = Array.from(el.files).map((f) => f.name);
+    else if (el.tagName === 'SELECT') v[k] = el.options[el.selectedIndex].text;
+    else v[k] = el.value;
+  });
+  return v;
+}
+
+function validate(step) {
+  step.querySelectorAll('.artdeco-inline-feedback--error').forEach((e) => e.remove());
+  const bad = [];
+  step.querySelectorAll('input, select, textarea').forEach((el) => {
+    if (el.closest('.ui-attachment')) return;
+    let ok = true;
+    if (el.type === 'file') ok = el.files.length > 0;
+    else if (el.type === 'radio') ok = !el.required || !!step.querySelector('input[name="' + el.name + '"]:checked');
+    else if (el.type === 'checkbox') ok = true;
+    else if (el.tagName === 'SELECT') ok = !el.required || el.selectedIndex > 0;
+    else if (el.required) ok = el.value.trim() !== '';
+    if (ok && el.dataset.integer !== undefined && !/^\d+$/.test(el.value.trim())) ok = false;
+    if (scenario === 'stuck' && el.id === 'q-react') ok = false;
+    if (!ok) bad.push(el);
+  });
+  bad.forEach((el) => {
+    const m = document.createElement('div');
+    m.className = 'artdeco-inline-feedback artdeco-inline-feedback--error';
+    m.textContent = 'Veuillez saisir une réponse valide (' + (el.id || el.name) + ')';
+    el.parentElement.appendChild(m);
+  });
+  return bad.length === 0;
+}
+
+function showDiscard(modal) {
+  const d = document.createElement('div');
+  d.setAttribute('role', 'alertdialog');
+  d.innerHTML = '<p>Ignorer la candidature ?</p>'
+    + '<button type="button" data-control-name="discard_application_confirm_btn">Supprimer</button>'
+    + '<button type="button" data-control-name="save_application_btn">Enregistrer</button>';
+  document.body.appendChild(d);
+  d.querySelector('[data-control-name=discard_application_confirm_btn]').addEventListener('click', async () => {
+    await post('discard', values(modal));
+    modal.remove();
+    d.remove();
+  });
+}
+
+function wireTypeahead(modal) {
+  const city = modal.querySelector('#q-city');
+  const list = modal.querySelector('#city-list');
+  city.addEventListener('input', () => {
+    const q = city.value.trim().toLowerCase();
+    list.innerHTML = '';
+    if (q.length < 2) { list.classList.add('hidden'); return; }
+    CITIES.filter((c) => c.toLowerCase().includes(q)).forEach((c) => {
+      const o = document.createElement('div');
+      o.setAttribute('role', 'option');
+      o.textContent = c;
+      o.addEventListener('click', () => { city.value = c; list.classList.add('hidden'); });
+      list.appendChild(o);
+    });
+    list.classList.remove('hidden');
+  });
+}
+
+function openModal() {
+  document.getElementById('modal-root').appendChild(document.getElementById('tpl').content.cloneNode(true));
+  const modal = document.querySelector('[role=dialog]');
+  if (scenario === 'unknown') {
+    document.getElementById('unknown-slot').innerHTML = '<div class="fb-dash-form-element" data-test-form-element>'
+      + '<label for="q-nir">Numéro de sécurité sociale</label><input id="q-nir" type="text" required></div>';
+  }
+  wireTypeahead(modal);
+  modal.addEventListener('click', async (ev) => {
+    const btn = ev.target.closest('button');
+    if (!btn) return;
+    if (btn.hasAttribute('data-test-modal-close-btn')) { showDiscard(modal); return; }
+    if (btn.hasAttribute('data-live-test-easy-apply-submit-button')) {
+      await post('submit', values(modal));
+      modal.querySelector('.jobs-easy-apply-modal__content').innerHTML =
+        '<h3>Votre candidature a été envoyée à Acme</h3><button type="button" id="done">Terminé</button>';
+      return;
+    }
+    if (btn.id === 'done') { modal.remove(); return; }
+    const step = modal.querySelector('section[data-step]:not(.hidden)');
+    if (!step || !validate(step)) return;
+    step.classList.add('hidden');
+    step.nextElementSibling.classList.remove('hidden');
+  });
+}
+
+const zone = document.getElementById('apply-zone');
+if (scenario === 'applied') {
+  zone.innerHTML = '<a class="jobs-s-apply__application-link" href="#">Candidature envoyée il y a 2 jours</a>';
+} else if (scenario === 'closed') {
+  zone.innerHTML = '<div class="artdeco-inline-feedback">N’accepte plus de candidatures</div>';
+} else if (scenario === 'external') {
+  zone.innerHTML = '<button id="jobs-apply-button-id" class="jobs-apply-button" '
+    + 'aria-label="Postuler pour Développeur Full-Stack sur le site de l’entreprise">Postuler</button>';
+} else if (scenario === 'sdui') {
+  zone.innerHTML = '<a href="/jobs/view/4410135372/apply/?openSDUIApplyFlow=true" '
+    + 'aria-label="Candidature simplifiée pour Développeur Full-Stack">Candidature simplifiée</a>';
+} else {
+  zone.innerHTML = '<button id="jobs-apply-button-id" class="jobs-apply-button artdeco-button" '
+    + 'aria-label="Candidature simplifiée pour Développeur Full-Stack chez Acme">'
+    + '<span class="artdeco-button__text">Candidature simplifiée</span></button>';
+  zone.querySelector('button').addEventListener('click', openModal);
+}
+if (scenario === 'captcha') {
+  document.body.insertAdjacentHTML('beforeend',
+    '<iframe title="Captcha challenge" src="about:blank" style="width:300px;height:80px"></iframe>');
+}
+if (scenario === 'login') {
+  document.getElementById('main').innerHTML = '<h1>S’identifier</h1><form><input type="email" id="username">'
+    + '<input type="password" id="password"><button type="submit">S’identifier</button></form>';
+}
+</script>
+</body>
+</html>

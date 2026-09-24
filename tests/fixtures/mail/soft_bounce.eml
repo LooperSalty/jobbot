@@ -1,0 +1,24 @@
+Return-Path: <>
+From: Mail Delivery Subsystem <mailer-daemon@googlemail.com>
+To: jean.dupont@example.com
+Subject: Delivery Status Notification (Delay)
+Date: Wed, 23 Sep 2026 14:13:02 -0700
+Message-ID: <dsn-0002@mx.google.com>
+MIME-Version: 1.0
+Content-Type: multipart/report; report-type=delivery-status; boundary="DSN"
+
+--DSN
+Content-Type: text/plain; charset="UTF-8"
+
+Message not delivered yet. Gmail will retry for 47 more hours.
+
+--DSN
+Content-Type: message/delivery-status
+
+Reporting-MTA: dns; googlemail.com
+
+Final-Recipient: rfc822; rh@slow-server.fr
+Action: delayed
+Status: 4.4.1
+
+--DSN--

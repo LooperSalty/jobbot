@@ -1,0 +1,70 @@
+"""Soft skills, languages and sibling-skill groups (FR/EN). Built into lookup tables by ``matching.lexicon``."""
+
+from __future__ import annotations
+
+SOFT: dict[str, tuple[str, ...]] = {
+    "Travail en équipe": ("travail en equipe", "esprit d'equipe", "travailler en equipe", "collaboratif",
+                          "collaboration", "teamwork", "team player", "esprit collectif", "team spirit"),
+    "Autonomie": ("autonomie", "autonome", "autonomous", "self starter", "independance"),
+    "Rigueur": ("rigueur", "rigoureux", "rigoureuse", "sens du detail", "minutie", "minutieux", "minutieuse",
+                "attention to detail", "detail oriented", "meticulous"),
+    "Curiosité": ("curiosite", "curieux", "curieuse", "curious", "veille technologique", "envie d'apprendre",
+                  "eager to learn", "appetence", "soif d'apprendre"),
+    "Communication": ("communication", "aisance relationnelle", "relationnel", "bon relationnel", "communicant",
+                      "communicante", "communication skills", "pedagogie", "pedagogue"),
+    "Adaptabilité": ("adaptabilite", "capacite d'adaptation", "adaptable", "flexibilite", "polyvalence", "polyvalent",
+                     "polyvalente", "adaptability"),
+    "Force de proposition": ("force de proposition", "proactif", "proactive", "proactivite", "prise d'initiative",
+                             "prise d'initiatives", "sens de l'initiative", "esprit d'initiative", "proactivity"),
+    "Esprit d'analyse": ("resolution de problemes", "resoudre des problemes", "problem solving", "esprit d'analyse",
+                         "esprit analytique", "capacite d'analyse", "capacites d'analyse", "analytical skills",
+                         "esprit de synthese", "capacite de synthese"),
+    "Organisation": ("organisation", "organise", "organisee", "gestion du temps", "gestion des priorites",
+                     "time management", "organized", "sens de l'organisation"),
+    "Sens des responsabilités": ("sens des responsabilites", "fiabilite", "fiable", "reliable", "implication",
+                                 "implique", "impliquee"),
+    "Sens du service": ("sens du service", "orientation client", "sens client", "customer focus", "customer oriented",
+                        "relation client", "service utilisateur", "sens du service utilisateur"),
+    "Gestion du stress": ("gestion du stress", "resistance au stress", "sang froid"),
+    "Créativité": ("creativite", "creatif", "creative", "creativity", "inventif"),
+    "Motivation": ("motivation", "motive", "motivee", "passionne", "passionnee", "enthousiasme", "enthousiaste",
+                   "motivated", "passionate", "dynamisme"),
+    "Écoute": ("ecoute", "a l'ecoute", "sens de l'ecoute", "empathie", "active listening"),
+    "Leadership": ("leadership",),
+    "Persévérance": ("perseverance", "tenacite", "tenace", "perseverant"),
+    "Esprit critique": ("esprit critique", "critical thinking"),
+}
+
+LANGUAGES: dict[str, tuple[str, ...]] = {
+    "Anglais": ("anglais", "english", "anglais technique", "anglais courant", "anglais professionnel"),
+    "Allemand": ("allemand", "german", "deutsch"),
+    "Espagnol": ("espagnol", "spanish"),
+    "Italien": ("italien", "italian"),
+    "Luxembourgeois": ("luxembourgeois", "luxembourgish"),
+    "Néerlandais": ("neerlandais", "dutch"),
+}
+
+# Sibling skills: knowing one gives a small partial credit for another (JD "Vue.js", CV "React").
+RELATED_GROUPS: tuple[tuple[str, ...], ...] = (
+    ("React", "Vue.js", "Angular", "Svelte", "AngularJS"),
+    ("React", "React Native"),
+    ("Flutter", "React Native", "Ionic", "Xamarin"),
+    ("Next.js", "Nuxt"),
+    ("PostgreSQL", "MySQL", "MariaDB", "SQL Server", "SQLite", "Oracle Database", "Supabase"),
+    ("MongoDB", "Firebase", "DynamoDB"),
+    ("GitHub Actions", "GitLab CI", "Jenkins", "Azure DevOps"),
+    ("GitHub", "GitLab", "Bitbucket"),
+    ("AWS", "Azure", "GCP", "OVHcloud"),
+    ("Jest", "Vitest"),
+    ("Cypress", "Playwright", "Selenium", "Puppeteer"),
+    ("Django", "Flask", "FastAPI"),
+    ("Symfony", "Laravel"),
+    ("Express.js", "NestJS"),
+    ("Docker", "Kubernetes"),
+    ("Tailwind CSS", "Bootstrap", "Material UI"),
+    ("Jira", "Trello"),
+    ("Prisma", "TypeORM", "Sequelize", "Doctrine", "SQLAlchemy", "Entity Framework"),
+    ("OpenAI API", "API Anthropic", "Google Gemini"),
+    ("Unity", "Unreal Engine", "Godot"),
+    ("Scrum", "Kanban"),
+)

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Alternant - Developpeur Web Fullstack H/F - Metz - Chausséa | HelloWork</title>
+<!-- Local reproduction of a HelloWork offer page + in-site apply funnel (docs/research/hellowork.md §3.2-3.3).
+     Scenarios via ?scenario=full|external|already|anon|nosession|otp|extra|prequal -->
+<style>.visually-hidden { position: absolute; width: 1px; height: 1px; opacity: 0; }</style>
+</head>
+<body class="isConnected">
+<div id="hw-cc-notice"><p>Nous utilisons des cookies.</p>
+  <button id="hw-cc-notice-continue-without-accepting-btn" onclick="this.parentElement.remove()">Continuer sans accepter</button></div>
+<main>
+  <h1 id="main-content"><span data-cy="jobTitle">Alternant - Developpeur Web Fullstack H/F</span>
+    <a href="/fr-fr/entreprises/chaussea-18417.html">Chausséa</a></h1>
+  <ul><li>Metz - 57</li><li>Alternance</li></ul>
+  <p id="already"></p>
+  <a data-cy="applyButtonHeader" href="#postuler" id="hdr">Postuler</a>
+  <section><h2><span>Les missions du poste</span></h2><p>Vue.js, Node.js, SQL, Git.</p></section>
+  <div style="height: 1200px"></div>
+  <div id="postuler"><h2>Envoyez votre candidature dès maintenant !</h2>
+    <turbo-frame id="offer-detail-step-frame" loading="lazy"></turbo-frame></div>
+</main>
+<script>
+const scenario = new URLSearchParams(location.search).get('scenario') || 'full';
+const loggedIn = !['anon', 'nosession'].includes(scenario);
+if (!loggedIn) document.body.classList.remove('isConnected');
+if (scenario === 'external') document.getElementById('hdr').textContent = 'Postuler sur le site du partenaire';
+if (scenario === 'already') document.getElementById('already').textContent = 'Vous avez déjà postulé à cette offre.';
+const frame = document.getElementById('offer-detail-step-frame');
+const pre = (v) => (loggedIn ? v : '');
+
+function renderForm() {
+  frame.innerHTML = `
+  <form id="offer-detail-main-step-form" novalidate>
+    <input type="hidden" name="FunnelId" value="CfDJ8-test-token">
+    <label for="Answer_Firstname_Funnel">Prénom</label>
+    <input id="Answer_Firstname_Funnel" name="Firstname" form="offer-detail-main-step-form" value="${pre('Jean')}" required>
+    <label for="Answer_LastName_Funnel">Nom</label>
+    <input id="Answer_LastName_Funnel" name="LastName" form="offer-detail-main-step-form" value="${pre('DUPONT')}" required>
+    <label for="Answer_Email_Funnel">E-mail</label>
+    <input id="Answer_Email_Funnel" type="email" name="Email" autocomplete="email" value="${pre('jean.dupont@example.com')}" required>
+    <input id="89c" name="JweHashResume" class="visually-hidden" value="${pre('default-cv-token')}" required>
+  </form>
+  <form id="upload-form"><label for="204">Déposer mon CV</label>
+    <input type="file" id="204" name="upload" data-cy="cv-uploader-input" accept=".rtf,.doc,.docx,.pdf,.odt"></form>
+  <p>Poids max. 2Mo — Formats .pdf, .doc, .docx, .odt, .rtf, .jpg ou .png</p>
+  <input type="checkbox" id="cover-letter-collapse-funnel" class="visually-hidden">
+  <label for="cover-letter-collapse-funnel" data-cy="motivationFieldButton">Personnaliser mon message au recruteur</label>
+  <textarea form="offer-detail-main-step-form" name="MotivationLetter" id="Answer_MotivationLetter_Funnel"
+    maxlength="2900" style="display:none"></textarea>
+  ${loggedIn ? '' : '<input type="checkbox" id="Answer_CGU" data-cy="cgu-box" name="HasAcceptedCGU" value="true" required>'
+    + '<label for="Answer_CGU">J’accepte de créer un compte</label>'}
+  <button type="submit" form="offer-detail-main-step-form" data-cy="submitButton">Continuer ma candidature</button>`;
+  frame.querySelector('[data-cy=cv-uploader-input]').addEventListener('change', (e) => {
+    if (scenario === 'noupload') return;  // upload never acknowledged by the server
+    setTimeout(() => { document.querySelector("input[name='JweHashResume']").value = 'tok-' + e.target.files[0].name; }, 100);
+  });
+  frame.querySelector('[data-cy=motivationFieldButton]').addEventListener('click', () => {
+    frame.querySelector('textarea').style.display = 'block';
+  });
+  frame.querySelector('[data-cy=submitButton]').addEventListener('click', async (ev) => {
+    ev.preventDefault();
+    await submitStepOne();
+  });
+}
+
+async function submitStepOne() {
+  const get = (n) => (document.querySelector('[name=' + n + ']') || {}).value || '';
+  const data = {Firstname: get('Firstname'), LastName: get('LastName'), Email: get('Email'),
+    JweHashResume: get('JweHashResume'), MotivationLetter: get('MotivationLetter')};
+  await fetch('/fr-fr/offres/postcandidateinformationfromstepframeview', {method: 'POST', body: JSON.stringify(data)});
+  if (scenario === 'otp') {
+    frame.innerHTML = '<div data-controller="otp"><p>Est-ce bien votre email ?</p>'
+      + '<input autocomplete="one-time-code" maxlength="6"></div>';
+    return;
+  }
+  if (scenario === 'extra' || scenario === 'prequal') { renderExtra(); return; }
+  success();
+}
+
+function renderExtra() {
+  const q = scenario === 'extra'
+    ? '<label for="x1">Êtes-vous disponible pour démarrer en octobre 2026 ?</label>'
+      + '<select id="x1" name="Availability" required><option value="">Sélectionner</option><option>Oui</option><option>Non</option></select>'
+      + '<label for="x2">Téléphone</label><input id="x2" name="Phone" required>'
+    : '<label for="x3">Code d’accès fourni par le recruteur</label><input id="x3" name="AccessCode" required>';
+  frame.innerHTML = '<form id="extra-form">' + q + '<button type="submit">Postuler</button></form>';
+  frame.querySelector('form').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const d = Object.fromEntries(new FormData(ev.target).entries());
+    await fetch('/fr-fr/offres/extra', {method: 'POST', body: JSON.stringify(d)});
+    success();
+  });
+}
+
+function success() {
+  frame.innerHTML = '<p>Votre candidature a bien été envoyée !</p>'
+    + '<div data-controller="multi-apply-bounce"><p>Postulez aussi à ces offres similaires</p>'
+    + '<input type="checkbox" checked id="b1"><label for="b1">Offre 1</label>'
+    + '<button type="button" id="bounce">Postuler aux 3 offres</button></div>';
+  frame.querySelector('#bounce').addEventListener('click', () => fetch('/fr-fr/rebond/apply', {method: 'POST'}));
+}
+
+document.getElementById('hdr').addEventListener('click', () => setTimeout(renderForm, 150));
+</script>
+</body>
+</html>

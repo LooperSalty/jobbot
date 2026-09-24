@@ -1,0 +1,40 @@
+# --- Environnement / outils
+.venv/
+.venv-jobspy/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+.workflow/
+.claude/settings.local.json
+
+# --- Secrets (mots de passe, clés API)
+.env
+.env.*
+!.env.example
+
+# --- Données personnelles : ne JAMAIS publier
+# Profil maître (identité, téléphone, e-mail, expériences, prétentions salariales) et profil extrait d'un CV.
+# Le modèle fictif config/profile.example.yaml, lui, est publié.
+config/profile.yaml
+config/profile.imported.yaml
+config/*.bak
+# Base de données (candidatures, entreprises, e-mails envoyés), profil navigateur connecté, logs, captures
+data/
+# CV, lettres de motivation, fiches entretien, rapports, exports, brouillons d'e-mails
+output/
+*.pdf
+*.docx
+*.doc
+*.odt
+*.xlsx
+*.csv
+*.eml
+CV_*
+Lettre*
+# ...sauf les exemples fictifs des tests
+!tests/fixtures/**/*.eml
+!tests/fixtures/**/*.pdf

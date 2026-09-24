@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Postuler | LinkedIn</title></head>
+<!-- Variant B (SDUI, since ~2026-09-14): no role=dialog, form rendered inside an open shadow root,
+     control ids contain "easyApplyFormElement" (docs/research/linkedin.md §3.5). -->
+<body>
+<header class="global-nav"><input type="text" aria-label="Recherche" placeholder="Recherche"></header>
+<div id="host"></div>
+<script>
+const root = document.getElementById('host').attachShadow({mode: 'open'});
+root.innerHTML = `
+  <div class="sdui-apply">
+    <form>
+      <div class="fb-dash-form-element">
+        <label for="urn-li-jobs-applyformcommon-easyApplyFormElement-phone">Numéro de téléphone mobile</label>
+        <input id="urn-li-jobs-applyformcommon-easyApplyFormElement-phone" type="text" required>
+      </div>
+      <div class="fb-dash-form-element">
+        <label for="urn-li-jobs-applyformcommon-easyApplyFormElement-years">Combien d'années d'expérience avez-vous avec TypeScript ?</label>
+        <input id="urn-li-jobs-applyformcommon-easyApplyFormElement-years" type="text" required>
+      </div>
+      <label for="resume-upload">Télécharger un CV</label>
+      <input id="resume-upload" type="file" name="file">
+    </form>
+    <button type="button" aria-label="Envoyer la candidature">Envoyer la candidature</button>
+    <div id="done" hidden>Votre candidature a été envoyée</div>
+  </div>`;
+root.querySelector('button').addEventListener('click', async () => {
+  const v = {
+    phone: root.querySelector('[id$=phone]').value,
+    years: root.querySelector('[id$=years]').value,
+    files: Array.from(root.querySelector('#resume-upload').files).map((f) => f.name),
+  };
+  await fetch('/__test/submit', {method: 'POST', body: JSON.stringify(v)});
+  root.querySelector('button').remove();
+  root.querySelector('#done').hidden = false;
+});
+</script>
+</body>
+</html>

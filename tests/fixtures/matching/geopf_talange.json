@@ -1,0 +1,25 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {"type": "Point", "coordinates": [6.1719, 49.2353]},
+      "properties": {
+        "label": "Talange",
+        "score": 0.9687,
+        "id": "57663",
+        "type": "municipality",
+        "name": "Talange",
+        "postcode": "57525",
+        "citycode": "57663",
+        "x": 931210.47,
+        "y": 6904331.12,
+        "population": 7806,
+        "city": "Talange",
+        "context": "57, Moselle, Grand Est",
+        "importance": 0.4331
+      }
+    }
+  ],
+  "query": "Talange"
+}

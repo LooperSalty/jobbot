@@ -1,0 +1,16 @@
+{
+  "ideaType": "offres_emploi_lba",
+  "title": "Développeur web full-stack en alternance",
+  "contact": {"email": "", "hasEmail": true, "phone": null, "url": null},
+  "place": {"fullAddress": "10 rue Serpenoise 57000 Metz", "city": "Metz", "zipCode": "57000", "remoteOnly": false},
+  "company": {"name": "ACME LOGICIELS", "siret": "12345678900011", "size": "10-19"},
+  "id": "6aaa5a821124e472788457ab",
+  "job": {
+    "description": "Développement d'applications React / Node.js.",
+    "status": "Active",
+    "dureeContrat": "24 mois",
+    "to_applicant_questions": null
+  },
+  "token": "TEST.JWT.TOKEN",
+  "recipient_id": "recruiters_6aaa5a821124e472788457ab"
+}

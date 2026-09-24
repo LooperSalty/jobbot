@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Développeur Full-Stack en alternance — Acme Logiciels</title>
+<!-- Generic company careers page with its own application form.
+     Scenarios via ?scenario=reveal|newtab|closed|login -->
+<style>.hidden { display: none; }</style></head>
+<body>
+<nav><input type="search" placeholder="Rechercher une offre"><a href="/offres">Toutes nos offres</a></nav>
+<main id="main">
+  <h1>Développeur Full-Stack en alternance (H/F)</h1>
+  <p>Stack : React, Node.js, PostgreSQL. Alternance 24 mois à Metz.</p>
+  <div id="cta"></div>
+  <section id="form-zone" class="hidden">
+    <form id="application" action="/submit" method="post">
+      <label for="fn">Prénom *</label><input id="fn" name="fn" required>
+      <input name="last_name" placeholder="Nom" required>
+      <input type="email" autocomplete="email" name="contact" required>
+      <label for="tel">Téléphone</label><input id="tel" type="tel">
+      <label for="city">Ville</label><input id="city">
+      <label for="li">Profil LinkedIn (URL)</label><input id="li" type="url">
+      <label for="cv">CV (PDF, 2 Mo max) *</label><input id="cv" type="file" accept=".pdf,.docx" required>
+      <label for="lm">Lettre de motivation</label><textarea id="lm" maxlength="1500"></textarea>
+      <label for="level">Niveau d'études</label>
+      <select id="level"><option value="">Choisir…</option><option>Bac+2</option><option>Bac+3</option><option>Bac+5</option></select>
+      <fieldset><legend>Êtes-vous disponible en octobre 2026 ?</legend>
+        <label><input type="radio" name="dispo" value="oui">Oui</label>
+        <label><input type="radio" name="dispo" value="non">Non</label></fieldset>
+      <label for="q-nir">Numéro de sécurité sociale *</label><input id="q-nir" required>
+      <label><input type="checkbox" name="rgpd" required> J'accepte la politique de confidentialité *</label>
+      <button type="submit">Envoyer ma candidature</button>
+    </form>
+  </section>
+</main>
+<script>
+const scenario = new URLSearchParams(location.search).get('scenario') || 'reveal';
+const cta = document.getElementById('cta');
+if (scenario === 'closed') {
+  cta.textContent = "Ce poste n'est plus ouvert.";
+} else if (scenario === 'login') {
+  document.getElementById('main').innerHTML = '<h1>Connexion à votre espace candidat</h1>'
+    + '<form><input type="email" name="login"><input type="password" name="pwd"><button>Se connecter</button></form>';
+} else if (scenario === 'newtab') {
+  cta.innerHTML = '<a href="/offres/42/candidature" target="_blank">Postuler</a>';
+} else {
+  cta.innerHTML = '<button type="button" id="apply">Postuler</button>';
+  document.getElementById('apply').addEventListener('click', () => {
+    document.getElementById('form-zone').classList.remove('hidden');
+    cta.remove();
+  });
+}
+document.getElementById('application').addEventListener('submit', (e) => {
+  e.preventDefault();
+  fetch('/__test/submit', {method: 'POST', body: '{}'});
+});
+</script>
+</body>
+</html>

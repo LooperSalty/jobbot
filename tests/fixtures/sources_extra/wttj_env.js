@@ -1,0 +1,1 @@
+window.env = {"PUBLIC_ALGOLIA_API_KEY_CLIENT": "4bd8f6215d0cc52b26430765769e65a0", "PUBLIC_ALGOLIA_APPLICATION_ID": "CSEKHVMS53", "PUBLIC_WTTJ_API_URL": "https://api.welcometothejungle.com", "PUBLIC_WTTJ_URL": "https://www.welcometothejungle.com"};

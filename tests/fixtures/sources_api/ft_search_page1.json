@@ -1,0 +1,54 @@
+{
+ "_comment": "Synthetic France Travail Offres v2 page built from the official OpenAPI spec field names (docs/research/specs). Not a live response.",
+ "resultats": [
+  {
+   "id": "212ABCD",
+   "intitule": "Développeur Full-Stack React / Node.js en alternance (H/F)",
+   "description": "Au sein de notre équipe produit à Metz, vous développerez des applications web en TypeScript, React et Node.js.\nTélétravail partiel possible (2 jours par semaine).",
+   "dateCreation": "2026-09-20T08:15:42Z",
+   "dateActualisation": "2026-09-21T08:15:42Z",
+   "lieuTravail": {"libelle": "57 - METZ", "latitude": 49.1193, "longitude": 6.1757, "codePostal": "57000", "commune": "57463"},
+   "romeCode": "M1855",
+   "romeLibelle": "Développeur / Développeuse web",
+   "appellationlibelle": "Développeur / Développeuse full-stack",
+   "entreprise": {"nom": "ACME LOGICIELS", "description": "Éditeur de logiciels lorrain.", "url": "www.acme-logiciels.fr"},
+   "typeContrat": "CDD",
+   "typeContratLibelle": "CDD - 24 Mois",
+   "natureContrat": "Contrat apprentissage",
+   "experienceExige": "D",
+   "experienceLibelle": "Débutant accepté",
+   "formations": [{"codeFormation": "31054", "domaineLibelle": "Informatique", "niveauLibelle": "Bac+5 et plus ou équivalents", "exigence": "S"}],
+   "langues": [{"libelle": "Anglais", "exigence": "S"}],
+   "competences": [{"code": "100001", "libelle": "Développer une application web", "exigence": "E"}, {"code": "100002", "libelle": "Utiliser Git", "exigence": "S"}],
+   "qualitesProfessionnelles": [{"libelle": "Faire preuve d'autonomie", "description": "..."}],
+   "salaire": {"libelle": "Mensuel de 1400.00 Euros sur 12 mois", "commentaire": "Selon grille alternance"},
+   "alternance": true,
+   "contact": {
+    "nom": "ACME LOGICIELS - Mme Martin",
+    "courriel": "Pour postuler, utiliser le lien suivant : https://candidat.francetravail.fr/offres/recherche/detail/212ABCD",
+    "urlPostulation": "https://careers.acme-logiciels.fr/jobs/42"
+   },
+   "agence": {"courriel": "Pour postuler, utiliser le lien suivant : https://candidat.francetravail.fr/offres/recherche/detail/212ABCD"},
+   "origineOffre": {"origine": "1", "urlOrigine": "https://candidat.francetravail.fr/offres/recherche/detail/212ABCD"}
+  },
+  {
+   "id": "212ABCE",
+   "intitule": "Alternant - Developpeur Web Fullstack H/F",
+   "description": "Tu développes des applications Vue.js / Node.js. Poste 100 % sur site.",
+   "dateCreation": "2026-09-13T20:05:40Z",
+   "lieuTravail": {"libelle": "57 - Metz", "latitude": 49.108385, "longitude": 6.194897, "codePostal": "57000"},
+   "entreprise": {"nom": "Chausséa"},
+   "typeContrat": "CDD",
+   "typeContratLibelle": "CDD - 24 Mois",
+   "natureContrat": "Cont. professionnalisation",
+   "alternance": true,
+   "contact": {"courriel": "Pour postuler, utiliser le lien suivant : https://candidat.francetravail.fr/offres/recherche/detail/212ABCE"},
+   "origineOffre": {
+    "origine": 2,
+    "urlOrigine": "https://www.hellowork.com/fr-fr/emplois/79006307.html",
+    "partenaires": [{"nom": "HELLOWORK", "url": "https://www.hellowork.com/fr-fr/emplois/79006307.html", "logo": "https://www.hellowork.com/logo.png"}]
+   }
+  }
+ ],
+ "filtresPossibles": [{"filtre": "natureContrat", "agregation": [{"valeurPossible": "E2", "nbResultats": 2}, {"valeurPossible": "FS", "nbResultats": 1}]}]
+}

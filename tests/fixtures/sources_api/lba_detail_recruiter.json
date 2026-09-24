@@ -1,0 +1,40 @@
+{
+ "ideaType": "recruteurs_lba",
+ "status": "Active",
+ "id": "85190096900011",
+ "title": "LORCA SERVICES",
+ "contact": {
+  "hasEmail": true,
+  "phone": null
+ },
+ "place": {
+  "distance": null,
+  "fullAddress": "rue de Metz 57580 LEMUD",
+  "latitude": 49.038056999986715,
+  "longitude": 6.363160999999999,
+  "city": "LEMUD",
+  "address": "rue de Metz 57580 LEMUD"
+ },
+ "company": {
+  "name": "LORCA SERVICES",
+  "siret": "85190096900011",
+  "size": "50-99",
+  "url": null,
+  "opco": {
+   "label": "OCAPIAT",
+   "url": null
+  },
+  "elligibleHandicap": false,
+  "hiringCount3Years": 4
+ },
+ "url": null,
+ "nafs": [
+  {
+   "code": "58.29C",
+   "label": "Edition de logiciels applicatifs"
+  }
+ ],
+ "applicationCount": 38,
+ "token": "REDACTED.JWT.TOKEN",
+ "recipient_id": "partners_6a003c199a6be614e489356f"
+}

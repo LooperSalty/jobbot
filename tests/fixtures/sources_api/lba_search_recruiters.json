@@ -1,0 +1,592 @@
+{
+ "hits": [
+  {
+   "_id": "6a003c019a6be614e4882149",
+   "url_id": "88787449300018",
+   "type": "offre",
+   "type_filter_label": "Candidatures spontanées",
+   "sub_type": "recruteurs_lba",
+   "contract_type": [
+    "Apprentissage",
+    "Professionnalisation"
+   ],
+   "publication_date": "2026-09-20T08:00:50.157Z",
+   "is_disabled_elligible": false,
+   "start_date": null,
+   "start_type": null,
+   "is_start_flexible": null,
+   "is_algo_company": true,
+   "is_formation_included": false,
+   "smart_apply": false,
+   "application_count": 0,
+   "title": "ATIXYS",
+   "description": "",
+   "address": "7 rue Grosdidier de Matons 57070 METZ",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     6.204191999999997,
+     49.11258699998689
+    ]
+   },
+   "departement_code": "57",
+   "region_code": "44",
+   "organization_name": "ATIXYS",
+   "level": "",
+   "activity_sector": "EDITION DE LOGICIELS APPLICATIFS",
+   "keywords": [
+    "Responsable programmatique",
+    "Développeur web",
+    "Développeuse web",
+    "Chef de projet étude et développement informatique",
+    "Cheffe de projet étude et développement informatique",
+    "Ingénieur DevOps",
+    "Ingénieure DevOps",
+    "Développeur informatique",
+    "Développeuse informatique",
+    "Technicien support client",
+    "Technicienne support client",
+    "industrie"
+   ],
+   "rome_labels": [
+    "Responsable programmatique",
+    "Développeur / Développeuse web",
+    "Technicien / Technicienne support client en industrie",
+    "Développeur / Développeuse informatique",
+    "Responsable Commercial / Commerciale",
+    "Chargé / Chargée de relation client"
+   ],
+   "distance": 3
+  },
+  {
+   "_id": "6a003cb49a6be614e490ebbb",
+   "url_id": "52262292700047",
+   "type": "offre",
+   "type_filter_label": "Candidatures spontanées",
+   "sub_type": "recruteurs_lba",
+   "contract_type": [
+    "Apprentissage",
+    "Professionnalisation"
+   ],
+   "publication_date": "2026-08-16T08:00:34.457Z",
+   "is_disabled_elligible": false,
+   "start_date": null,
+   "start_type": null,
+   "is_start_flexible": null,
+   "is_algo_company": true,
+   "is_formation_included": false,
+   "smart_apply": false,
+   "application_count": 0,
+   "title": "QUADRAL E-SERVICES",
+   "description": "",
+   "address": "3 place du Roi George 57000 METZ",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     6.172114,
+     49.110921999986886
+    ]
+   },
+   "departement_code": "57",
+   "region_code": "44",
+   "organization_name": "QUADRAL E-SERVICES",
+   "level": "",
+   "activity_sector": "EDITION DE LOGICIELS APPLICATIFS",
+   "keywords": [
+    "Responsable programmatique",
+    "Développeur web",
+    "Développeuse web",
+    "Chef de projet étude et développement informatique",
+    "Cheffe de projet étude et développement informatique",
+    "Ingénieur DevOps",
+    "Ingénieure DevOps",
+    "Développeur informatique",
+    "Développeuse informatique",
+    "Technicien support client",
+    "Technicienne support client",
+    "industrie"
+   ],
+   "rome_labels": [
+    "Responsable programmatique",
+    "Développeur / Développeuse web",
+    "Technicien / Technicienne support client en industrie",
+    "Développeur / Développeuse informatique",
+    "Responsable Commercial / Commerciale",
+    "Chargé / Chargée de relation client"
+   ],
+   "distance": 1
+  },
+  {
+   "_id": "6a003c199a6be614e489356f",
+   "url_id": "85190096900011",
+   "type": "offre",
+   "type_filter_label": "Candidatures spontanées",
+   "sub_type": "recruteurs_lba",
+   "contract_type": [
+    "Apprentissage",
+    "Professionnalisation"
+   ],
+   "publication_date": "2026-09-20T08:00:50.157Z",
+   "is_disabled_elligible": false,
+   "start_date": null,
+   "start_type": null,
+   "is_start_flexible": null,
+   "is_algo_company": true,
+   "is_formation_included": false,
+   "smart_apply": true,
+   "application_count": 38,
+   "title": "LORCA SERVICES",
+   "description": "",
+   "address": "rue de Metz 57580 LEMUD",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     6.363160999999999,
+     49.038056999986715
+    ]
+   },
+   "departement_code": "57",
+   "region_code": "44",
+   "organization_name": "LORCA SERVICES",
+   "level": "",
+   "activity_sector": "EDITION DE LOGICIELS APPLICATIFS",
+   "keywords": [
+    "Responsable programmatique",
+    "Développeur web",
+    "Développeuse web",
+    "Chef de projet étude et développement informatique",
+    "Cheffe de projet étude et développement informatique",
+    "Ingénieur DevOps",
+    "Ingénieure DevOps",
+    "Développeur informatique",
+    "Développeuse informatique",
+    "Technicien support client",
+    "Technicienne support client",
+    "industrie"
+   ],
+   "rome_labels": [
+    "Responsable programmatique",
+    "Développeur / Développeuse web",
+    "Technicien / Technicienne support client en industrie",
+    "Développeur / Développeuse informatique",
+    "Responsable Commercial / Commerciale",
+    "Chargé / Chargée de relation client"
+   ],
+   "distance": 17
+  },
+  {
+   "_id": "6a003c349a6be614e48aa5db",
+   "url_id": "78887652200038",
+   "type": "offre",
+   "type_filter_label": "Candidatures spontanées",
+   "sub_type": "recruteurs_lba",
+   "contract_type": [
+    "Apprentissage",
+    "Professionnalisation"
+   ],
+   "publication_date": "2026-09-13T08:00:32.333Z",
+   "is_disabled_elligible": false,
+   "start_date": null,
+   "start_type": null,
+   "is_start_flexible": null,
+   "is_algo_company": true,
+   "is_formation_included": false,
+   "smart_apply": true,
+   "application_count": 67,
+   "title": "EFLUID",
+   "description": "",
+   "address": "2B RUE ARDANT DU PICQ 57000 METZ",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     6.174426,
+     49.1288939999869
+    ]
+   },
+   "departement_code": "57",
+   "region_code": "44",
+   "organization_name": "EFLUID",
+   "level": "",
+   "activity_sector": "EDITION DE LOGICIELS APPLICATIFS",
+   "keywords": [
+    "Responsable programmatique",
+    "Développeur web",
+    "Développeuse web",
+    "Chef de projet étude et développement informatique",
+    "Cheffe de projet étude et développement informatique",
+    "Ingénieur DevOps",
+    "Ingénieure DevOps",
+    "Développeur informatique",
+    "Développeuse informatique",
+    "Technicien support client",
+    "Technicienne support client",
+    "industrie"
+   ],
+   "rome_labels": [
+    "Responsable programmatique",
+    "Développeur / Développeuse web",
+    "Technicien / Technicienne support client en industrie",
+    "Développeur / Développeuse informatique",
+    "Responsable Commercial / Commerciale",
+    "Chargé / Chargée de relation client"
+   ],
+   "distance": 2
+  },
+  {
+   "_id": "6a003ca69a6be614e4902a33",
+   "url_id": "47955789400066",
+   "type": "offre",
+   "type_filter_label": "Candidatures spontanées",
+   "sub_type": "recruteurs_lba",
+   "contract_type": [
+    "Apprentissage",
+    "Professionnalisation"
+   ],
+   "publication_date": "2026-08-16T08:00:34.457Z",
+   "is_disabled_elligible": false,
+   "start_date": null,
+   "start_type": null,
+   "is_start_flexible": null,
+   "is_algo_company": true,
+   "is_formation_included": false,
+   "smart_apply": false,
+   "application_count": 0,
+   "title": "ACTIMAGE CONSULTING SAS",
+   "description": "",
+   "address": "5 BOULEVARD DE TREVES 57070 METZ",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     6.188159000000001,
+     49.122599999986896
+    ]
+   },
+   "departement_code": "57",
+   "region_code": "44",
+   "organization_name": "ACTIMAGE CONSULTING SAS",
+   "level": "",
+   "activity_sector": "Conseil en systèmes et logiciels informatiques",
+   "keywords": [
+    "Développeur web",
+    "Développeuse web",
+    "Consultant fonctionnel",
+    "Consultante fonctionnelle",
+    "systèmes d'information",
+    "support technique informatique",
+    "intégrateur logiciels métiers",
+    "intégratrice logiciels métiers",
+    "Administrateur systèmes d'information",
+    "Administratrice systèmes d'information",
+    "Chef de projet étude et développement informatique",
+    "Cheffe de projet étude et développement informatique"
+   ],
+   "rome_labels": [
+    "Développeur / Développeuse web",
+    "Expert / Experte systèmes et réseaux informatiques",
+    "Consultant fonctionnel / Consultante fonctionnelle des systèmes d'information",
+    "Data engineer",
+    "Développeur / Développeuse informatique",
+    "Ingénieur / Ingénieure systèmes, réseaux et sécurité informatique"
+   ],
+   "distance": 1
+  },
+  {
+   "_id": "68f7be9949b8c5a96688576b",
+   "url_id": "89107677000017",
+   "type": "offre",
+   "type_filter_label": "Candidatures spontanées",
+   "sub_type": "recruteurs_lba",
+   "contract_type": [
+    "Apprentissage",
+    "Professionnalisation"
+   ],
+   "publication_date": "2026-09-20T08:00:50.157Z",
+   "is_disabled_elligible": false,
+   "start_date": null,
+   "start_type": null,
+   "is_start_flexible": null,
+   "is_algo_company": true,
+   "is_formation_included": false,
+   "smart_apply": false,
+   "application_count": 0,
+   "title": "3D JUNGLE CONSULTING",
+   "description": "",
+   "address": "6 rue aux Ours 57000 METZ",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     6.172826999999999,
+     49.11841899998689
+    ]
+   },
+   "departement_code": "57",
+   "region_code": "44",
+   "organization_name": "3D JUNGLE CONSULTING",
+   "level": "",
+   "activity_sector": "Conseil en systèmes et logiciels informatiques",
+   "keywords": [
+    "Développeur web",
+    "Développeuse web",
+    "Consultant fonctionnel",
+    "Consultante fonctionnelle",
+    "systèmes d'information",
+    "support technique informatique",
+    "intégrateur logiciels métiers",
+    "intégratrice logiciels métiers",
+    "Administrateur systèmes d'information",
+    "Administratrice systèmes d'information",
+    "Chef de projet étude et développement informatique",
+    "Cheffe de projet étude et développement informatique"
+   ],
+   "rome_labels": [
+    "Développeur / Développeuse web",
+    "Expert / Experte systèmes et réseaux informatiques",
+    "Consultant fonctionnel / Consultante fonctionnelle des systèmes d'information",
+    "Data engineer",
+    "Développeur / Développeuse informatique",
+    "Ingénieur / Ingénieure systèmes, réseaux et sécurité informatique"
+   ],
+   "distance": 1
+  },
+  {
+   "_id": "68f7be3b49b8c5a966861007",
+   "url_id": "81348554700026",
+   "type": "offre",
+   "type_filter_label": "Candidatures spontanées",
+   "sub_type": "recruteurs_lba",
+   "contract_type": [
+    "Apprentissage",
+    "Professionnalisation"
+   ],
+   "publication_date": "2026-08-16T08:00:34.457Z",
+   "is_disabled_elligible": false,
+   "start_date": null,
+   "start_type": null,
+   "is_start_flexible": null,
+   "is_algo_company": true,
+   "is_formation_included": false,
+   "smart_apply": false,
+   "application_count": 0,
+   "title": "IMPACT 3W",
+   "description": "",
+   "address": "30 rue Laurent Charles Marechal 57070 METZ",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     6.193161000000001,
+     49.101327999986864
+    ]
+   },
+   "departement_code": "57",
+   "region_code": "44",
+   "organization_name": "IMPACT 3W",
+   "level": "",
+   "activity_sector": "Conseil en systèmes et logiciels informatiques",
+   "keywords": [
+    "Développeur web",
+    "Développeuse web",
+    "Consultant fonctionnel",
+    "Consultante fonctionnelle",
+    "systèmes d'information",
+    "support technique informatique",
+    "intégrateur logiciels métiers",
+    "intégratrice logiciels métiers",
+    "Administrateur systèmes d'information",
+    "Administratrice systèmes d'information",
+    "Chef de projet étude et développement informatique",
+    "Cheffe de projet étude et développement informatique"
+   ],
+   "rome_labels": [
+    "Développeur / Développeuse web",
+    "Expert / Experte systèmes et réseaux informatiques",
+    "Consultant fonctionnel / Consultante fonctionnelle des systèmes d'information",
+    "Data engineer",
+    "Développeur / Développeuse informatique",
+    "Ingénieur / Ingénieure systèmes, réseaux et sécurité informatique"
+   ],
+   "distance": 3
+  },
+  {
+   "_id": "6a003c629a6be614e48cf341",
+   "url_id": "85065002900018",
+   "type": "offre",
+   "type_filter_label": "Candidatures spontanées",
+   "sub_type": "recruteurs_lba",
+   "contract_type": [
+    "Apprentissage",
+    "Professionnalisation"
+   ],
+   "publication_date": "2026-08-30T08:00:48.190Z",
+   "is_disabled_elligible": false,
+   "start_date": null,
+   "start_type": null,
+   "is_start_flexible": null,
+   "is_algo_company": true,
+   "is_formation_included": false,
+   "smart_apply": false,
+   "application_count": 0,
+   "title": "MASTERS CONSULTING",
+   "description": "",
+   "address": "6A rue Sainte Marie 57860 MONTOIS-LA-MONTAGNE",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     6.013738,
+     49.2136359999871
+    ]
+   },
+   "departement_code": "57",
+   "region_code": "44",
+   "organization_name": "MASTERS CONSULTING",
+   "level": "",
+   "activity_sector": "Conseil en systèmes et logiciels informatiques",
+   "keywords": [
+    "Développeur web",
+    "Développeuse web",
+    "Consultant fonctionnel",
+    "Consultante fonctionnelle",
+    "systèmes d'information",
+    "support technique informatique",
+    "intégrateur logiciels métiers",
+    "intégratrice logiciels métiers",
+    "Administrateur systèmes d'information",
+    "Administratrice systèmes d'information",
+    "Chef de projet étude et développement informatique",
+    "Cheffe de projet étude et développement informatique"
+   ],
+   "rome_labels": [
+    "Développeur / Développeuse web",
+    "Expert / Experte systèmes et réseaux informatiques",
+    "Consultant fonctionnel / Consultante fonctionnelle des systèmes d'information",
+    "Data engineer",
+    "Développeur / Développeuse informatique",
+    "Ingénieur / Ingénieure systèmes, réseaux et sécurité informatique"
+   ],
+   "distance": 16
+  },
+  {
+   "_id": "6a003c019a6be614e4880a85",
+   "url_id": "83441804800015",
+   "type": "offre",
+   "type_filter_label": "Candidatures spontanées",
+   "sub_type": "recruteurs_lba",
+   "contract_type": [
+    "Apprentissage",
+    "Professionnalisation"
+   ],
+   "publication_date": "2026-09-20T08:00:50.157Z",
+   "is_disabled_elligible": false,
+   "start_date": null,
+   "start_type": null,
+   "is_start_flexible": null,
+   "is_algo_company": true,
+   "is_formation_included": false,
+   "smart_apply": false,
+   "application_count": 0,
+   "title": "IMMO QUARE EUROPE",
+   "description": "",
+   "address": "28 RUE PASTEUR 57000 METZ",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     6.170757,
+     49.108218999986875
+    ]
+   },
+   "departement_code": "57",
+   "region_code": "44",
+   "organization_name": "IMMO QUARE EUROPE",
+   "level": "",
+   "activity_sector": "Conseil en systèmes et logiciels informatiques",
+   "keywords": [
+    "Développeur web",
+    "Développeuse web",
+    "Consultant fonctionnel",
+    "Consultante fonctionnelle",
+    "systèmes d'information",
+    "support technique informatique",
+    "intégrateur logiciels métiers",
+    "intégratrice logiciels métiers",
+    "Administrateur systèmes d'information",
+    "Administratrice systèmes d'information",
+    "Chef de projet étude et développement informatique",
+    "Cheffe de projet étude et développement informatique"
+   ],
+   "rome_labels": [
+    "Développeur / Développeuse web",
+    "Expert / Experte systèmes et réseaux informatiques",
+    "Consultant fonctionnel / Consultante fonctionnelle des systèmes d'information",
+    "Data engineer",
+    "Développeur / Développeuse informatique",
+    "Ingénieur / Ingénieure systèmes, réseaux et sécurité informatique"
+   ],
+   "distance": 2
+  },
+  {
+   "_id": "6a0976ef7fd1311f99ce4997",
+   "url_id": "82870446000025",
+   "type": "offre",
+   "type_filter_label": "Candidatures spontanées",
+   "sub_type": "recruteurs_lba",
+   "contract_type": [
+    "Apprentissage",
+    "Professionnalisation"
+   ],
+   "publication_date": "2026-08-16T08:00:34.457Z",
+   "is_disabled_elligible": false,
+   "start_date": null,
+   "start_type": null,
+   "is_start_flexible": null,
+   "is_algo_company": true,
+   "is_formation_included": false,
+   "smart_apply": false,
+   "application_count": 0,
+   "title": "BLUE WIRE FRANCE",
+   "description": "",
+   "address": "7 rue Andre Marie Ampere 57070 METZ",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     6.226765999999999,
+     49.10440299998685
+    ]
+   },
+   "departement_code": "57",
+   "region_code": "44",
+   "organization_name": "BLUE WIRE FRANCE",
+   "level": "",
+   "activity_sector": "Conseil en systèmes et logiciels informatiques",
+   "keywords": [
+    "Développeur web",
+    "Développeuse web",
+    "Consultant fonctionnel",
+    "Consultante fonctionnelle",
+    "systèmes d'information",
+    "support technique informatique",
+    "intégrateur logiciels métiers",
+    "intégratrice logiciels métiers",
+    "Administrateur systèmes d'information",
+    "Administratrice systèmes d'information",
+    "Chef de projet étude et développement informatique",
+    "Cheffe de projet étude et développement informatique"
+   ],
+   "rome_labels": [
+    "Développeur / Développeuse web",
+    "Expert / Experte systèmes et réseaux informatiques",
+    "Consultant fonctionnel / Consultante fonctionnelle des systèmes d'information",
+    "Data engineer",
+    "Développeur / Développeuse informatique",
+    "Ingénieur / Ingénieure systèmes, réseaux et sécurité informatique"
+   ],
+   "distance": 5
+  }
+ ],
+ "nbHits": 18,
+ "page": 0,
+ "nbPages": 2,
+ "counts": {
+  "is_disabled_elligible": 0,
+  "urgent": 0,
+  "smart_apply": 3
+ }
+}

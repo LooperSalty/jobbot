@@ -1,0 +1,68 @@
+{
+ "hits": [
+  {
+   "_id": "6a064773687b65f199a02f5f",
+   "url_id": "6a064773687b65f199a02f5f",
+   "type": "offre",
+   "type_filter_label": "Offres d'emploi partenaires",
+   "sub_type": "offres_emploi_partenaires",
+   "contract_type": [
+    "Apprentissage",
+    "Professionnalisation"
+   ],
+   "publication_date": "2026-09-13T20:05:40.000Z",
+   "is_disabled_elligible": false,
+   "start_date": null,
+   "start_type": null,
+   "is_start_flexible": null,
+   "is_algo_company": false,
+   "is_formation_included": false,
+   "smart_apply": false,
+   "application_count": 0,
+   "title": "Alternant - Developpeur Web Fullstack H/F",
+   "description": "Tu es passionné(e) par le développement web et tu as envie d'évoluer au sein d'une équipe dynamique, bienveillante et pleine de projets ? Rejoins-nous pour vivre une expérience enrichissante au coeur de projets variés et du quotidien d'une équipe tech dynamique !\n\nDécouvre tes futures missions juste ici :\n\n- Tu analyses les besoins des utilisateurs afin de proposer des solutions adaptées\n\n- Tu rédiges les spécifications techniques des projets\n\n- Tu développes et codes des applications en utilisant les langages de programmation appropriés\n\n- Tu assures la maintenance et l'amélioration des applications existantes\n\n- Tu documentes le code et les différents process mis en place\n\n- Tu apportes un support technique aux utilisateurs en cas de besoin\n\n- Tu effectues une veille technologique afin de suivre les évolutions et les bonnes pratiques du secteur",
+   "address": "57000 Metz",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     6.194897,
+     49.108385
+    ]
+   },
+   "departement_code": "57",
+   "region_code": "44",
+   "organization_name": "Chausséa",
+   "level": "Master, titre ingénieur, grande école (Bac+5)",
+   "activity_sector": "Commerce de détail de la chaussure",
+   "keywords": [
+    "alternant",
+    "développeur web",
+    "fullstack",
+    "développement web",
+    "équipe dynamique",
+    "analyse des besoins",
+    "spécifications techniques",
+    "développement d'applications",
+    "langages de programmation",
+    "maintenance d'applications",
+    "documentation de code",
+    "support technique",
+    "veille technologique",
+    "bonnes pratiques",
+    "projets variés"
+   ],
+   "rome_labels": [
+    "Développeur / Développeuse web"
+   ],
+   "distance": 2
+  }
+ ],
+ "nbHits": 1,
+ "page": 0,
+ "nbPages": 1,
+ "counts": {
+  "is_disabled_elligible": 0,
+  "urgent": 0,
+  "smart_apply": 0
+ }
+}

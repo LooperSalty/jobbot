@@ -1,0 +1,217 @@
+# Profil FICTIF utilisé par les tests (même structure et mêmes compétences qu'un vrai profil).
+# Aucune donnée réelle : identité, entreprises, écoles et chiffres sont inventés.
+
+identity:
+  first_name: Jean
+  last_name: DUPONT
+  email: jean.dupont@example.com
+  phone: "+33 6 12 34 56 78"
+  city: Metz
+  postal_code: "57000"
+  country: France
+  linkedin: https://www.linkedin.com/in/jean-dupont-exemple
+  github: https://github.com/jean-dupont-exemple
+  portfolio: https://jean-dupont.example.com
+  driving_license: "Permis B — véhicule personnel"
+
+headline: "Développeur Full-Stack Web & Logiciel — Alternance Bac+5 (24 mois) dès octobre 2026"
+
+summary: >-
+  Diplômé du BUT Informatique (IUT Exemple, juin 2026 — RNCP niveau 6 / Bac+3), je recherche un contrat
+  d'alternance de 24 mois à partir d'octobre 2026 (3 semaines en entreprise / 1 semaine en formation) pour préparer
+  le titre Expert en ingénierie du développement et en architecture logicielle (Bac+5, RNCP 36469) à Exemple Digital
+  School, avec un intérêt fort pour l'IA appliquée. J'ai déjà mené un cycle projet complet en entreprise —
+  analyse des besoins, spécifications, développement, mise en production, documentation et support — sur une
+  application intranet conçue seul et utilisée quotidiennement, ainsi que le développement en équipe d'un logiciel
+  de gestion métier .NET.
+
+target:
+  contract_types: [alternance, cdi]
+  job_titles:
+    - développeur full-stack
+    - développeur web
+    - développeur logiciel
+    - développeur fullstack alternance
+    - concepteur développeur d'applications
+    - développeur React
+    - développeur Next.js
+    - développeur .NET
+    - développeur Python
+    - développeur IA
+  keywords: [TypeScript, React, Next.js, Node.js, C#, .NET, Python, PostgreSQL]
+  locations:
+    - {city: Metz, postal_code: "57000", radius_km: 40, latitude: 49.1193, longitude: 6.1757}
+    - {city: Nancy, postal_code: "54000", radius_km: 25, latitude: 48.6921, longitude: 6.1844}
+    - city: Luxembourg
+      postal_code: ''
+      radius_km: 25
+      latitude: 49.6116
+      longitude: 6.1319
+      country: LU
+      contract_types:
+        - cdi
+  remote_ok: true
+  exclude_title_keywords:
+    - senior
+    - sénior
+    - lead
+    - tech lead
+    - principal
+    - staff engineer
+    - manager
+    - head of
+    - directeur
+    - directrice
+    - responsable
+    - expert
+    - confirmé
+    - "5 ans"
+  exclude_description_keywords:
+    - "5 ans d'expérience minimum"
+    - "7 ans d'expérience"
+    - "10 ans d'expérience"
+    - habilitation secret défense
+  exclude_companies: []
+  max_experience_years: 2
+  min_salary_eur:
+  naf_codes: ["62.01Z", "62.02A", "62.03Z", "62.09Z", "63.11Z", "63.12Z", "58.29A", "58.29B", "58.29C", "58.21Z", "73.11Z"]
+  departments: ["57", "54"]
+  min_headcount_code: "02"
+
+alternance:
+  school: Exemple Digital School
+  degree: "Expert en ingénierie du développement et en architecture logicielle (Bac+5, RNCP 36469)"
+  rncp_level: "7"
+  duration_months: 24
+  start_date: "2026-10"
+  rhythm: "3 semaines en entreprise / 1 semaine en formation"
+  school_url: https://digital-school.example.com
+
+experiences:
+  - title: Développeur Full-Stack — Stage de fin d'études (BUT3)
+    company: ACME INDUSTRIE
+    location: Metz (57)
+    start: "2026-02"
+    end: "2026-06"
+    kind: internship
+    bullets:
+      - "Conception et développement en autonomie d'une application web intranet full-stack (Next.js 15, TypeScript, React, Node.js, API REST, Prisma, PostgreSQL, Tailwind CSS) : recueil des besoins, spécifications techniques, modélisation de la base de données, back-end, interface, authentification et gestion fine des droits."
+      - "Mise en production sur serveur Synology NAS (Docker) — application utilisée quotidiennement par les équipes, avec maintenance corrective et évolutive, documentation technique et support utilisateurs."
+      - "Contribution en équipe (3-4 développeurs) à un logiciel de gestion métier .NET 8 / C# / WPF (commandes, stocks, fournisseurs, facturation, planification de production, reporting) : nouvelles fonctionnalités, UI/UX (XAML), correction de bugs et optimisation des performances."
+      - "Workflow Git formalisé (issues, branches, pull requests, CI, code review) — 210 commits sur 450 sur la période."
+      - "Développement d'un assistant IA intégré au logiciel métier (Google Gemini + serveur MCP en Python, 23 outils en lecture seule)."
+    skills: [Next.js, TypeScript, React, Node.js, API REST, Prisma, PostgreSQL, Tailwind CSS, Docker, Synology NAS, .NET 8, C#, WPF, XAML, SQL, Git, CI/CD, code review, Google Gemini, MCP, Python, authentification, gestion des droits]
+  - title: Développeur Web — Auto-entrepreneur (freelance)
+    company: Indépendant
+    location: Metz (57)
+    start: "2025"
+    end: ""
+    kind: freelance
+    bullets:
+      - "Création et maintenance de sites web pour des clients (artisans, TPE) : cahier des charges, développement, mise en ligne et suivi — relation client directe."
+      - "Réalisation complète du site de Rénov'Exemple (entreprise de rénovation) : cadrage du besoin avec le client, développement Next.js, back-office d'administration, génération automatisée de devis et factures, déploiement et suivi."
+    skills: [Next.js, React, TypeScript, back-office, déploiement, relation client, cahier des charges]
+  - title: Développeur Web — Stage
+    company: Éditions Exemple
+    location: Metz (57)
+    start: "2025"
+    end: "2025"
+    kind: internship
+    bullets:
+      - "Développement d'un site e-commerce complet from scratch (HTML, CSS, JavaScript, PHP, SQL) : base de données, catalogue produits, panier, commandes et back-office de gestion."
+    skills: [HTML5, CSS3, JavaScript, PHP, SQL, MySQL, e-commerce]
+  - title: Agent saisonnier — Mairie (service voirie) & régie municipale
+    company: Mairie / Régie municipale
+    location: Metz (57)
+    start: "2022"
+    end: "2025"
+    kind: seasonal
+    bullets:
+      - "Travail en équipe sur 3 étés consécutifs, puis missions administratives avec saisie et contrôle de données informatiques."
+    skills: [travail en équipe, rigueur, saisie de données]
+
+education:
+  - degree: "Expert en ingénierie du développement et en architecture logicielle (Bac+5, RNCP 36469) — en alternance, entreprise d'accueil recherchée"
+    school: Exemple Digital School
+    location: Metz
+    start: "2026"
+    end: "2028"
+  - degree: "BUT Informatique — RNCP niveau 6 / Bac+3 (DUT Informatique obtenu en 2025)"
+    school: IUT Exemple, Université Exemple
+    location: Metz
+    start: "2023"
+    end: "2026"
+  - degree: Baccalauréat STI2D — Mention Bien
+    school: Lycée Exemple
+    location: Metz
+    start: "2022"
+    end: "2022"
+
+projects:
+  - name: Application mobile de reconnaissance de cartes
+    description: "Application mobile qui identifie des cartes à jouer à partir d'une photo, avec un back-end Python de traitement d'image communiquant via une API REST."
+    skills: [Flutter, Dart, Python, vision par ordinateur, API REST]
+  - name: Détection d'objets par vision par ordinateur
+    description: "Expérimentations de détection d'objets avec YOLOv8."
+    skills: [Python, YOLOv8, vision par ordinateur]
+  - name: Développement de jeux vidéo
+    description: "Un jeu de plateforme 2D complet (Unity) et un jeu multijoueur publié sur Roblox — conception, développement et itérations selon les retours des joueurs."
+    skills: [Unity, C#, Roblox, Luau]
+
+skills:
+  - category: Langages
+    items: [TypeScript, JavaScript, Python, C#, PHP, C, SQL, Dart, Luau, HTML5, CSS3]
+  - category: Front-end
+    items: [React, Next.js 15, Tailwind CSS, responsive design, JavaScript ES6+]
+  - category: Back-end & API
+    items: [Node.js, API REST, Prisma, Symfony, .NET 8, WPF, programmation orientée objet]
+  - category: Bases de données
+    items: [PostgreSQL, MySQL, SQLite, MongoDB, Redis, modélisation de données]
+  - category: DevOps & outils
+    items: [Git, GitHub, Docker, CI/CD, mise en production, Linux, Synology NAS, documentation technique]
+  - category: IA appliquée
+    items: [intégration de LLM, Google Gemini, API Anthropic, serveurs MCP, prompt engineering, vision par ordinateur, YOLOv8]
+  - category: Mobile & jeux
+    items: [Flutter, Dart, Unity, Roblox]
+  - category: Méthodes
+    items: [recueil des besoins, spécifications techniques, code review, gestion de tickets, travail en équipe]
+
+languages:
+  - {name: Français, level: langue maternelle}
+  - {name: Anglais, level: B2}
+
+interests: [Veille technologique, développement de jeux vidéo (Roblox/Luau, Unity), street workout, pêche, cinéma]
+
+qualities: [autonome, rigoureux, curieux, sens du service utilisateur, esprit d'équipe]
+
+years_experience:
+  default: 1
+  TypeScript: 2
+  JavaScript: 2
+  React: 1
+  Next.js: 1
+  Node.js: 1
+  Python: 2
+  C#: 1
+  .NET: 1
+  PHP: 2
+  SQL: 2
+  PostgreSQL: 1
+  Git: 3
+  Docker: 1
+
+answers:
+  work_authorization: "Oui"
+  requires_sponsorship: "Non"
+  notice_period: "Disponible immédiatement"
+  availability_date: "Octobre 2026"
+  salary_expectation_alternance: "Selon la grille légale de rémunération des apprentis"
+  salary_expectation_cdi: "32000"
+  willing_to_relocate: "Non"
+  remote_preference: "Hybride ou sur site"
+  highest_degree: "Bac+3 (BUT Informatique) — Master Bac+5 en cours"
+  english_level: "B2"
+  driving_license: "Oui"
+  contract_duration: "24 mois"
+  how_did_you_hear: "Site d'offres d'emploi"
+  salary_expectation_cdi_luxembourg: '45000'

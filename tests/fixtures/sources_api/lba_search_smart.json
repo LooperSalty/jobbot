@@ -1,0 +1,284 @@
+{
+ "hits": [
+  {
+   "_id": "6aaa5a821124e472788457aa",
+   "url_id": "6aaa5a821124e472788457aa",
+   "type": "offre",
+   "type_filter_label": "Offres d'emploi La bonne alternance",
+   "sub_type": "offres_emploi_lba",
+   "contract_type": [
+    "Apprentissage",
+    "Professionnalisation"
+   ],
+   "publication_date": "2026-09-16T08:59:46.300Z",
+   "is_disabled_elligible": false,
+   "start_date": "2026-09-16T08:59:46.300Z",
+   "start_type": "des_que_possible",
+   "is_start_flexible": false,
+   "is_algo_company": false,
+   "is_formation_included": false,
+   "smart_apply": true,
+   "application_count": 0,
+   "title": "Aide maçon / Aide maçonne Voiries et Réseaux Divers VRD",
+   "description": "Prépare le terrain, les outils et les matériaux nécessaires à l'exécution de travaux de construction, de réparation ou d'entretien dans le bâtiment, sur les routes ou voiries, dans les ports ou voies navigables, selon les règles de sécurité. Peut réaliser divers travaux simples.",
+   "address": "1 RUE DE L'EXEMPLE 57930 GOSSELMING",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     7.0,
+     48.79
+    ]
+   },
+   "departement_code": "57",
+   "region_code": "44",
+   "organization_name": "BASTIEN EXEMPLE - TERRASSEMENT",
+   "level": "CAP, BEP (Infrabac)",
+   "activity_sector": "Travaux de terrassement spécialisés ou de grande masse",
+   "keywords": [
+    "aide maçon",
+    "maçonne",
+    "VRD",
+    "Voiries et Réseaux Divers",
+    "travaux de construction",
+    "réparation",
+    "entretien",
+    "bâtiment",
+    "routes",
+    "voiries",
+    "ports",
+    "voies navigables",
+    "règles de sécurité",
+    "travaux simples"
+   ],
+   "rome_labels": [
+    "Manœuvre bâtiment"
+   ],
+   "distance": null
+  },
+  {
+   "_id": "6aaa58e71124e472788455de",
+   "url_id": "6aaa58e71124e472788455de",
+   "type": "offre",
+   "type_filter_label": "Offres d'emploi partenaires",
+   "sub_type": "offres_emploi_partenaires",
+   "contract_type": [
+    "Apprentissage"
+   ],
+   "publication_date": "2026-09-16T08:52:55.801Z",
+   "is_disabled_elligible": false,
+   "start_date": "2026-09-17T00:00:00.000Z",
+   "start_type": null,
+   "is_start_flexible": null,
+   "is_algo_company": false,
+   "is_formation_included": false,
+   "smart_apply": true,
+   "application_count": 0,
+   "title": "Commis pâtissier / Commise pâtissière de restaurant",
+   "description": "Le Commis de cuisine, un acteur essentiel dans la préparation des mets et la production en cuisine.\\nAssiste les cuisiniers, chefs de partie dans la préparation des plats\\nPrépare les ingrédients nécessaires à la confection des recettes\\nMaintient la propreté des plans de travail et des ustensiles de cuisine\\nParticipe à la réception et au stockage des marchandises\\nApplique les normes d'hygiène et de sécurité alimentaire\\nPeut aider à la mise en place des plats pour le service",
+   "address": "31 Rue de la Tête d'Or 57000 Metz",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     6.177572,
+     49.117105
+    ]
+   },
+   "departement_code": "57",
+   "region_code": "44",
+   "organization_name": "PATISSERIE CLAUDE EXEMPLE",
+   "level": "",
+   "activity_sector": "Pâtisserie",
+   "keywords": [
+    "commis pâtissier",
+    "cuisine",
+    "préparation des plats",
+    "ingrédients",
+    "hygiène alimentaire",
+    "sécurité alimentaire",
+    "normes d'hygiène",
+    "stockage des marchandises",
+    "mise en place des plats",
+    "restaurant",
+    "cuisiniers",
+    "chefs de partie",
+    "propreté des plans de travail",
+    "ustensiles de cuisine",
+    "réception des marchandises"
+   ],
+   "rome_labels": [
+    "Commis / Commise de cuisine"
+   ],
+   "distance": null
+  },
+  {
+   "_id": "6aaa58741734e71a67c883b4",
+   "url_id": "6aaa58741734e71a67c883b4",
+   "type": "offre",
+   "type_filter_label": "Offres d'emploi partenaires",
+   "sub_type": "offres_emploi_partenaires",
+   "contract_type": [
+    "Apprentissage"
+   ],
+   "publication_date": "2026-09-16T08:51:00.089Z",
+   "is_disabled_elligible": false,
+   "start_date": "2026-09-17T00:00:00.000Z",
+   "start_type": null,
+   "is_start_flexible": null,
+   "is_algo_company": false,
+   "is_formation_included": false,
+   "smart_apply": true,
+   "application_count": 0,
+   "title": "Pâtissier / Pâtissière",
+   "description": "Le pâtissier, un artiste de la gourmandise, crée des douceurs qui ravissent les papilles.  \\nConçoit et réalise des produits de pâtisserie, confiserie, chocolaterie et glacerie selon les règles d'hygiène et de sécurité alimentaires  \\nDécore les gâteaux et autres créations pour les rendre aussi beaux que savoureux  \\nSélectionne et dose les ingrédients pour la confection de recettes, en suivant les fiches techniques  \\nUtilise et entretient les équipements de pâtisserie (fours, batteurs, etc.)  \\nPeut former et superviser un personnel moins expérimenté  \\nPeut gérer les stocks de matières premières et les commandes de fournitures",
+   "address": "31 Rue de la Tête d'Or 57000 Metz",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     6.177572,
+     49.117105
+    ]
+   },
+   "departement_code": "57",
+   "region_code": "44",
+   "organization_name": "PATISSERIE CLAUDE EXEMPLE",
+   "level": "",
+   "activity_sector": "Pâtisserie",
+   "keywords": [
+    "pâtissier",
+    "pâtissière",
+    "pâtisserie",
+    "confiserie",
+    "chocolaterie",
+    "glacerie",
+    "hygiène alimentaire",
+    "sécurité alimentaire",
+    "décoration de gâteaux",
+    "recettes pâtissières",
+    "fiches techniques",
+    "équipements de pâtisserie",
+    "gestion des stocks",
+    "commandes de fournitures",
+    "formation de personnel"
+   ],
+   "rome_labels": [
+    "Pâtissier / Pâtissière"
+   ],
+   "distance": null
+  },
+  {
+   "_id": "6aa4207cef95c6a323256bce",
+   "url_id": "6aa4207cef95c6a323256bce",
+   "type": "offre",
+   "type_filter_label": "Offres d'emploi La bonne alternance",
+   "sub_type": "offres_emploi_lba",
+   "contract_type": [
+    "Apprentissage",
+    "Professionnalisation"
+   ],
+   "publication_date": "2026-09-11T15:38:36.509Z",
+   "is_disabled_elligible": false,
+   "start_date": "2026-09-11T15:38:36.509Z",
+   "start_type": "des_que_possible",
+   "is_start_flexible": false,
+   "is_algo_company": false,
+   "is_formation_included": false,
+   "smart_apply": true,
+   "application_count": 1,
+   "title": "Apprenti / Apprentie paysagiste",
+   "description": "Le Jardinier paysagiste, entretient des jardins ou espaces verts, pour embellir l'environnement et créer une atmosphère fonctionnelle et accueillante. Conçoit et aménage des jardins et des espaces verts selon les besoins du client et les contraintes du site Entretient les plantations, les pelouses et les équipements extérieurs Réalise des opérations de taille, de tonte, de désherbage et de traitement des plantes Installe les systèmes d'irrigation et veille à leur fonctionnement pour optimiser la consommation d'eau Peut participer à la création de décors pour des événements spéciaux",
+   "address": "3 RUE DES FONTAINES 57420 CHERISEY",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     6.23545,
+     49.012985
+    ]
+   },
+   "departement_code": "57",
+   "region_code": "44",
+   "organization_name": "DMPAYSAGE",
+   "level": "Bac, Bac Pro, BP (Bac)",
+   "activity_sector": "Services d'aménagement paysager",
+   "keywords": [
+    "paysagiste",
+    "entretien espaces verts",
+    "aménagement jardins",
+    "taille",
+    "tonte",
+    "désherbage",
+    "traitement plantes",
+    "systèmes d'irrigation",
+    "décors événements",
+    "conception espaces verts",
+    "fonctionnement irrigation",
+    "optimisation consommation eau"
+   ],
+   "rome_labels": [
+    "Jardinier / Jardinière paysagiste"
+   ],
+   "distance": null
+  },
+  {
+   "_id": "6aa4190fef95c6a323256765",
+   "url_id": "6aa4190fef95c6a323256765",
+   "type": "offre",
+   "type_filter_label": "Offres d'emploi partenaires",
+   "sub_type": "offres_emploi_partenaires",
+   "contract_type": [
+    "Apprentissage"
+   ],
+   "publication_date": "2026-09-11T15:06:55.242Z",
+   "is_disabled_elligible": false,
+   "start_date": "2026-09-14T00:00:00.000Z",
+   "start_type": null,
+   "is_start_flexible": null,
+   "is_algo_company": false,
+   "is_formation_included": false,
+   "smart_apply": true,
+   "application_count": 3,
+   "title": "Préparateur / Préparatrice en pharmacie",
+   "description": "Le Préparateur en pharmacie, en collaboration étroite avec le pharmacien, assure la préparation, la gestion et la délivrance des médicaments aux patients.\\nPrépare et délivre les médicaments sous la supervision d'un pharmacien\\nConseille et informe les clients sur l'utilisation des produits pharmaceutiques et la compatibilité avec d'autres\\nGère les stocks de médicaments et passe les commandes nécessaires\\nAssure le suivi des dossiers patients et la mise à jour des informations\\nParticipe à la réalisation des préparations magistrales et officinales\\nVeille au respect des normes d'hygiène et de sécurité dans l'espace de travail",
+   "address": "34 Avenue Erckmann Chatrian 57800 Freyming-Merlebach",
+   "location": {
+    "type": "Point",
+    "coordinates": [
+     6.800747,
+     49.144119
+    ]
+   },
+   "departement_code": "57",
+   "region_code": "44",
+   "organization_name": "PHARMACIE SAINTE-BARBE",
+   "level": "",
+   "activity_sector": "Commerce de détail de produits pharmaceutiques en magasin spécialisé",
+   "keywords": [
+    "préparateur en pharmacie",
+    "pharmacien",
+    "préparation des médicaments",
+    "délivrance des médicaments",
+    "gestion des stocks",
+    "commandes de médicaments",
+    "suivi des dossiers patients",
+    "préparations magistrales",
+    "préparations officinales",
+    "hygiène et sécurité",
+    "conseil pharmaceutique",
+    "compatibilité des produits",
+    "normes d'hygiène",
+    "pharmacie"
+   ],
+   "rome_labels": [
+    "Préparateur / Préparatrice en pharmacie"
+   ],
+   "distance": null
+  }
+ ],
+ "nbHits": 39,
+ "page": 0,
+ "nbPages": 8,
+ "counts": {
+  "is_disabled_elligible": 0,
+  "urgent": 24,
+  "smart_apply": 39
+ }
+}

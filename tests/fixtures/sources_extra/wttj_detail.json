@@ -1,0 +1,168 @@
+{
+ "job": {
+  "application_fields": [
+   {
+    "id": "a505ace5-740c-4206-8529-9a74d4267a3c",
+    "mode": "optional",
+    "name": "cover_letter"
+   },
+   {
+    "id": "f24473c1-20ba-4b91-b4bf-21671bf9a484",
+    "mode": "mandatory",
+    "name": "resume"
+   },
+   {
+    "id": "ada8a184-afdc-402f-9e7c-17313a13fa1c",
+    "mode": "disabled",
+    "name": "portfolio"
+   },
+   {
+    "id": "b4fd9bf6-6435-48b6-a40a-b1d81f29d5ba",
+    "mode": "optional",
+    "name": "picture"
+   },
+   {
+    "id": "d3e711e9-3a9c-4ee5-af2c-ec2aa81f72bc",
+    "mode": "optional",
+    "name": "media_website"
+   },
+   {
+    "id": "9ed1dcd2-6bc5-4747-a550-33a503f72423",
+    "mode": "optional",
+    "name": "media_linkedin"
+   },
+   {
+    "id": "f6d22687-4383-4471-b83a-8b7eecbbc2cd",
+    "mode": "optional",
+    "name": "media_twitter"
+   },
+   {
+    "id": "faef5823-28cd-4f52-8f21-d0282b9a18aa",
+    "mode": "disabled",
+    "name": "media_github"
+   },
+   {
+    "id": "e8e12800-409e-4fe4-bcf8-4b45ac72018e",
+    "mode": "disabled",
+    "name": "media_stackoverflow"
+   },
+   {
+    "id": "5160c0be-79dc-4628-a47e-a1261553dc3c",
+    "mode": "disabled",
+    "name": "media_behance"
+   },
+   {
+    "id": "b71d3c5c-70d6-41e3-ba58-26c35fd7c23d",
+    "mode": "disabled",
+    "name": "media_dribbble"
+   },
+   {
+    "id": "5510e922-b443-4a1b-b355-ecfa3da939a4",
+    "mode": "disabled",
+    "name": "media_xing"
+   }
+  ],
+  "apply_url": "https://atos.contactrh.com/jobs/10425/44454330",
+  "ats": "external",
+  "ats_questions": [],
+  "contract_duration_max": null,
+  "contract_duration_min": null,
+  "contract_type": "full_time",
+  "description": "<h1>Le poste en quelques mots</h1><p>Dans le cadre du développement de nos activités à Strasbourg, nous recherchons un(e) <strong>Expert(e) Développement Java</strong> pour rejoindre nos équipes et intervenir auprès de grands comptes régionaux.</p><p>Vous intégrerez un environnement stable et structuré sur des projets de longue durée, avec une visibilité à long terme et de réelles perspectives d&#39;évolution. Chez Atos, nous privilégions la continuité des parcours et l&#39;accompagnement de nos collaborateurs sur des missions construites pour durer.</p><p>Vous participerez à des projets stratégiques dans des secteurs variés tels que l&#39;énergie, la finance, le secteur public ou encore les institutions européennes.<br/><br/></p><h1>Ce que vous ferez concrètement</h1><p>Au quotidien, vous serez amené(e) à :</p><ul> <li>Concevoir et développer des applications robustes basées sur les technologies Java.</li> <li>Participer à l&#39;analyse des besoins et à la conception technique des solutions.</li> <li>Rédiger les spécifications techniques, plans de tests et documentation associée.</li> <li>Réaliser les développements et garantir la qualité des livrables produits.</li> <li>Mettre en œuvre les bonnes pratiques de développement et de qualité de code.</li> <li>Participer aux phases de tests unitaires et d&#39;intégration.</li> <li>Contribuer aux rituels Agile de l&#39;équipe (daily meetings, sprint planning, rétrospectives, revues).</li> <li>Être force de proposition sur les choix d&#39;architecture et les orientations techniques.</li> <li>Accompagner les développeurs plus juniors et partager votre expertise au sein de l&#39;équipe.<br/><br/></li> </ul><p>Selon les projets, vous pourrez intervenir dans différents contextes :<br/><br/></p><ul> <li>Développement et évolution d&#39;applications existantes.</li> <li>Projets de transformation ou de modernisation du SI.</li> <li>Réalisation de nouvelles applications from scratch.</li> <li>Missions d&#39;expertise technique auprès de nos clients.<br/><br/></li> </ul>",
+  "education_level": "bac_5",
+  "experience_level": "2_TO_3_YEARS",
+  "key_missions": [],
+  "language": "fr",
+  "name": "Développeur Java (F/H) - Strasbourg",
+  "office": {
+   "address": "Nancy, Grand Est, France",
+   "local_address": "Nancy, Grand Est, France",
+   "city": "Nancy",
+   "latitude": 48.68956,
+   "longitude": 6.18337,
+   "country_code": "FR",
+   "district": "Meurthe-et-Moselle",
+   "zip_code": "54000",
+   "local_district": "Meurthe-et-Moselle",
+   "local_city": "Nancy"
+  },
+  "offices": [
+   {
+    "address": "Nancy, Grand Est, France",
+    "local_address": "Nancy, Grand Est, France",
+    "city": "Nancy",
+    "latitude": 48.68956,
+    "longitude": 6.18337,
+    "country_code": "FR",
+    "district": "Meurthe-et-Moselle",
+    "zip_code": "54000",
+    "local_district": "Meurthe-et-Moselle",
+    "local_city": "Nancy"
+   }
+  ],
+  "profile": "<p><span>Description du profil :<br/><br/></span></p><h1>Profil recherché</h1><p>Vous justifiez d’une expérience confirmée en développement Java et souhaitez vous inscrire dans un environnement vous permettant de mettre à profit votre expertise tout en continuant à progresser techniquement.<br/><br/></p><p>Vous disposez notamment de :<br/><br/></p><ul> <li>Une solide expérience du développement Java.</li> <li>Une excellente maîtrise des frameworks Spring et/ou Quarkus.</li> <li>De bonnes connaissances des architectures applicatives modernes.</li> <li>Une sensibilité aux enjeux de qualité logicielle, tests et documentation.</li> <li>Une capacité à prendre du recul sur les problématiques techniques et à proposer des solutions adaptées.</li> <li>Une aisance dans le travail en équipe et le partage de connaissances.</li> <li>Une expérience des environnements Agile.<br/><br/></li> </ul><p>La connaissance d’Angular constitue un atout supplémentaire.<br/><br/></p><h1>Stack et outils</h1><p>En fonction des projets, vous pourrez évoluer dans les environnements suivants :<br/><br/></p><p><strong>Langages et Frameworks</strong></p><ul> <li>Java</li> <li>Spring Boot</li> <li>Spring</li> <li>JEE / J2EE</li> <li>Quarkus</li> <li>Angular<br/><br/></li> </ul><p><strong>Méthodes &amp; Qualité</strong></p><ul> <li>Agile / Scrum</li> <li>Intégration Continue</li> <li>Revues de code</li> <li>Tests unitaires<br/><br/></li> </ul><p><strong>Environnements</strong></p><ul> <li>Git</li> <li>Jenkins</li> <li>Docker</li> <li>Outils DevOps<strong><br/><br/></strong></li> </ul><br/><br/><span>Nous proposons :<br/><br/></span><strong>Ce que nous proposons</strong><strong><br/></strong> <ul> <li>Jusqu’à 3 jours de télétravail par semaine</li> <li>Tickets restaurant (valeur faciale 10 €, prise en charge 60 %)</li> <li>Événements d’intégration et moments conviviaux réguliers</li> <li>Tous vos congés disponibles dès votre arrivée</li> <li>Programme de cooptation jusqu’à 2 750 €</li> <li>Accès aux activités sociales et culturelles</li> <li>Aide à la mobilité durable (vélo, covoiturage)<br/><br/></li> </ul> <p> </p><p></p>",
+  "published_at": "2026-09-19T14:20:13Z",
+  "reference": "ATOS_Zw2WrJ3",
+  "remote": "unknown",
+  "salary_currency": "EUR",
+  "salary_max": 45000.0,
+  "salary_min": 35000.0,
+  "salary_period": "yearly",
+  "slug": "developpeur-java-f-h-strasbourg_nancy_ATOS_Zw2WrJ3",
+  "start_date": null,
+  "status": "published",
+  "summary": "",
+  "tools": [
+   {
+    "name": "Java",
+    "reference": "12ee4e2b-81a3-4290-9df9-5897699b86bf"
+   },
+   {
+    "name": "Spring-Boot",
+    "reference": "384616ae-7d87-4fbf-b463-4a85b5f135be"
+   },
+   {
+    "name": "Git",
+    "reference": "4440c73d-caf0-4adb-b41a-c5890f7a648b"
+   },
+   {
+    "name": "Jenkins",
+    "reference": "59d98c20-ebef-455b-8f47-a22dcc4b7d61"
+   },
+   {
+    "name": "Angular",
+    "reference": "678ca455-4085-4e47-a48a-b55cfeb1b5f0"
+   },
+   {
+    "name": "Spring",
+    "reference": "b3ff27b2-30c5-4869-ace8-5e003673e626"
+   },
+   {
+    "name": "Quarkus",
+    "reference": "bb4ce9e2-ff30-4907-b5d6-8dc6fb33a341"
+   },
+   {
+    "name": "Docker",
+    "reference": "e4b6970a-5b93-40d5-8189-7641ef89c032"
+   }
+  ],
+  "urls": [
+   {
+    "kind": "canonical",
+    "language": "fr",
+    "href": "https://www.welcometothejungle.com/fr/companies/atos/jobs/developpeur-java-f-h-strasbourg_nancy_ATOS_Zw2WrJ3"
+   },
+   {
+    "kind": "alternate",
+    "language": "fr",
+    "href": "https://www.welcometothejungle.com/fr/companies/atos/jobs/developpeur-java-f-h-strasbourg_nancy_ATOS_Zw2WrJ3"
+   }
+  ],
+  "wttj_reference": "590af61a-4008-4221-ac61-4e077a8e4205",
+  "organization": {
+   "name": "Atos",
+   "reference": "bKGYqPm",
+   "media_website_url": "https://atos.net/fr/"
+  }
+ }
+}

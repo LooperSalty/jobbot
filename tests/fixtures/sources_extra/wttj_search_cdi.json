@@ -1,0 +1,278 @@
+{
+ "hits": [
+  {
+   "has_education_level": true,
+   "published_at_date": "2026-09-19",
+   "summary": "Rejoignez Atos, un leader mondial de la transformation numérique. En tant que Développeur Java, vous travaillerez sur des projets stratégiques dans divers secteurs, bénéficierez d'un environnement stable et structuré, et aurez de réelles perspectives d'évolution.",
+   "published_at": "2026-09-19T14:20:13Z",
+   "published_at_timestamp": 1789827613,
+   "salary_minimum": 35000.0,
+   "salary_yearly_minimum": 35000,
+   "slug": "developpeur-java-f-h-strasbourg_nancy_ATOS_Zw2WrJ3",
+   "contract_type": "full_time",
+   "is_boosted": false,
+   "experience_level_minimum": 2.0,
+   "sectors": [
+    {
+     "name": "IT / Digital",
+     "reference": "it-digital-1",
+     "parent_name": "Conseil / Audit",
+     "parent_reference": "consulting-audit"
+    }
+   ],
+   "_geoloc": [
+    {
+     "lat": 48.68956,
+     "lng": 6.18337
+    }
+   ],
+   "contract_duration_minimum": null,
+   "salary_currency": "EUR",
+   "language": "fr",
+   "organization": {
+    "name": "Atos",
+    "slug": "atos",
+    "reference": "bKGYqPm",
+    "summary": "Services informatiques sécurisés et IA pour transformation digitale.",
+    "nb_employees": 63000,
+    "creation_year": 1997
+   },
+   "has_contract_duration": false,
+   "remote": "unknown",
+   "has_remote": true,
+   "salary_maximum": 45000.0,
+   "source_stage": "production",
+   "contract_duration_maximum": null,
+   "key_missions": [
+    "Concevoir et développer des applications robustes basées sur les technologies Java, participer à l'analyse des besoins et à la conception technique des solutions.",
+    "Rédiger les spécifications techniques, plans de tests et documentation associée, réaliser les développements et garantir la qualité des livrables produits.",
+    "Participer aux phases de tests unitaires et d'intégration, contribuer aux rituels Agile de l'équipe, être force de proposition sur les choix d'architecture."
+   ],
+   "offices": [
+    {
+     "state": "Grand Est",
+     "city": "Nancy",
+     "country": "France",
+     "country_code": "FR",
+     "district": "Meurthe-et-Moselle",
+     "local_district": "Meurthe-et-Moselle",
+     "local_city": "Nancy",
+     "local_state": "Grand Est"
+    }
+   ],
+   "profile": "<span>Description du profil :<br><br></span><h1>Profil recherché</h1><p>Vous justifiez d'une expérience confirmée en développement Java et souhaitez vous inscrire dans un environnement vous permettant de mettre à profit votre expertise tout en continuant à progresser techniquement.<br><br></p><p>Vous disposez notamment de :<br><br></p><ul> <li>Une solide expérience du développement Java.</li> <li>Une excellente maîtrise des frameworks Spring et/ou Quarkus.</li> <li>De bonnes connaissances des architectures applicatives modernes.</li> <li>Une sensibilité aux enjeux de qualité logicielle, tests et documentation.</li> <li>Une capacité à prendre du recul sur les problématiques techniques et à proposer des solutions adaptées.</li> <li>Une aisance dans le travail en équipe et le partage de connaissances.</li> <li>Une expérience des environnements Agile.<br><br></li> </ul><p>La connaissance d'Angular constitue un atout supplémentaire.<br><br></p><h1>Stack et outils</h1><p>En fonction des projets, vous pourrez évoluer dans les environnements suivants :<br><br></p><p><strong>Langages et Frameworks</strong></p><ul> <li>Java</li> <li>Spring Boot</li> <li>Spring</li> <li>JEE / J2EE</li> <li>Quarkus</li> <li>Angular<br><br></li> </ul><p><strong>Méthodes &amp; Qualité</strong></p><ul> <li>Agile / Scrum</li> <li>Intégration Continue</li> <li>Revues de code</li> <li>Tests unitaires<br><br></li> </ul><p><strong>Environnements</strong></p><ul> <li>Git</li> <li>Jenkins</li> <li>Docker</li> <li>Outils DevOps<strong><br><br></strong></li> </ul><br><br><span>Nous proposons :<br><br></span><strong>Ce que nous proposons</strong><strong><br></strong> <ul> <li>Jusqu’à 3 jours de télétravail par semaine</li> <li>Tickets restaurant (valeur faciale 10 €, prise en charge 60 %)</li> <li>Événements d’intégration et moments conviviaux réguliers</li> <li>Tous vos congés disponibles dès votre arrivée</li> <li>Programme de cooptation jusqu’à 2 750 €</li> <li>Accès aux activités sociales et culturelles</li> <li>Aide à la mobilité durable (vélo, covoiturage)<br><br></li> </ul> <p> </p>",
+   "name": "Développeur Java (F/H) - Strasbourg",
+   "wk_reference": "ATOS_Zw2WrJ3",
+   "has_experience_level_minimum": true,
+   "education_level": "bac_5",
+   "new_profession": {
+    "sub_category_reference": "software-web-development-iMzA4",
+    "sub_category_name": "Développement de logiciels et de sites Web",
+    "category_reference": "tech-engineering-3NjUy",
+    "category_name": "Technologie et ingénierie",
+    "pivot_name": "Développeur de logiciels",
+    "pivot_reference": "software-developer-xY2Ri"
+   },
+   "has_salary_yearly_minimum": true,
+   "has_benefits": true,
+   "reference": "590af61a-4008-4221-ac61-4e077a8e4205",
+   "salary_period": "yearly",
+   "objectID": "590af61a-4008-4221-ac61-4e077a8e4205"
+  },
+  {
+   "published_at_timestamp": 1789596271,
+   "contract_duration_maximum": null,
+   "salary_currency": null,
+   "salary_maximum": null,
+   "has_remote": true,
+   "published_at": "2026-09-16T22:04:31Z",
+   "salary_minimum": null,
+   "key_missions": [
+    "Développer et maintenir de nouvelles fonctionnalités sur les différentes applications, en environnement Back et Front end.",
+    "Participer aux points de suivi de projet selon la méthodologie Agile Scrum, en appliquant les standards et les bonnes pratiques.",
+    "Mettre en place des tests unitaires et réaliser la documentation technique, en assurant la maintenance corrective et évolutive des développements."
+   ],
+   "slug": "developpeur-full-stack-java-angular-h-f_luxembourg",
+   "is_boosted": false,
+   "organization": {
+    "name": "Open",
+    "slug": "open",
+    "reference": "kXqe803",
+    "summary": "Industriel de l'innovation AI First pour la transformation digitale.",
+    "nb_employees": 4000,
+    "creation_year": 1989
+   },
+   "summary": "Rejoignez Open PSF Luxembourg, une entreprise leader dans le secteur public, bancaire et de la finance/assurance. En tant que développeur full stack Java/Angular, vous serez intégré à une équipe client et serez responsable du développement et de la maintenance de nouvelles fonctionnalités sur différentes applications, ainsi que de la maintenance corrective et évolutive des développements. Vous bénéficierez d'un parcours d'intégration sur-mesure et d'opportunités de formation et d'évolution de carrière.",
+   "reference": "27de3beb-8cc6-454e-89a4-30787e8baef7",
+   "salary_period": null,
+   "remote": "partial",
+   "new_profession": {
+    "sub_category_reference": "software-web-development-iMzA4",
+    "sub_category_name": "Développement de logiciels et de sites Web",
+    "category_reference": "tech-engineering-3NjUy",
+    "category_name": "Technologie et ingénierie",
+    "pivot_name": "Développeur full stack",
+    "pivot_reference": "full-stack-developer-5YTYy"
+   },
+   "_geoloc": [
+    {
+     "lat": 49.6096,
+     "lng": 6.12966
+    }
+   ],
+   "experience_level_minimum": 5.0,
+   "source_stage": "production",
+   "salary_yearly_minimum": null,
+   "has_experience_level_minimum": true,
+   "profile": null,
+   "education_level": null,
+   "name": "Développeur full stack Java / Angular H/F",
+   "has_benefits": false,
+   "has_education_level": false,
+   "has_salary_yearly_minimum": false,
+   "contract_type": "full_time",
+   "contract_duration_minimum": null,
+   "published_at_date": "2026-09-16",
+   "has_contract_duration": false,
+   "offices": [
+    {
+     "state": null,
+     "city": "Luxembourg",
+     "country": "Luxembourg",
+     "country_code": "LU",
+     "district": "Luxembourg",
+     "local_district": "Luxembourg",
+     "local_city": "Luxembourg",
+     "local_state": null
+    }
+   ],
+   "wk_reference": "OPEN_qPlNO3J",
+   "sectors": [
+    {
+     "name": "IT / Digital",
+     "reference": "it-digital-1",
+     "parent_name": "Conseil / Audit",
+     "parent_reference": "consulting-audit"
+    },
+    {
+     "name": "SaaS / Cloud Services",
+     "reference": "saas-cloud-services",
+     "parent_name": "Tech",
+     "parent_reference": "tech-1"
+    },
+    {
+     "name": "Big Data",
+     "reference": "big-data-1",
+     "parent_name": "Tech",
+     "parent_reference": "tech-1"
+    }
+   ],
+   "language": "fr",
+   "objectID": "27de3beb-8cc6-454e-89a4-30787e8baef7"
+  },
+  {
+   "contract_type": "full_time",
+   "has_contract_duration": false,
+   "has_salary_yearly_minimum": false,
+   "published_at_timestamp": 1789074026,
+   "key_missions": [
+    "Comprendre les besoins métiers et être force de propositions, participer à la définition des architectures techniques et fonctionnelles.",
+    "Animer et participer à tout le cycle de vie d’un projet : analyse, développement, qualification, déploiement, maintenance, support technique et fonctionnel.",
+    "Respecter le plan de charge et les engagements de l’équipe, mettre en œuvre la démarche qualité en vigueur dans l’entreprise."
+   ],
+   "slug": "ingenieur-d-etudes-et-developpement-h-f_nancy",
+   "salary_yearly_minimum": null,
+   "experience_level_minimum": null,
+   "source_stage": "production",
+   "new_profession": {
+    "sub_category_reference": "software-web-development-iMzA4",
+    "sub_category_name": "Développement de logiciels et de sites Web",
+    "category_reference": "tech-engineering-3NjUy",
+    "category_name": "Technologie et ingénierie",
+    "pivot_name": "Ingénieur logiciel",
+    "pivot_reference": "software-engineer-zYWFh"
+   },
+   "has_benefits": true,
+   "has_education_level": false,
+   "organization": {
+    "name": "Crédit Mutuel Alliance Fédérale",
+    "slug": "credit-mutuel-alliance-federale",
+    "reference": "iyTILx",
+    "summary": "Groupe bancaire coopératif axé sur responsabilité et solidarité.",
+    "nb_employees": 80200,
+    "creation_year": null
+   },
+   "published_at": "2026-09-10T21:00:26Z",
+   "salary_period": null,
+   "remote": "unknown",
+   "summary": "Rejoignez Euro-Information, la filiale technologique du Crédit Mutuel Alliance Fédérale. En tant qu'Analyste Développeur, vous serez responsable de la gestion et de l'évolution de divers domaines applicatifs, notamment les crédits à la consommation, les crédits immobiliers et la gestion des risques. Vous participerez à l'ensemble du cycle de vie d'un projet, de l'analyse au déploiement, tout en respectant les engagements de l'équipe et en mettant en œuvre la démarche qualité.",
+   "salary_maximum": null,
+   "reference": "ebafc420-e537-45c3-8a68-727bcf820136",
+   "contract_duration_maximum": null,
+   "salary_minimum": null,
+   "contract_duration_minimum": null,
+   "sectors": [
+    {
+     "name": "Banque",
+     "reference": "banking-1",
+     "parent_name": "Banques / Assurances / Finance",
+     "parent_reference": "banking-insurance-finance"
+    },
+    {
+     "name": "Assurance",
+     "reference": "insurance-1",
+     "parent_name": "Banques / Assurances / Finance",
+     "parent_reference": "banking-insurance-finance"
+    },
+    {
+     "name": "Finance",
+     "reference": "finance-2",
+     "parent_name": "Banques / Assurances / Finance",
+     "parent_reference": "banking-insurance-finance"
+    }
+   ],
+   "language": "fr",
+   "has_experience_level_minimum": false,
+   "salary_currency": null,
+   "has_remote": true,
+   "profile": null,
+   "name": "Analyste développeur (F/H)",
+   "is_boosted": false,
+   "offices": [
+    {
+     "state": "Grand Est",
+     "city": "Nancy",
+     "country": "France",
+     "country_code": "FR",
+     "district": "Meurthe-et-Moselle",
+     "local_district": "Meurthe-et-Moselle",
+     "local_city": "Nancy",
+     "local_state": "Grand Est"
+    }
+   ],
+   "_geoloc": [
+    {
+     "lat": 48.68956,
+     "lng": 6.18337
+    }
+   ],
+   "published_at_date": "2026-09-10",
+   "education_level": null,
+   "wk_reference": "CMAF_orr58GO",
+   "objectID": "ebafc420-e537-45c3-8a68-727bcf820136"
+  }
+ ],
+ "nbHits": 65,
+ "page": 0,
+ "nbPages": 22,
+ "hitsPerPage": 3,
+ "exhaustiveNbHits": true,
+ "exhaustiveTypo": true,
+ "exhaustive": {
+  "nbHits": true,
+  "typo": true
+ },
+ "query": "developpeur",
+ "processingTimeMS": 4,
+ "serverTimeMS": 7
+}

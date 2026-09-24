@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" data-controller="fetch-account-data" data-fetch-account-data-url-value="/fr-fr/compte/accountdata" lang="fr-fr">
+<head>
+
+
+<title>Recherche Offres d'emploi en France | Hellowork</title>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="application/ld+json">
+    {"@context": "https://schema.org","@type": "WebSite","name" : "Hellowork","url": "https://www.hellowork.com/fr-fr/"}
+</script>
+<script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Organization","name":"Hellowork","sameAs":["https://www.facebook.com/helloworkcom","https://www.youtube.com/channel/UCry7TiN8-dFKQUgyUMYANTQ","https://twitter.com/hellowork","https://www.tiktok.com/@helloworkcom","https://www.instagram.com/hellowork_/","https://www.linkedin.com/company/helloworkcom/"],"url":"https://www.hellowork.com","logo":{"@type":"ImageObject","url":"https://f.hellowork.com/hellowork/ressources/2.54.2/images/png/logo_hellowork.png"}}
+</script>
+<script type="application/ld+json">
+        {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement": [
+        {"@type":"ListItem","position":1,"item": { "@id":"https://www.hellowork.com/fr-fr/","name":"Accueil" }},
+{"@type":"ListItem","position":2,"item": {"@id":"https://www.hellowork.com/fr-fr/emploi.html","name":"Emploi"}},{"@type":"ListItem","position":3,"item": {"name":"Recherche"}}        ]}
+</script>
+
+</head>
+<body class="relative typo-s" data-action="mutable:pageLoaded-&gt;tracker#identify turbo:frame-missing@window-&gt;content-missing#handleFrameMissing" data-controller="toggle-on-body analytics tracker scroll-to-top mutable content-missing display-toast-message service-unsubscriber page-restore" data-mutable-event-name-value="pageLoaded" data-toggle-on-body-toggled-class="overflow-hidden">
+<a class="hidden xl:block sr-only focus-visible:!btn-primary-l focus-visible:not-sr-only focus-visible:w-64 focus-visible:top-4 focus-visible:left-4 focus-visible:absolute focus-visible:z-40 focus-visible:py-3" href="#main-content">
+            Aller au contenu principal
+        </a>
+<main>
+
+
+
+
+
+<turbo-frame data-content-missing-target="excluded" id="modal-new-profile">
+<form action="/fr-fr/candidat/onetapturbocustom" data-controller="auto-submittable" id="formCustomOneTap" method="post">
+<input data-action="mutable:connected-&gt;auto-submittable#submit" data-controller="mutable" name="auto-submit" type="hidden"/>
+</form>
+<form action="/fr-fr/candidat/onetapturbo" id="formOneTap" method="post">
+<input name="clientId" type="hidden"/>
+<input name="credential" type="hidden"/>
+<input name="selectBy" type="hidden"/>
+</form>
+<div class="z-50" data-auto_select="false" data-callback="setFormWithGoogleCredential" data-cancel_on_tap_outside="false" data-client_id="983461533668-5f2b35au8h7fpiu443ich72bb8juf60l.apps.googleusercontent.com" data-skip_prompt_cookie="hw_onetap" data-use_fedcm_for_prompt="true" id="g_id_onload">
+</div>
+
+</turbo-frame>
+<div data-controller="onetap-importer" data-onetap-importer-custom-url-value="/fr-fr/candidat/customonetapframeview">
+<turbo-frame data-onetap-importer-target="customFrame" id="one-tap-custom" src=""></turbo-frame>
+
+</div>
+<div>
+
+<input class="peer" hidden="" id="cp-mobile-menu-side-panel" type="checkbox"/>
+
+<div class="fixed flex flex-col h-full z-50 top-0 cp-menu-width bg-grey-50 transform ease-in duration-400 peer-checked:translate-x-full xl:hidden">
+<nav aria-label="Menu de navigation" class="h-full flex flex-col justify-between overflow-y-auto" data-controller="focus-trap" data-focus-trap-target="container">
+<div class="hidden connected:block px-6 py-8 flex-grow">
+<div class="flex pb-14 xl:hidden justify-between">
+<div class="flex justify-between">
+<div class="flex flex-col gap-3" data-action="from-account-data:empty@document-&gt;toggle#add from-account-data:copied:Initials@document-&gt;toggle#remove" data-controller="toggle" data-toggle-target="toToggle" data-toggle-toggled-class="hidden">
+<div class="bg-blue-500 min-w-16 min-h-16 size-16 rounded-full flex items-center justify-center relative overflow-hidden">
+<div class="text-white absolute typo-xl-bold" data-action="fetch-account-data:account-data-refreshed@document-&gt;from-account-data#copy" data-controller="from-account-data" data-from-account-data-copy-value="Initials" data-from-account-data-into-value="innerText">
+</div>
+</div>
+<div class="flex flex-col">
+<span class="flex flex-wrap typo-l-bold pb-1 break-all">
+<span data-action="fetch-account-data:account-data-refreshed@document-&gt;from-account-data#copy" data-controller="from-account-data" data-from-account-data-copy-value="FirstName" data-from-account-data-into-value="innerText">
+</span>
+<span class="px-[2px]"></span>
+<span data-action="fetch-account-data:account-data-refreshed@document-&gt;from-account-data#copy" data-controller="from-account-data" data-from-account-data-copy-value="LastName" data-from-account-data-into-value="innerText">
+</span>
+</span>
+<span class="typo-m text-grey-500 break-all" data-action="fetch-account-data:account-data-refreshed@document-&gt;from-account-data#copy" data-controller="from-account-data" data-from-account-data-copy-value="Email" data-from-account-data-into-value="innerText">
+</span>
+</div>
+</div>
+<div class="hidden flex flex-col gap-4" data-action="from-account-data:empty@document-&gt;toggle#remove from-account-data:copied:Initials@document-&gt;toggle#add" data-controller="toggle" data-toggle-target="toToggle" data-toggle-toggled-class="hidden">
+<div class="bg-grey-100 min-w-16 min-h-16 size-16 rounded-full flex items-center justify-center relative overflow-hidden">
+
+</div>
+<span class="typo-s">
+<span data-atc-l-value="x/se-se/pnaqvqng/zba-cebsvy=pt=ugzyf" data-controller="atc">Complétez votre profil</span> pour recevoir des offres adaptées.
+            </span>
+</div>
+</div>
+<button aria-label="Fermer le menu" class="self-start" data-action="toggle-on-body#remove click-&gt;input-checker#uncheck" data-controller="input-checker" data-input-checker-input-value="#cp-mobile-menu-side-panel">
+
+
+</button>
+</div>
+<div class="flex flex-col gap">
+<span class="mb-[148px] hidden xl:block" data-atc-l-value="x/se-sef" data-controller="atc">
+
+</span>
+<div class="flex flex-col gap-8">
+<span class="rounded-full px-4 py-2 no-underline hover:bg-grey-100 focus:bg-grey-100 active:bg-grey-300" data-action="click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"menu_click","event_info":"espace-candidat","wording":"Mon espace"}' data-atc-l-value="x/se-se/pnaqvqng/zba-rfcnpr=pt=ugzyf" data-controller="atc cp-menu-item" data-cp-menu-item-active-class="bg-grey-100" data-cp-menu-item-hidden-class="hidden" data-cp-menu-item-url-value="/fr-fr/candidat/mon-espace.html" data-cy="cpMenuDashboard">
+<div class="flex typo-m gap-3 items-center">
+
+
+                Mon espace
+            </div>
+</span>
+<span class="rounded-full px-4 py-2 no-underline hover:bg-grey-100 focus:bg-grey-100 active:bg-grey-300" data-action="click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"menu_click","event_info":"espace-candidat","wording":"Mes CV vus"}' data-atc-l-value="x/se-se/pnaqvqng/zrf-pi-ihf=pt=ugzyf" data-controller="atc cp-menu-item" data-cp-menu-item-active-class="bg-grey-100" data-cp-menu-item-hidden-class="hidden" data-cp-menu-item-url-value="/fr-fr/candidat/mes-cv-vus.html" data-cy="cpMenuCV">
+<div class="flex typo-m gap-3 items-center">
+
+
+                Mes CV vus
+            </div>
+</span>
+<span class="rounded-full px-4 py-2 no-underline hover:bg-grey-100 focus:bg-grey-100 active:bg-grey-300" data-action="click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"menu_click","event_info":"espace-candidat","wording":"Mes candidatures"}' data-atc-l-value="x/se-se/pnaqvqng/zrf-pnaqvqngherf=pt=ugzyf" data-controller="atc cp-menu-item" data-cp-menu-item-active-class="bg-grey-100" data-cp-menu-item-hidden-class="hidden" data-cp-menu-item-url-value="/fr-fr/candidat/mes-candidatures.html" data-cy="cpMenuOfferResponses">
+<div class="flex typo-m gap-3 items-center">
+
+
+                Mes candidatures
+            </div>
+</span>
+<span class="rounded-full px-4 py-2 no-underline hover:bg-grey-100 focus:bg-grey-100 active:bg-grey-300" data-action="click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"menu_click","event_info":"espace-candidat","wording":"Mes alertes"}' data-atc-l-value="x/se-se/pnaqvqng/zrf-nyregrf=pt=ugzyf" data-controller="atc cp-menu-item" data-cp-menu-item-active-class="bg-grey-100" data-cp-menu-item-hidden-class="hidden" data-cp-menu-item-url-value="/fr-fr/candidat/mes-alertes.html" data-cy="cpMenuAlerts">
+<div class="flex typo-m gap-3 items-center">
+
+
+                Mes alertes
+            </div>
+</span>
+<span class="rounded-full px-4 py-2 no-underline hover:bg-grey-100 focus:bg-grey-100 active:bg-grey-300" data-action="click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"menu_click","event_info":"espace-candidat","wording":"Mon profil"}' data-atc-l-value="x/se-se/pnaqvqng/zba-cebsvy=pt=ugzyf" data-controller="atc cp-menu-item" data-cp-menu-item-active-class="bg-grey-100" data-cp-menu-item-hidden-class="hidden" data-cp-menu-item-url-value="/fr-fr/candidat/mon-profil.html" data-cy="cpMenuProfil">
+<div class="flex typo-m gap-3 items-center">
+
+
+                Mon profil
+            </div>
+</span>
+<span class="rounded-full px-4 py-2 no-underline hover:bg-grey-100 focus:bg-grey-100 active:bg-grey-300" data-action="click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"menu_click","event_info":"espace-candidat","wording":"Paramètres"}' data-atc-l-value="x/se-se/pnaqvqng/cnenzrgerf=pt=ugzyf" data-controller="atc cp-menu-item" data-cp-menu-item-active-class="bg-grey-100" data-cp-menu-item-hidden-class="hidden" data-cp-menu-item-url-value="/fr-fr/candidat/parametres.html" data-cy="cpMenuParameters">
+<div class="flex typo-m gap-3 items-center">
+
+
+                Paramètres
+            </div>
+</span>
+<span class="xl:hidden rounded-full px-4 py-2 no-underline hover:bg-grey-100 focus:bg-grey-100 active:bg-grey-300" data-action="click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"menu_click","event_info":"espace-candidat","wording":"Déconnexion"}' data-atc-l-value="x/se-se/pnaqvqng/ybtbssf" data-controller="atc cp-menu-item" data-cp-menu-item-active-class="bg-grey-100" data-cp-menu-item-hidden-class="hidden" data-cp-menu-item-url-value="/fr-fr/candidat/logoff" data-cy="cpMenuLogOff">
+<div class="flex typo-m gap-3 items-center">
+
+                Déconnexion
+            </div>
+</span>
+</div>
+</div>
+</div>
+<div class="hidden not-connected:block px-6 py-8 flex-grow">
+<div class="flex pb-14 xl:hidden justify-between">
+<input class="peer/employment" hidden="" id="cp-mobile-menu-side-panel-employment" type="checkbox"/>
+
+<div class="fixed flex flex-col h-full z-50 top-0 w-full -left-full bg-grey-50 transform ease-in duration-400 xl:hidden peer-checked/employment:translate-x-full">
+<nav aria-label="Onglet Emploi" class="h-full flex flex-col justify-between overflow-y-auto" data-controller="focus-trap" data-focus-trap-target="container">
+<div class="px-6 py-8 flex-grow">
+<div class="flex pb-14 xl:hidden justify-between">
+<button aria-label="Retour" class="self-start" data-action="toggle-on-body#remove click-&gt;input-checker#uncheck" data-controller="input-checker" data-input-checker-input-value="#cp-mobile-menu-side-panel-employment">
+
+</button>
+<button aria-label="Fermer le menu" class="self-start" data-action="toggle-on-body#remove click-&gt;input-checker#uncheck" data-controller="input-checker" data-input-checker-input-value="#cp-mobile-menu-side-panel-employment">
+
+
+</button>
+</div>
+<ul class="flex flex-col gap-6">
+<li>
+<a class="typo-m no-underline" data-cy="headerJobInterimLink" href="/fr-fr/interim.html">Missions d'intérim</a>
+</li>
+<li>
+<a class="typo-m no-underline" data-cy="headerJobInternshipLink" href="/fr-fr/stage.html">Offres de stage</a>
+</li>
+<li>
+<a class="typo-m no-underline" data-cy="headerJobAlternatelyLink" href="/fr-fr/alternance.html">Offres en alternance</a>
+</li>
+<li>
+<span class="typo-m no-underline" data-atc-l-value="x/se-se/pnaqvqng/perngvba-nyregr=pt=ugzyf" data-controller="atc" data-cy="headerJobAlertAtc">
+            Créer mon alerte
+        </span>
+</li>
+<li>
+<span class="typo-m no-underline" data-atc-l-value="x/se-se/cntr/qrcbg-pi=pt=ugzyf" data-controller="atc" data-cy="navJobCvAtc">
+            Déposer mon CV
+        </span>
+</li>
+<li>
+<a class="typo-m no-underline" href="/fr-fr/outil/salaire-brut-net.html" title="Calcul du salaire brut en net">
+            Salaire brut net
+        </a>
+</li>
+</ul>
+</div>
+<div class="shrink-0">
+<div class="bg-blue-200 overflow-hidden px-6 py-4 xl:hidden bg-auto bg-[calc(50%-9px)_center]" data-controller="mobile-app" style="background-image: url(/svg/illustrations/pattern-chevron.svg)">
+<div class="flex gap-4 items-center justify-between z-10">
+<div class="flex flex-col">
+<span class="typo-m-bold">Téléchargez l'app</span>
+<span class="typo-m-">et postulez dans les <span class="whitespace-nowrap">premiers !</span></span>
+</div>
+<span data-action="click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"app_download","event_info":"Apple"}' data-atc-l-value="xuggcf://nccf=pt=nccyr=pt=pbz/se/ncc/ertvbafwbo-rzcybv/vq408615037?zg=8f" data-controller="atc" data-mobile-app-target="ios">
+
+</span>
+<span data-action="click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"app_download","event_info":"Android"}' data-atc-l-value="xuggcf://cynl=pt=tbbtyr=pt=pbz/fgber/nccf/qrgnvyf?vq=pbz=pt=ertvbafwbo=pt=naqebvqf" data-controller="atc" data-mobile-app-target="android">
+
+</span>
+</div>
+</div>
+</div>
+</nav>
+</div>
+<input class="peer/recruiter" hidden="" id="cp-mobile-menu-side-panel-recruiter-access" type="checkbox"/>
+
+<div class="fixed flex flex-col h-full z-50 top-0 w-full -left-full bg-grey-50 transform ease-in duration-400 xl:hidden peer-checked/recruiter:translate-x-full">
+<nav aria-label="Onglet Accès Recruteur" class="h-full flex flex-col justify-between overflow-y-auto" data-controller="focus-trap" data-focus-trap-target="container">
+<div class="px-6 py-8 flex-grow">
+<div class="flex pb-14 xl:hidden justify-between">
+<button aria-label="Retour" class="self-start" data-action="toggle-on-body#remove click-&gt;input-checker#uncheck" data-controller="input-checker" data-input-checker-input-value="#cp-mobile-menu-side-panel-recruiter-access">
+
+</button>
+<button aria-label="Fermer le menu" class="self-start" data-action="toggle-on-body#remove click-&gt;input-checker#uncheck" data-controller="input-checker" data-input-checker-input-value="#cp-mobile-menu-side-panel-recruiter-access">
+
+
+</button>
+</div>
+<div class="flex flex-col gap-6">
+<span class="no-underline typo-m" data-atc-l-value="xuggcf://erpehgrhe=pt=uryybjbex=pt=pbz/se/cebqhvg/cyngrsbezr-erpehgrzrag/pbagnpg=pt=ugzyf" data-controller="atc" data-cy="headerRecruiterLinkPublish">
+        Diffuser ma première offre
+    </span>
+<span class="no-underline typo-m" data-atc-l-value="xuggcf://ohqqv=pt=uryybjbex=pt=pbzf" data-controller="atc" data-cy="headerRecruiterLinkCustomers">
+        Déjà client
+    </span>
+</div>
+</div>
+<div class="shrink-0">
+<div class="bg-blue-200 overflow-hidden px-6 py-4 xl:hidden bg-auto bg-[calc(50%-9px)_center]" data-controller="mobile-app" style="background-image: url(/svg/illustrations/pattern-chevron.svg)">
+<div class="flex gap-4 items-center justify-between z-10">
+<div class="flex flex-col">
+<span class="typo-m-bold">Téléchargez l'app</span>
+<span class="typo-m-">et postulez dans les <span class="whitespace-nowrap">premiers !</span></span>
+</div>
+<span data-action="click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"app_download","event_info":"Apple"}' data-atc-l-value="xuggcf://nccf=pt=nccyr=pt=pbz/se/ncc/ertvbafwbo-rzcybv/vq408615037?zg=8f" data-controller="atc" data-mobile-app-target="ios">
+
+</span>
+<span data-action="click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"app_download","event_info":"Android"}' data-atc-l-value="xuggcf://cynl=pt=tbbtyr=pt=pbz/fgber/nccf/qrgnvyf?vq=pbz=pt=ertvbafwbo=pt=naqebvqf" data-controller="atc" data-mobile-app-target="android">
+
+</span>
+</div>
+</div>
+</div>
+</nav>
+</div>
+<div class="flex justify-between">
+<div class="relative max-w-max top-0 left-0 transition-all ease-in-out duration-300 peer-parent-checked:left-[calc(50%-40px)]">
+<a aria-label="Aller à l'accueil" class="inline-flex" href="https://www.hellowork.com/fr-fr/">
+
+</a>
+</div>
+</div>
+<button aria-label="Fermer le menu" class="self-start" data-action="toggle-on-body#remove click-&gt;input-checker#uncheck" data-controller="input-checker" data-input-checker-input-value="#cp-mobile-menu-side-panel">
+
+
+</button>
+</div>
+<div class="flex flex-col gap-6">
+<span class="no-underline typo-m" data-action="click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"menu_click","cta":"menu-burger","wording":"Se connecter"}' data-atc-l-value="x/se-se/pnaqvqng/pbaarkvba-vafpevcgvba=pt=ugzy#pbaarkvbaf" data-controller="atc">
+        Se connecter
+    </span>
+<span class="no-underline typo-m" data-action="click-&gt;analytics#push" data-analytics-values-param="{&quot;event&quot;:&quot;generic&quot;,&quot;event_name&quot;:&quot;menu_click&quot;,&quot;cta&quot;:&quot;menu-burger&quot;,&quot;wording&quot;:&quot;S'inscrire&quot;}" data-atc-l-value="x/se-se/pnaqvqng/pbaarkvba-vafpevcgvba=pt=ugzy#vafpevcgvbaf" data-controller="atc" data-cy="headerAccountRegister">
+        S'inscrire
+    </span>
+<button aria-label="Ouvrir le menu" class="flex h-fit items-center cursor-pointer connected:hidden lg:hidden typo-m w-auto gap-2" data-action="toggle-on-body#add click-&gt;input-checker#check from-account-data:empty-&gt;toggle#toggle" data-controller="input-checker toggle" data-input-checker-input-value="#cp-mobile-menu-side-panel-employment" data-toggle-toggled-class="hidden">
+        Emploi
+        
+</button>
+<a aria-label="Accès Formation" class="no-underline typo-m" data-cy="headerEduLink" href="https://www.maformation.fr/">
+        Formation
+    </a>
+<button aria-label="Ouvrir le menu" class="flex h-fit items-center cursor-pointer connected:hidden lg:hidden typo-m w-auto gap-2" data-action="toggle-on-body#add click-&gt;input-checker#check from-account-data:empty-&gt;toggle#toggle" data-controller="input-checker toggle" data-input-checker-input-value="#cp-mobile-menu-side-panel-recruiter-access" data-toggle-toggled-class="hidden">
+        Accès recruteur
+        
+</button>
+</div>
+</div>
+<div class="shrink-0">
+<div class="bg-blue-200 overflow-hidden px-6 py-4 xl:hidden bg-auto bg-[calc(50%-9px)_center]" data-controller="mobile-app" style="background-image: url(/svg/illustrations/pattern-chevron.svg)">
+<div class="flex gap-4 items-center justify-between z-10">
+<div class="flex flex-col">
+<span class="typo-m-bold">Téléchargez l'app</span>
+<span class="typo-m-">et postulez dans les <span class="whitespace-nowrap">premiers !</span></span>
+</div>
+<span data-action="click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"app_download","event_info":"Apple"}' data-atc-l-value="xuggcf://nccf=pt=nccyr=pt=pbz/se/ncc/ertvbafwbo-rzcybv/vq408615037?zg=8f" data-controller="atc" data-mobile-app-target="ios">
+
+</span>
+<span data-action="click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"app_download","event_info":"Android"}' data-atc-l-value="xuggcf://cynl=pt=tbbtyr=pt=pbz/fgber/nccf/qrgnvyf?vq=pbz=pt=ertvbafwbo=pt=naqebvqf" data-controller="atc" data-mobile-app-target="android">
+
+</span>
+</div>
+</div>
+</div>
+</nav>
+</div>
+
+<div class="fixed top-0 h-full w-full bg-black opacity-0 pointer-events-none transition-all duration-600 peer-checked:!z-40 peer-checked:opacity-40 peer-checked:pointer-events-auto peer-checked:z-fade-in z-fade-out overflow-hidden xl:hidden" data-action="click-&gt;input-checker#uncheck modal:form-submitted@document-&gt;input-checker#uncheck click-&gt;toggle-on-body#remove" data-controller="input-checker" data-input-checker-input-value="#cp-mobile-menu-side-panel" id="mobile-overlay">
+</div>
+</div>
+<div class="layout-wrapper md:mx-auto lg:px-6 xl:layout-grid">
+<div class="xl:layout-inner-grid">
+<div class="col-span-full xl:col-start-1 xl:col-end-13">
+<header class="flex justify-between overflow-y-auto sm:overflow-y-visible z-30 py-3 px-4 sm:px-0 bg-white relative sm:static sm:flex-row sm:justify-between sm:items-center">
+<div class="relative max-w-max top-0 left-0 transition-all ease-in-out duration-300">
+<a aria-label="Aller à l'accueil" class="inline-flex" href="https://www.hellowork.com/fr-fr/">
+
+</a>
+</div>
+<div class="flex items-center justify-end gap-4 sm:gap-6" data-controller="show-on-auth-state" data-show-on-auth-state-hidden-class="hidden">
+<div class="flex items-center gap-4 sm:gap-6" data-show-on-auth-state-target="skeleton">
+<div class="skeleton h-8 w-12 sm:w-24 rounded-full"></div>
+<div class="skeleton h-8 w-12 sm:w-24 rounded-full"></div>
+<div class="skeleton h-10 w-16 sm:w-32 rounded-full"></div>
+</div>
+<div class="hidden" data-show-on-auth-state-target="notConnected">
+<nav class="flex connected:items-center sm:ml-4">
+<menu class="py-0 connected:h-auto overflow-hidden flex items-center justify-end sm:flex-row sm:p-0 sm:overflow-visible sm:h-auto w-auto gap-4 sm:gap-6">
+<li class="text-center">
+<a aria-label="Trouver mon job" class="link-header typo-s gap-1" data-action="click-&gt;analytics#push" data-analytics-values-param="
+            Hw.Emploi.Web.Common.Models.Tracking.TrackingAnalytics;.AsJson()" href="/fr-fr/emploi.html" title="Offres d’emploi">
+<span class="hidden sm:inline">Trouver mon </span>
+<span class="uppercase sm:lowercase">j</span>ob<span class="sm:hidden">s</span>
+</a>
+</li>
+<li class="text-center">
+<a aria-label="Trouver mon entreprise" class="link-header typo-s gap-1" data-action="click-&gt;analytics#push" data-analytics-values-param='
+              {"event":"generic","event_name":"menu_click","cta":"trouver-mon-entreprise","wording":"Trouver-mon-entreprise"}' href="/fr-fr/entreprise.html" title="Entreprises qui recrutent">
+<span class="hidden sm:inline">Trouver mon </span>
+<span class="uppercase sm:lowercase">e</span>ntreprise<span class="sm:hidden">s</span>
+</a>
+</li>
+<li class="hidden lg:block">
+<details data-action="
+            details:not:sm-&gt;details#expand
+            details:not:sm-&gt;details#disableClickOutside
+            details:is:sm-&gt;details#collapse
+            details:is:sm-&gt;details#enableClickOutside
+            details:click:outside-&gt;details#collapse
+        " data-controller="details">
+<summary class="mx-auto w-max mt-10 mb-4 uppercase link-header typo-s border-b border-grey-100 sm:my-0 sm:flex sm:normal-case sm:border-0" data-cy="headerRecruiterMenu">
+            Accès recruteur
+            
+</summary>
+<div class="sm:relative">
+<menu class="flex flex-col items-center bg-white rounded-sm border-grey-300 right-0 sm:z-10 sm:p-2 sm:mt-2 sm:items-start sm:w-max sm:absolute sm:border">
+<li class="sm:w-full">
+<span class="atc-m sm:atc-s sm:rounded-xs sm:p-2" data-atc-l-value="xuggcf://erpehgrhe=pt=uryybjbex=pt=pbz/se/cebqhvg/cyngrsbezr-erpehgrzrag/pbagnpg=pt=ugzyf" data-controller="atc" data-cy="headerRecruiterLinkPublish">
+                  Diffuser ma première offre
+                </span>
+</li>
+<li class="mt-4 sm:mt-auto sm:w-full">
+<span class="atc-m sm:atc-s sm:rounded-xs sm:p-2" data-atc-l-value="xuggcf://ohqqv=pt=uryybjbex=pt=pbzf" data-controller="atc" data-cy="headerRecruiterLinkCustomers">
+                  Déjà client
+                </span>
+</li>
+</menu>
+</div>
+</details>
+</li>
+<li class="hidden lg:block">
+<details data-action="
+            details:not:sm-&gt;details#expand
+            details:not:sm-&gt;details#disableClickOutside
+            details:is:sm-&gt;details#collapse
+            details:is:sm-&gt;details#enableClickOutside
+            details:click:outside-&gt;details#collapse
+        " data-controller="details">
+<summary aria-label="Accès Emploi" class="hidden link-header typo-s sm:rounded-sm sm:flex connected:sm:mr-4" data-cy="headerJobMenu">
+            Emploi
+            
+</summary>
+<div class="hidden sm:relative sm:block">
+<menu class="space-y-4 flex flex-col items-center bg-white rounded-sm border-grey-300 right-0 sm:space-y-0 sm:p-2 sm:mt-2 sm:items-start sm:w-max sm:absolute sm:border sm:z-20">
+<li class="sm:w-full hidden sm:block">
+<a class="link-m sm:link-s sm:rounded-xs sm:p-2" data-cy="headerJobInterimLink" href="/fr-fr/interim.html">Missions d'intérim</a>
+</li>
+<li class="sm:w-full hidden sm:block">
+<a class="link-m sm:link-s sm:rounded-xs sm:p-2" data-cy="headerJobInternshipLink" href="/fr-fr/stage.html">Offres de stage</a>
+</li>
+<li class="sm:w-full hidden sm:block">
+<a class="link-m sm:link-s sm:rounded-xs sm:p-2" data-cy="headerJobAlternatelyLink" href="/fr-fr/alternance.html">Offres en alternance</a>
+</li>
+<li class="sm:w-full hidden sm:block">
+<span class="atc-m sm:atc-s sm:rounded-xs sm:p-2" data-atc-l-value="x/se-se/pnaqvqng/perngvba-nyregr=pt=ugzyf" data-controller="atc" data-cy="headerJobAlertAtc">
+                  Créer mon alerte
+                </span>
+</li>
+<li class="sm:w-full hidden sm:block">
+<span class="atc-m sm:atc-s sm:rounded-xs sm:p-2" data-atc-l-value="x/se-se/cntr/qrcbg-pi=pt=ugzyf" data-controller="atc" data-cy="navJobCvAtc">
+                  Déposer mon CV
+                </span>
+</li>
+<li class="sm:w-full hidden sm:block">
+<a class="link-m sm:link-s sm:rounded-xs sm:p-2" href="/fr-fr/outil/salaire-brut-net.html" title="Calcul du salaire brut en net">
+                  Salaire brut net
+                </a>
+</li>
+</menu>
+</div>
+</details>
+</li>
+<li class="hidden not-connected:lg:block connected:hidden">
+<a aria-label="Accès Formation" class="link-header typo-s mt-4 sm:mt-0 connected:hidden" data-cy="headerEduLink" href="https://www.maformation.fr/">
+          Formation
+        </a>
+</li>
+<li class="max-w-[250px] hidden not-connected:lg:block connected:hidden">
+<details data-action="
+                    details:not:sm-&gt;details#expand
+                    details:not:sm-&gt;details#disableClickOutside
+                    details:is:sm-&gt;details#collapse
+                    details:is:sm-&gt;details#enableClickOutside
+                    details:click:outside-&gt;details#collapse
+                " data-controller="details">
+<summary aria-label="Accès mon compte" class="hidden text-white sm:btn-primary-l relative" data-action="click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"menu_click","cta":"menu-se-connecter","wording":"menu-se-connecter"}' data-cy="headerAccountMenu">
+
+            Se connecter
+            <div class="absolute -top-1 right-1">
+<div class="rounded-full bg-error-500 size-3 border-solid border-[2px] border-white">
+</div>
+</div>
+</summary>
+<div class="sm:relative">
+<menu class="flex flex-col items-center bg-white rounded-sm border-grey-300 sm:z-10 sm:p-2 sm:mt-3 sm:w-max sm:absolute sm:border sm:right-0">
+<li class="sm:w-full connected:hidden">
+<span class="no-underline" data-action="click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"menu_click","cta":"menu-se-connecter","wording":"Se connecter"}' data-atc-l-value="x/se-se/pnaqvqng/pbaarkvba-vafpevcgvba=pt=ugzy#pbaarkvbaf" data-controller="atc">
+<span class="hidden sm:block atc-m sm:atc-s sm:rounded-xs sm:p-2" data-cy="headerAccountLogIn">Se connecter</span>
+</span>
+</li>
+<li class="sm:w-full connected:hidden">
+<span class="atc-m sm:atc-s sm:rounded-xs sm:p-2" data-action="click-&gt;analytics#push" data-analytics-values-param="{&quot;event&quot;:&quot;generic&quot;,&quot;event_name&quot;:&quot;menu_click&quot;,&quot;cta&quot;:&quot;menu-se-connecter&quot;,&quot;wording&quot;:&quot;S'inscrire&quot;}" data-atc-l-value="x/se-se/pnaqvqng/pbaarkvba-vafpevcgvba=pt=ugzy#vafpevcgvbaf" data-controller="atc" data-cy="headerAccountRegister">
+                  S'inscrire
+                </span>
+</li>
+</menu>
+</div>
+</details>
+</li>
+<button aria-label="Ouvrir le menu" class="flex w-min h-fit items-center cursor-pointer connected:hidden lg:hidden" data-action="toggle-on-body#add click-&gt;input-checker#check analytics#push from-account-data:empty-&gt;toggle#toggle" data-analytics-values-param='{"event":"generic","event_name":"menu_click","cta":"menu-burger","wording":"menu-burger"}' data-controller="input-checker toggle" data-input-checker-input-value="#cp-mobile-menu-side-panel" data-toggle-toggled-class="hidden">
+
+</button>
+</menu>
+</nav>
+</div>
+<div class="hidden" data-show-on-auth-state-target="connected">
+<nav class="flex items-center sm:ml-4">
+<menu class="flex items-center gap-4 sm:gap-6">
+<li class="text-center">
+<a aria-label="Trouver mon job" class="link-header typo-s gap-1" data-action="click-&gt;analytics#push" data-analytics-values-param='
+            {"event":"generic","event_name":"menu_click","cta":"trouver-mon-job","wording":"Trouver-mon-job"}' href="/fr-fr/emploi.html" title="Offres d'emploi">
+<span class="hidden sm:inline">Trouver mon </span>
+<span>
+<span class="uppercase sm:lowercase">j</span>ob<span class="sm:hidden">s</span>
+</span>
+</a>
+</li>
+<li class="text-center">
+<a aria-label="Trouver mon entreprise" class="link-header typo-s gap-1" data-action="click-&gt;analytics#push" data-analytics-values-param='
+            {"event":"generic","event_name":"menu_click","cta":"trouver-mon-entreprise","wording":"Trouver-mon-entreprise"}' href="/fr-fr/entreprise.html" title="Entreprises qui recrutent">
+<span class="hidden sm:inline">Trouver mon </span>
+<span>
+<span class="uppercase sm:lowercase">e</span>ntreprise<span class="sm:hidden">s</span>
+</span>
+</a>
+</li>
+<li class="flex items-center">
+<details class="hidden sm:flex relative" data-action="
+            click-outside:click:outside-&gt;toggle-attribute#unsetAttribute
+            click-outside:click:outside-&gt;toggle#removeAdditional
+            click-&gt;toggle#toggleAdditional" data-controller="click-outside toggle-attribute toggle" data-toggle-attribute-attribute-param="open" data-toggle-attribute-target="element" data-toggle-toggled-additional-class="rotate-180">
+<summary aria-label="Ouvrir le menu déroulant" class="cursor-pointer flex items-center justify-center">
+<div class="pr-0 sm:pr-2">
+<span data-action="from-account-data:empty@document-&gt;toggle#add from-account-data:copied:Initials@document-&gt;toggle#remove" data-controller="toggle" data-toggle-target="toToggle" data-toggle-toggled-class="hidden">
+<div class="bg-blue-500 min-w-8 min-h-8 size-8 rounded-full flex items-center justify-center relative overflow-hidden">
+<div class="text-white absolute typo-s-bold" data-action="fetch-account-data:account-data-refreshed@document-&gt;from-account-data#copy" data-controller="from-account-data" data-from-account-data-copy-value="Initials" data-from-account-data-into-value="innerText">
+</div>
+</div>
+</span>
+<span class="hidden" data-action="from-account-data:empty@document-&gt;toggle#remove from-account-data:copied:Initials@document-&gt;toggle#add" data-controller="toggle" data-toggle-target="toToggle" data-toggle-toggled-class="hidden">
+<div class="bg-grey-100 min-w-8 min-h-8 size-8 rounded-full flex items-center justify-center relative overflow-hidden">
+
+</div>
+</span>
+</div>
+
+</summary>
+<menu class="flex z-[11] flex-col items-center bg-white rounded-sm border-grey-300 sm:p-2 sm:mt-3 sm:w-max sm:absolute sm:border sm:right-0 sm:top-8">
+<li class="hidden connected:block mt-4 sm:mt-auto sm:w-full">
+<span class="atc-m sm:atc-s sm:rounded-xs sm:p-2" data-atc-l-value="x/se-se/pnaqvqng/zba-rfcnpr=pt=ugzyf" data-controller="atc" data-cy="headerAccountMyDashboardLink">
+                Mon espace
+              </span>
+</li>
+<li class="hidden connected:block mt-4 sm:mt-auto sm:w-full">
+<span class="atc-m sm:atc-s sm:rounded-xs sm:p-2" data-atc-l-value="x/se-se/pnaqvqng/zrf-pi-ihf=pt=ugzyf" data-controller="atc" data-cy="headerAccountMyDashboardLink">
+                Mes CV vus
+              </span>
+</li>
+<li class="hidden connected:block mt-4 sm:mt-auto sm:w-full">
+<span class="atc-m sm:atc-s sm:rounded-xs sm:p-2" data-atc-l-value="x/se-se/pnaqvqng/zrf-pnaqvqngherf=pt=ugzyf" data-controller="atc" data-cy="headerAccountMyDashboardLink">
+                Mes candidatures
+              </span>
+</li>
+<li class="hidden connected:block mt-4 sm:mt-auto sm:w-full">
+<span class="atc-m sm:atc-s sm:rounded-xs sm:p-2" data-atc-l-value="x/se-se/pnaqvqng/zrf-nyregrf=pt=ugzyf" data-controller="atc" data-cy="headerAccountMyAlertLink">
+                Mes alertes
+              </span>
+</li>
+<li class="hidden connected:block mt-4 sm:mt-auto sm:w-full">
+<span class="atc-m sm:atc-s sm:rounded-xs sm:p-2" data-atc-l-value="x/se-se/pnaqvqng/zba-cebsvy=pt=ugzyf" data-controller="atc" data-cy="headerAccountMyAccountLink">
+                Mon profil
+              </span>
+</li>
+<li class="hidden connected:block mt-4 sm:mt-auto sm:w-full">
+<span class="atc-m sm:atc-s sm:rounded-xs sm:p-2" data-atc-l-value="x/se-se/pnaqvqng/cnenzrgerf=pt=ugzyf" data-controller="atc" data-cy="headerAccountMyParametersLink">
+                Paramètres
+              </span>
+</li>
+<li class="hidden connected:block mt-4 sm:mt-auto sm:w-full">
+<span class="atc-m sm:atc-s sm:rounded-xs sm:p-2" data-atc-l-value="x/se-se/pnaqvqng/ybtbss?ergheaHey=%2Sse-se%2Srzcybv%2Serpurepur=pt=ugzy%3Sp%3QNygreanapr%26p%3QPQV%26q%3Qnyy%26x%3Qq%25P3%25N9irybccrhe%26y%3QZrgm%26y_nhgbpbzcyrgr%3Quggc%253N%252S%252Sjjj=pt=ew=pt=pbz%252Spbzzha%252Sybpnyvgr%252Spbzzhar%252S57463%26c%3Q1%26enl%3Q50%26fg%3Qqngrf" data-controller="atc" data-cy="headerAccountLogOut">
+                Déconnexion
+              </span>
+</li>
+</menu>
+</details>
+<button aria-label="Ouvrir le menu" class="flex w-min h-fit items-center cursor-pointer sm:hidden" data-action="toggle-on-body#add click-&gt;input-checker#check" data-controller="input-checker" data-input-checker-input-value="#cp-mobile-menu-side-panel">
+<div class="flex mr-2">
+<span data-action="from-account-data:empty@document-&gt;toggle#add from-account-data:copied:Initials@document-&gt;toggle#remove" data-controller="toggle" data-toggle-target="toToggle" data-toggle-toggled-class="hidden">
+<div class="bg-blue-500 min-w-8 min-h-8 size-8 rounded-full flex items-center justify-center relative overflow-hidden">
+<div class="text-white absolute typo-s-bold" data-action="fetch-account-data:account-data-refreshed@document-&gt;from-account-data#copy" data-controller="from-account-data" data-from-account-data-copy-value="Initials" data-from-account-data-into-value="innerText">
+</div>
+</div>
+</span>
+<span class="hidden" data-action="from-account-data:empty@document-&gt;toggle#remove from-account-data:copied:Initials@document-&gt;toggle#add" data-controller="toggle" data-toggle-target="toToggle" data-toggle-toggled-class="hidden">
+<div class="bg-grey-100 min-w-8 min-h-8 size-8 rounded-full flex items-center justify-center relative overflow-hidden">
+
+</div>
+</span>
+</div>
+
+</button>
+</li>
+</menu>
+</nav>
+</div>
+</div>
+</header>
+</div>
+</div>
+</div>
+<div data-action="removable:removed-&gt;smart-banner#close" data-controller="smart-banner removable" data-smart-banner-cookie-lifespan-value="30" data-smart-banner-display-on-first-page-value="False">
+<div data-smart-banner-target="container"></div>
+<template data-smart-banner-target="template">
+<div class="fixed inset-0 z-50 bg-black/40" data-action="intersect:enter-&gt;analytics#push:once" data-analytics-values-param='{"event":"generic","event_name":"appbox_click","event_info":"Affichage de la bannière"}' data-controller="intersect">
+<div aria-labelledby="smart-banner-title" aria-modal="true" class="fixed inset-x-0 bottom-0 flex flex-col gap-8 bg-white rounded-t-sm p-6" data-controller="focus-trap" data-focus-trap-target="container" role="dialog">
+<div class="flex flex-col gap-3">
+<div class="flex justify-end">
+<button aria-label="Fermer" class="shrink-0" data-action="removable#remove" type="button">
+
+</button>
+</div>
+<p class="typo-l-bold" id="smart-banner-title">Gagnez du temps avec l'app</p>
+</div>
+<p class="typo-long-s">Recevez une notification dès qu'une offre est publiée et postulez en quelques clics.</p>
+<div class="flex flex-col items-center gap-4">
+<span aria-label="Continuer dans l'application Hellowork (nouvelle fenêtre)" class="btn-primary-l w-full justify-center" data-action="analytics#push removable#remove" data-analytics-values-param="{&quot;event&quot;:&quot;generic&quot;,&quot;event_name&quot;:&quot;appbox_click&quot;,&quot;event_info&quot;:&quot;Téléchargement de l'application&quot;,&quot;cta&quot;:&quot;download-button&quot;,&quot;wording&quot;:&quot;Continuer dans l'app&quot;}" data-atc-l-value="xuggcf://uryybjbex=pt=baryvax=pt=zr/7XHy/76h4uumdf" data-atc-t-value="x_oynaxf" data-controller="atc">
+                        Continuer dans l'app
+                        
+</span>
+<button class="typo-long-m underline" data-action="removable#remove" type="button">
+                        Rester sur le navigateur
+                    </button>
+</div>
+</div>
+</div>
+</template>
+</div>
+<turbo-frame data-action="turbo:before-frame-render-&gt;scroll-to-top#scroll:self" data-clear-inputs-all-value="true" data-controller="state checkbox-sync clear-inputs" data-fetch-account-data-target="offersInPage" data-scroll-to-top-behavior-param="smooth" data-turbo-action="advance" id="turboSerp">
+
+
+
+
+
+
+<section class="layout-grid mt-[14px] sm:mt-[18px] relative" data-action="turbo:frame-render:turboSerp@document-&gt;analytics#push" data-analytics-values-param='{"event":"VirtualPageview-Ecommerce","categoryPage":"SERP","sujetPage":"Offre","typePage":"LO-Moteur","idOffre":"78273485,78262233,83619908,79326345,70413930,83571317,82502103,74578079,83564343,83555478,83555398,82480563,83528111,83527661,83467736,83425327,83422173,76848680,70275452,81303413,81312877,83328272,82324530,79006307,80112122,83311558,34612342,83292557,83292364,83281703","Domaine":"","Region":"","Departement":"","Ville":"","Metier":null,"Resultat-Recherche":"[101+]","Compteur-Offre":"293","searchOu":"Metz","searchCategorie":"","searchTypeContrat":"CDI|Alternance","searchQuoi":"développeur","searchRayon":"50 km","searchDate":"Toutes","searchSecteur":"","searchTypeEntreprise":"","searchSalary":"","searchSalaryOnly":false,"searchTeletravail":"","searchRhythm":"","searchRseLabel":"","searchDuration":"Toutes les durées","searchExperience":"","searchPartTime":"","EnhancedEcommerce":"false","ecommerce":{"currencyCode":"EUR","impressions":[],"promoView":null,"click":null},"page_component":null,"mv_test":null,"mv_creation":null}'>
+<div class="layout-inner-grid">
+<section class="col-span-12 sm:col-span-10 sm:col-start-2">
+<div class="flex flex-wrap mb-8 sm:mb-12 justify-between items-center" data-controller="input-checker intersect" data-intersect-name-value="buttonsBar">
+<div class="overflow-x-auto hidden-scrollbar">
+<div class="flex gap-4 mt-2 mr-2">
+<label class="cursor-pointer tag-primary-s sm:tag-primary-m 2xl:tag-primary-l relative border !border-black" data-action="click-&gt;toggle-on-body#toggle click-&gt;state#save click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"filter_load","event_info":"all","cta":"top"}' data-cy="serpFilters" for="allFilters">
+    Filtres
+    
+<div class="absolute right-0 top-0 -mr-[9px] -mt-[9px] px-[6px] bg-black typo-xs-bold text-white rounded-full flex text-center">3</div>
+</label>
+<label class="tag-primary-s sm:tag-primary-m 2xl:tag-primary-l gag-3 cursor-pointer relative border !border-black" data-action="click-&gt;toggle-on-body#toggle click-&gt;state#save click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"filter_load","event_info":"contract","cta":"top"}' data-cy="serpFilters" for="modal-c">
+Contrats    
+<div class="absolute right-0 top-0 -mr-[9px] -mt-[9px] px-[6px] bg-black typo-xs-bold text-white rounded-full flex text-center">2</div>
+</label>
+<label class="tag-primary-s sm:tag-primary-m 2xl:tag-primary-l gag-3 cursor-pointer relative" data-action="click-&gt;toggle-on-body#toggle click-&gt;state#save click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"filter_load","event_info":"salary","cta":"top"}' data-cy="serpFilters" for="modal-msa">
+Salaire    
+</label>
+<label class="tag-green-s sm:tag-green-m 2xl:tag-green-l gag-3 cursor-pointer relative" data-action="click-&gt;toggle-on-body#toggle click-&gt;state#save click-&gt;analytics#push" data-analytics-values-param='{"event":"generic","event_name":"filter_load","event_info":"super-recruiter","cta":"top"}' data-cy="serpFilters" for="modal-sr">
+<div class="flex gap-1 sm:gap-2 items-center flex-shrink-0">
+
+<span class="truncate">Super recruteur</span>
+</div>
+
+</label> </div>
+</div>
+<div class="hidden lg:block" data-controller="input-checker" data-input-checker-input-value="#alert-modal">
+<button class="btn-primary-m bg-yellow-300 text-black h-[28px] 2xl:h-[38px]" data-action="analytics#push input-checker#check" data-analytics-values-param='{"event": "EventGeneric", "EventName": "alert_load", "EventLibelle": "serp-top" }' data-cy="createAlertBtn">
+
+                Créer mon alerte
+            </button>
+</div>
+</div>
+</section>
+<section class="col-span-12 2xl:col-start-2 2xl:col-span-10 mb-4 sm:mb-6">
+<div class="flex justify-between items-end">
+<div>
+<h1 class="typo-l-bold sm:typo-xl-bold">
+            293 offres
+        </h1>
+</div>
+<div data-controller="input-checker" data-input-checker-input-value="#sort-modal">
+<button aria-label="Trier les résultats de la recherche par pertinence ou date" class="flex items-center gap-2 group" data-action="analytics#push input-checker#check" data-analytics-values-param='{"event": "generic", "EventName": "sort_load" }' data-cy="sortBtn">
+<span class="group-hover:underline">Date</span>
+
+</button>
+<div data-action="modal:navigate-to-next-page@document-&gt;input-checker#uncheck" data-controller="input-checker modal" data-input-checker-input-value="#sort-modal" data-modal-form-validator-outlet="form" id="sort-modal-container">
+<input class="peer" hidden="" id="sort-modal" type="checkbox"/>
+<div class="fixed inset-0 z-50 overflow-auto bg-black/60 sm:bg-black/40 backdrop-blur sm:backdrop-blur-md items-end sm:items-center collapse opacity-0 peer-checked:visible peer-checked:opacity-100 transition-[visibility,_opacity] duration-700">
+<div class="px-0 sm:px-6 layout-wrapper h-full hidden peer-parent-checked:block">
+<div class="layout-outer-grid h-full content-end sm:content-center" data-action="click-&gt;input-checker#uncheck:self click-&gt;modal#dispatchDiscardedEvent:self" data-toggle-on-body-force-param="false">
+<div aria-labelledby="sort-modal-title" class="bg-white shadow-modal overflow-auto col-span-full sm:col-start-4 xl:col-start-5 sm:col-span-6 rounded-t-sm mt-4 sm:rounded-sm px-6 sm:px-10 py-6 sm:py-8 sm:my-6" data-action="intersect:enter-&gt;toggle-on-body#add intersect:enter-&gt;toggle-attribute#setAttribute intersect:exit-&gt;toggle-on-body#remove intersect:exit-&gt;toggle-attribute#unsetAttribute" data-controller="intersect focus-trap toggle-attribute" data-cy="modalContainer" data-focus-trap-target="container" data-toggle-attribute-attribute-param="aria-modal" data-toggle-attribute-target="element" data-toggle-attribute-value-param="true" data-toggle-on-body-force-param="true" role="dialog">
+<div class="flex flex-col gap-4">
+<div class="flex items-start justify-between">
+<div class="ml-auto">
+<button aria-label="Fermer la fenêtre modale" class="ml-6" data-action="click-&gt;input-checker#uncheck click-&gt;modal#dispatchDiscardedEvent" data-cy="crossButton" data-toggle-on-body-force-param="false" type="button">
+
+</button>
+</div>
+</div>
+<h2 class="typo-l-bold text-pretty" id="sort-modal-title">Trier mes offres@titleMarkup&gt;
+                                                </h2></div>
+<div class="flex flex-col" data-controller="auto-submittable">
+<div class="flex flex-row-reverse w-full items-center justify-between mt-8 group">
+<input class="radio ml-4 mr-0" data-action="
+                    analytics#push
+                    input-checker#uncheck:self
+                    toggle-on-body#toggle
+                    auto-submittable#formSubmit
+                " data-analytics-values-param='{"event": "generic", "EventName": "sort_click", "wording": "par pertinence" }' data-turbo-frame="turboSerp" form="searchForm" id="relevant" name="st" type="radio" value="relevance"/>
+<label class="flex w-4/5" for="relevant">
+
+<div class="ml-4">
+<span class="typo-m-bold [group-hover&amp;:not(group-disabled)]:underline">Par pertinence</span>
+<p class="typo-s mt-1">Afficher les offres recommandées pour votre recherche.</p>
+</div>
+</label>
+</div>
+<div class="flex flex-row-reverse w-full items-center justify-between mt-8 group">
+<input checked="" class="radio ml-4 mr-0 radio-disabled" data-action="
+                    analytics#push
+                    input-checker#uncheck:self
+                    toggle-on-body#toggle
+                    auto-submittable#formSubmit
+                " data-analytics-values-param='{"event": "generic", "EventName": "sort_click", "wording": "par date" }' data-turbo-frame="turboSerp" form="searchForm" id="date" name="st" type="radio" value="date"/>
+<label class="flex w-4/5" for="date">
+
+<div class="ml-4">
+<span class="typo-m-bold [group-hover&amp;:not(group-disabled)]:underline">Par date</span>
+<p class="typo-s mt-1">Afficher les dernières offres publiées pour votre recherche.</p>
+</div>
+</label>
+</div>
+<button class="hidden" data-auto-submittable-target="submitter" data-turbo-frame="turboSerp" form="searchForm" formaction="">
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="col-span-12 2xl:col-start-2 2xl:col-span-10">
+<div data-controller="hide-offer" data-hide-offer-hidden-class="hidden">
+<ul aria-label="liste des offres" class="grid grid-cols-1 gap-6 mb-6" data-action="pageshow@window-&gt;id-storage#applyFlagClass turbo:frame-load@document-&gt;id-storage#applyFlagClass" data-controller="id-storage" data-id-storage-flag-class="opacity-50" data-id-storage-local-storage-key-param="visited_offers">
+<li data-hide-offer-item-id-value="78273485" data-hide-offer-target="item" data-id-storage-item-id="78273485" data-id-storage-target="item">
+<div>
+<div class="group h-full overflow-hidden bg-white rounded-sm border border-grey-100 hover:border-grey-500 focus-within:outline focus-within:transition-none transition-border-color duration-100">
+<div class="h-full relative flex flex-col sm:flex-row sm:small-group:flex-col">
+<div class="absolute right-6 sm:small-group:right-4 top-6 sm:small-group:top-[21px] z-[2] flex gap-4 sm:gap-0">
+<form action="/fr-fr/searchoffers/hideoffermodalframeview" data-turbo-frame="exclude-criteria-frame" method="GET">
+<input name="offerId" type="hidden" value="78273485"/>
+<input name="title" type="hidden" value="Concepteur Développeur . Net H/F"/>
+<input name="company" type="hidden" value="Utigroup"/>
+<button aria-label="Masquer l'offre Concepteur Développeur . Net H/F" class="btn-icon-no-outline-m sm:btn-icon-no-outline-l small-group:sm:btn-icon-no-outline-m" data-action="analytics#push" data-analytics-values-param="{&quot;event&quot;:&quot;generic&quot;,&quot;event_name&quot;:&quot;exclude_offer&quot;,&quot;event_info&quot;:&quot;Icône masquage d'offre&quot;}" data-cy="hideOfferBtn" type="submit">
+
+</button>
+</form>
+<turbo-frame id="bookmark-frame-card78273485">
+<form action="/fr-fr/candidat/tooglebookmark" data-action="fetch-account-data#refreshAfterNextTurboEvent" data-bookmark-bookmarked-class="text-pink-500" data-bookmark-bookmarked-icon-value="/svg/icons/bookmark.svg#bookmark-active" data-bookmark-offer-id-value="78273485" data-bookmark-unbookmarked-icon-value="/svg/icons/bookmark.svg#bookmark" data-controller="bookmark" data-fetch-account-data-event-param="turbo:submit-end" method="GET">
+<input name="idOffre" type="hidden" value="78273485"/>
+<input name="turboFrameId" type="hidden" value="bookmark-frame-card78273485"/>
+<input name="isFromToolbar" type="hidden" value="False"/>
+<button class="btn-icon-no-outline-m sm:btn-icon-no-outline-l small-group:sm:btn-icon-no-outline-m" data-action="analytics#push:stop" data-analytics-values-param='{"event": "generic", "EventName" : "bookmark_add", "EventLibelle": "" }' data-bookmark-target="button" data-cy="bookmarkBtn">
+
+</button>
+</form>
+</turbo-frame>
+</div>
+<header class="max-h-[74px] min-h-[74px] sm:max-h-none relative w-full overflow-hidden sm:max-w-64 sm:small-group:w-full sm:small-group:max-h-[74px] sm:small-group:max-w-none">
+<div class="absolute inset-0 bg-black/5 z-[1]"></div>
+<img alt="Utigroup recrutement" class="size-full object-cover object-center" loading="lazy" src="https://f.hellowork.com/media/companypage/203523/350_233/Utigroup_87424_63758414158696138162860539.jpeg"/>
+<div class="z-[2] absolute sm:top-auto inset-4 sm:inset-6 flex justify-center items-center w-[5.75rem] h-11 rounded-xs bg-white sm:small-group:inset-4">
+<img alt="Utigroup recrutement" class="w-full h-full px-3 py-2 object-contain" loading="lazy" src="https://f.hellowork.com/img/entreprises/203523.png" title="Recrutement Utigroup"/>
+</div>
+</header>
+<div class="flex flex-col justify-between size-full p-4 sm:p-6 sm:small-group:p-4 min-w-0" data-action="intersect:enter-&gt;analytics#push:once" data-analytics-values-param='{"event":"generic_product","event_name":"product.display","product_data":[{"product_id":"78273485","product_response_type":"ATS","product_list":"LO-Moteur-Exact","product_position":1,"product_category":"1","product_status":"Suivi de candidature"}]}' data-controller="intersect" data-cy="serpCard">
+<div class="flex flex-col">
+<header class="w-10/12">
+<span class="badge-m badge-purple mb-4 relative z-[2]" data-cy="followUpTag" title="Ce recruteur partage l’avancement des candidatures.">
+                    Suivi de candidature
+                </span>
+<div>
+<a aria-label="Voir offre de Concepteur Développeur . Net H/F à Nancy - 54, chez Utigroup, super recruteur, pour un CDI, avec un salaire de 38 000 - 42 000 € / an, en temps plein, Télétravail partiel" class="no-underline outline-none focus-within:underline forwarder inline" data-action="analytics#push" data-analytics-values-param='{"event":"generic_product","event_name":"productClick","product_data":[{"product_id":"78273485","product_response_type":"ATS","product_list":"LO-Moteur-Exact","product_position":1}],"app_version_array":{"one-time-password-V1.0":"Version_B"}}' data-cy="offerTitle" data-turbo="false" href="/fr-fr/emplois/78273485.html" title="Concepteur Développeur . Net H/F - Utigroup">
+<h3 class="inline">
+</h3><p class="typo-l sm:small-group:typo-l sm:typo-xl">Concepteur Développeur . Net H/F</p>
+<p class="typo-s inline">Utigroup</p>
+</a>
+<div class="inline-flex gap-2 align-middle">
+<div class="typo-s-bold">
+<div class="text-green-500 flex items-center" data-cy="superRecruiterBadge">
+
+<p class="typo-s-bold">Super recruteur</p>
+</div>
+</div>
+</div>
+</div>
+</header>
+<div class="mt-6 flex flex-col gap-3 sm:flex-row sm:small-group:flex-col">
+<div class="flex gap-3 flex-wrap">
+<div class="readonly tag-secondary-s w-fit border-0" data-cy="localisationCard">
+                            Nancy - 54
+                        </div>
+<div class="readonly tag-secondary-s w-fit border-0" data-cy="contractCard">
+                            CDI
+                        </div>
+<div class="readonly tag-secondary-s typo-s-bold w-fit border-0">38 000 - 42 000 € / an</div>
+<div class="readonly tag-secondary-s border-0 w-fit" data-cy="contractTag">
+                                Télétravail partiel
+                            </div>
+</div>
+</div>
+</div>
+<div class="mt-6 sm:mt-3 flex sm:flex-row-reverse items-end justify-between sm:small-group:mt-6 sm:small-group:flex-row flex-wrap">
+<span class="btn-outline-m group-hocus-within:bg-black group-hocus-within:border-transparent group-hocus-within:text-white group-hocus-within:opacity-100">Voir l’offre</span>
+<div class="typo-s text-grey-500 pl-1 pt-1">il y a 14 heures</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</li>
+<li data-hide-offer-item-id-value="78262233" data-hide-offer-target="item" data-id-storage-item-id="78262233" data-id-storage-target="item">
+<div>
+<div class="group h-full overflow-hidden bg-white rounded-sm border border-grey-100 hover:border-grey-500 focus-within:outline focus-within:transition-none transition-border-color duration-100">
+<div class="h-full relative flex flex-col sm:flex-row sm:small-group:flex-col">
+<div class="absolute right-6 sm:small-group:right-4 top-6 sm:small-group:top-[21px] z-[2] flex gap-4 sm:gap-0">
+<form action="/fr-fr/searchoffers/hideoffermodalframeview" data-turbo-frame="exclude-criteria-frame" method="GET">
+<input name="offerId" type="hidden" value="78262233"/>
+<input name="title" type="hidden" value="Développeur·euse Full Stack Java H/F"/>
+<input name="company" type="hidden" value="Bloomind"/>
+<button aria-label="Masquer l'offre Développeur·euse Full Stack Java H/F" class="btn-icon-no-outline-m sm:btn-icon-no-outline-l small-group:sm:btn-icon-no-outline-m" data-action="analytics#push" data-analytics-values-param="{&quot;event&quot;:&quot;generic&quot;,&quot;event_name&quot;:&quot;exclude_offer&quot;,&quot;event_info&quot;:&quot;Icône masquage d'offre&quot;}" data-cy="hideOfferBtn" type="submit">
+
+</button>
+</form>
+<turbo-frame id="bookmark-frame-card78262233">
+<form action="/fr-fr/candidat/tooglebookmark" data-action="fetch-account-data#refreshAfterNextTurboEvent" data-bookmark-bookmarked-class="text-pink-500" data-bookmark-bookmarked-icon-value="/svg/icons/bookmark.svg#bookmark-active" data-bookmark-offer-id-value="78262233" data-bookmark-unbookmarked-icon-value="/svg/icons/bookmark.svg#bookmark" data-controller="bookmark" data-fetch-account-data-event-param="turbo:submit-end" method="GET">
+<input name="idOffre" type="hidden" value="78262233"/>
+<input name="turboFrameId" type="hidden" value="bookmark-frame-card78262233"/>
+<input name="isFromToolbar" type="hidden" value="False"/>
+<button class="btn-icon-no-outline-m sm:btn-icon-no-outline-l small-group:sm:btn-icon-no-outline-m" data-action="analytics#push:stop" data-analytics-values-param='{"event": "generic", "EventName" : "bookmark_add", "EventLibelle": "" }' data-bookmark-target="button" data-cy="bookmarkBtn">
+
+</button>
+</form>
+</turbo-frame>
+</div>
+<header class="max-h-[74px] min-h-[74px] sm:max-h-none relative w-full overflow-hidden sm:max-w-64 sm:small-group:w-full sm:small-group:max-h-[74px] sm:small-group:max-w-none">
+<div class="absolute inset-0 bg-black/5 z-[1]"></div>
+<img alt="Bloomind recrutement" class="size-full object-cover object-center" loading="lazy" src="https://f.hellowork.com/media/companypage/193455/350_233/193455_63923958790442691656499650.jpg"/>
+<div class="z-[2] absolute sm:top-auto inset-4 sm:inset-6 flex justify-center items-center w-[5.75rem] h-11 rounded-xs bg-white sm:small-group:inset-4">
+<img alt="Bloomind recrutement" class="w-full h-full px-3 py-2 object-contain" loading="lazy" src="https://f.hellowork.com/img/entreprises/193455.png" title="Recrutement Bloomind"/>
+</div>
+</header>
+<div class="flex flex-col justify-between size-full p-4 sm:p-6 sm:small-group:p-4 min-w-0" data-action="intersect:enter-&gt;analytics#push:once" data-analytics-values-param='{"event":"generic_product","event_name":"product.display","product_data":[{"product_id":"78262233","product_response_type":"ATS","product_list":"LO-Moteur-Exact","product_position":2,"product_category":"1","product_status":"Suivi de candidature"}]}' data-controller="intersect" data-cy="serpCard">
+<div class="flex flex-col">
+<header class="w-10/12">
+<span class="badge-m badge-purple mb-4 relative z-[2]" data-cy="followUpTag" title="Ce recruteur partage l’avancement des candidatures.">
+                    Suivi de candidature
+                </span>
+<div>
+<a aria-label="Voir offre de Développeur·euse Full Stack Java H/F à Metz - 57, chez Bloomind, super recruteur, pour un CDI, avec un salaire de 33 000 - 50 000 € / an, en temps plein, Télétravail partiel" class="no-underline outline-none focus-within:underline forwarder inline" data-action="analytics#push" data-analytics-values-param='{"event":"generic_product","event_name":"productClick","product_data":[{"product_id":"78262233","product_response_type":"ATS","product_list":"LO-Moteur-Exact","product_position":2}],"app_version_array":{"one-time-password-V1.0":"Version_B"}}' data-cy="offerTitle" data-turbo="false" href="/fr-fr/emplois/78262233.html" title="Développeur·euse Full Stack Java H/F - Bloomind">
+<h3 class="inline">
+</h3><p class="typo-l sm:small-group:typo-l sm:typo-xl">Développeur·euse Full Stack Java H/F</p>
+<p class="typo-s inline">Bloomind</p>
+</a>
+<div class="inline-flex gap-2 align-middle">
+<div class="typo-s-bold">
+<div class="text-green-500 flex items-center" data-cy="superRecruiterBadge">
+
+<p class="typo-s-bold">Super recruteur</p>
+</div>
+</div>
+</div>
+</div>
+</header>
+<div class="mt-6 flex flex-col gap-3 sm:flex-row sm:small-group:flex-col">
+<div class="flex gap-3 flex-wrap">
+<div class="readonly tag-secondary-s w-fit border-0" data-cy="localisationCard">
+                            Metz - 57
+                        </div>
+<div class="readonly tag-secondary-s w-fit border-0" data-cy="contractCard">
+                            CDI
+                        </div>
+<div class="readonly tag-secondary-s typo-s-bold w-fit border-0">33 000 - 50 000 € / an</div>
+<div class="readonly tag-secondary-s border-0 w-fit" data-cy="contractTag">
+                                Télétravail partiel
+                            </div>
+</div>
+</div>
+</div>
+<div class="mt-6 sm:mt-3 flex sm:flex-row-reverse items-end justify-between sm:small-group:mt-6 sm:small-group:flex-row flex-wrap">
+<span class="btn-outline-m group-hocus-within:bg-black group-hocus-within:border-transparent group-hocus-within:text-white group-hocus-within:opacity-100">Voir l’offre</span>
+<div class="typo-s text-grey-500 pl-1 pt-1">il y a 14 heures</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</li>
+<li data-hide-offer-item-id-value="83619908" data-hide-offer-target="item" data-id-storage-item-id="83619908" data-id-storage-target="item">
+<div>
+<div class="group h-full overflow-hidden bg-white rounded-sm border border-grey-100 hover:border-grey-500 focus-within:outline focus-within:transition-none transition-border-color duration-100">
+<div class="h-full relative flex flex-col sm:flex-row sm:small-group:flex-col">
+<div class="absolute right-6 sm:small-group:right-4 top-6 sm:small-group:top-[21px] z-[2] flex gap-4 sm:gap-0">
+<form action="/fr-fr/searchoffers/hideoffermodalframeview" data-turbo-frame="exclude-criteria-frame" method="GET">
+<input name="offerId" type="hidden" value="83619908"/>
+<input name="title" type="hidden" value="Alternant Commercial - Business Developer B2b en Alternance H/F"/>
+<input name="company" type="hidden" value="Pigier Nancy"/>
+<button aria-label="Masquer l'offre Alternant Commercial - Business Developer B2b en Alternance H/F" class="btn-icon-no-outline-m sm:btn-icon-no-outline-l small-group:sm:btn-icon-no-outline-m" data-action="analytics#push" data-analytics-values-param="{&quot;event&quot;:&quot;generic&quot;,&quot;event_name&quot;:&quot;exclude_offer&quot;,&quot;event_info&quot;:&quot;Icône masquage d'offre&quot;}" data-cy="hideOfferBtn" type="submit">
+
+</button>
+</form>
+<turbo-frame id="bookmark-frame-card83619908">
+<form action="/fr-fr/candidat/tooglebookmark" data-action="fetch-account-data#refreshAfterNextTurboEvent" data-bookmark-bookmarked-class="text-pink-500" data-bookmark-bookmarked-icon-value="/svg/icons/bookmark.svg#bookmark-active" data-bookmark-offer-id-value="83619908" data-bookmark-unbookmarked-icon-value="/svg/icons/bookmark.svg#bookmark" data-controller="bookmark" data-fetch-account-data-event-param="turbo:submit-end" method="GET">
+<input name="idOffre" type="hidden" value="83619908"/>
+<input name="turboFrameId" type="hidden" value="bookmark-frame-card83619908"/>
+<input name="isFromToolbar" type="hidden" value="False"/>
+<button class="btn-icon-no-outline-m sm:btn-icon-no-outline-l small-group:sm:btn-icon-no-outline-m" data-action="analytics#push:stop" data-analytics-values-param='{"event": "generic", "EventName" : "bookmark_add", "EventLibelle": "" }' data-bookmark-target="button" data-cy="bookmarkBtn">
+
+</button>
+</form>
+</turbo-frame>
+</div>
+<header class="max-h-[74px] min-h-[74px] sm:max-h-none relative w-full overflow-hidden sm:max-w-64 sm:small-group:w-full sm:small-group:max-h-[74px] sm:small-group:max-w-none">
+<div class="relative h-[74px] sm:h-full bg-purple-100 text-purple-200">
+
+</div>
+<div class="z-[2] absolute sm:top-auto inset-4 sm:inset-6 flex justify-center items-center w-[5.75rem] h-11 rounded-xs bg-white sm:small-group:inset-4">
+<img alt="Pigier Nancy recrutement" class="w-full h-full px-3 py-2 object-contain" loading="lazy" src="https://f.hellowork.com/img/entreprises/207208.png" title="Recrutement Pigier Nancy"/>
+</div>
+</header>
+<div class="flex flex-col justify-between size-full p-4 sm:p-6 sm:small-group:p-4 min-w-0" data-action="intersect:enter-&gt;analytics#push:once" data-analytics-values-param='{"event":"generic_product","event_name":"product.display","product_data":[{"product_id":"83619908","product_response_type":"ATS","product_list":"LO-Moteur-Exact","product_position":3,"product_category":"1","product_status":"Suivi de candidature"}]}' data-controller="intersect" data-cy="serpCard">
+<div class="flex flex-col">
+<header class="w-10/12">
+<span class="badge-m badge-purple mb-4 relative z-[2]" data-cy="followUpTag" title="Ce recruteur partage l’avancement des candidatures.">
+                    Suivi de candidature
+                </span>
+<div>
+<a aria-label="Voir offre de Alternant Commercial - Business Developer B2b en Alternance H/F à Tomblaine - 54, chez Pigier Nancy, pour un Alternance, avec un salaire de 5 000 - 10 000 € / an, en temps plein" class="no-underline outline-none focus-within:underline forwarder inline" data-action="analytics#push" data-analytics-values-param='{"event":"generic_product","event_name":"productClick","product_data":[{"product_id":"83619908","product_response_type":"ATS","product_list":"LO-Moteur-Exact","product_position":3}],"app_version_array":{"one-time-password-V1.0":"Version_B"}}' data-cy="offerTitle" data-turbo="false" href="/fr-fr/emplois/83619908.html" title="Alternant Commercial - Business Developer B2b en Alternance H/F - Pigier Nancy">
+<h3 class="inline">
+</h3><p class="typo-l sm:small-group:typo-l sm:typo-xl">Alternant Commercial - Business Developer B2b en Alternance H/F</p>
+<p class="typo-s inline">Pigier Nancy</p>
+</a>
+</div>
+</header>
+<div class="mt-6 flex flex-col gap-3 sm:flex-row sm:small-group:flex-col">
+<div class="flex gap-3 flex-wrap">
+<div class="readonly tag-secondary-s w-fit border-0" data-cy="localisationCard">
+                            Tomblaine - 54
+                        </div>
+<div class="readonly tag-secondary-s w-fit border-0" data-cy="contractCard">
+                            Alternance
+                        </div>
+<div class="readonly tag-secondary-s typo-s-bold w-fit border-0">5 000 - 10 000 € / an</div>
+</div>
+</div>
+</div>
+<div class="mt-6 sm:mt-3 flex sm:flex-row-reverse items-end justify-between sm:small-group:mt-6 sm:small-group:flex-row flex-wrap">
+<span class="btn-outline-m group-hocus-within:bg-black group-hocus-within:border-transparent group-hocus-within:text-white group-hocus-within:opacity-100">Voir l’offre</span>
+<div class="typo-s text-grey-500 pl-1 pt-1">il y a 1 jour</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</li>
+<turbo-frame class="hidden has-child:block peer" data-controller="toggle form-validator" data-toggle-target="toToggleAdditional" data-toggle-toggled-additional-class="has-child:block" data-toggle-toggled-class="opacity-0 scale-y-0" data-toggle-transition-delay-value="500" id="profile-serp-card" src="/fr-fr/updateprofile/getcandidateprofilesearch?location=http%3A%2F%2Fwww.rj.com%2Fcommun%2Flocalite%2Fcommune%2F57463&amp;itemsSearchJson=%5B%7B%22Label%22%3A%22CDI%22,%22IsChecked%22%3Atrue,%22Value%22%3A%22CDI%22%7D,%7B%22Label%22%3A%22CDD%22,%22IsChecked%22%3Afalse,%22Value%22%3A%22CDD%22%7D,%7B%22Label%22%3A%22Int%C3%A9rim%22,%22IsChecked%22%3Afalse,%22Value%22%3A%22Travail_temp%22%7D,%7B%22Label%22%3A%22Stage%22,%22IsChecked%22%3Afalse,%22Value%22%3A%22Stage%22%7D,%7B%22Label%22%3A%22Alternance%22,%22IsChecked%22%3Atrue,%22Value%22%3A%22Alternance%22%7D,%7B%22Label%22%3A%22Ind%C3%A9pendant%22,%22IsChecked%22%3Afalse,%22Value%22%3A%22Independant%22%7D,%7B%22Label%22%3A%22Franchise%22,%22IsChecked%22%3Afalse,%22Value%22%3A%22Franchise%22%7D,%7B%22Label%22%3A%22Associ%C3%A9%22,%22IsChecked%22%3Afalse,%22Value%22%3A%22Associe%22%7D,%7B%22Label%22%3A%22Fonctionnaire%22,%22IsChecked%22%3Afalse,%22Value%22%3A%22Fonctionnaire%22%7D,%7B%22Label%22%3A%22Freelance%22,%22IsChecked%22%3Afalse,%22Value%22%3A%22Freelance%22%7D,%7B%22Label%22%3A%22Stage%20de%20lyc%C3%A9e%22,%22IsChecked%22%3Afalse,%22Value%22%3A%22Stage_de_lycee%22%7D%5D">
+</turbo-frame>
+<li data-hide-offer-item-id-value="79326345" data-hide-offer-target="item" data-id-storage-item-id="79326345" data-id-storage-target="item">
+<div>
+<div class="group h-full overflow-hidden bg-white rounded-sm border border-grey-100 hover:border-grey-500 focus-within:outline focus-within:transition-none transition-border-color duration-100">
+<div class="h-full relative flex flex-col sm:flex-row sm:small-group:flex-col">
+<div class="absolute right-6 sm:small-group:right-4 top-6 sm:small-group:top-[21px] z-[2] flex gap-4 sm:gap-0">
+<form action="/fr-fr/searchoffers/hideoffermodalframeview" data-turbo-frame="exclude-criteria-frame" method="GET">
+<input name="offerId" type="hidden" value="79326345"/>
+<input name="title" type="hidden" value="Business Developer Bilingue Allemand - Français H/F"/>
+<input name="company" type="hidden" value="Spera Recrutement"/>
+<button aria-label="Masquer l'offre Business Developer Bilingue Allemand - Français H/F" class="btn-icon-no-outline-m sm:btn-icon-no-outline-l small-group:sm:btn-icon-no-outline-m" data-action="analytics#push" data-analytics-values-param="{&quot;event&quot;:&quot;generic&quot;,&quot;event_name&quot;:&quot;exclude_offer&quot;,&quot;event_info&quot;:&quot;Icône masquage d'offre&quot;}" data-cy="hideOfferBtn" type="submit">
+
+</button>
+</form>
+<turbo-frame id="bookmark-frame-card79326345">
+<form action="/fr-fr/candidat/tooglebookmark" data-action="fetch-account-data#refreshAfterNextTurboEvent" data-bookmark-bookmarked-class="text-pink-500" data-bookmark-bookmarked-icon-value="/svg/icons/bookmark.svg#bookmark-active" data-bookmark-offer-id-value="79326345" data-bookmark-unbookmarked-icon-value="/svg/icons/bookmark.svg#bookmark" data-controller="bookmark" data-fetch-account-data-event-param="turbo:submit-end" method="GET">
+<input name="idOffre" type="hidden" value="79326345"/>
+<input name="turboFrameId" type="hidden" value="bookmark-frame-card79326345"/>
+<input name="isFromToolbar" type="hidden" value="False"/>
+<button class="btn-icon-no-outline-m sm:btn-icon-no-outline-l small-group:sm:btn-icon-no-outline-m" data-action="analytics#push:stop" data-analytics-values-param='{"event": "generic", "EventName" : "bookmark_add", "EventLibelle": "" }' data-bookmark-target="button" data-cy="bookmarkBtn">
+
+</button>
+</form>
+</turbo-frame>
+</div>
+<header class="max-h-[74px] min-h-[74px] sm:max-h-none relative w-full overflow-hidden sm:max-w-64 sm:small-group:w-full sm:small-group:max-h-[74px] sm:small-group:max-w-none">
+<div class="relative h-[74px] sm:h-full bg-blue-100 text-blue-200">
+
+</div>
+<div class="z-[2] absolute sm:top-auto inset-4 sm:inset-6 flex justify-center items-center w-[5.75rem] h-11 rounded-xs bg-white sm:small-group:inset-4">
+<img alt="Spera Recrutement recrutement" class="w-full h-full px-3 py-2 object-contain" loading="lazy" src="https://f.hellowork.com/img/entreprises/202604.png" title="Recrutement Spera Recrutement"/>
+</div>
+</header>
+<div class="flex flex-col justify-between size-full p-4 sm:p-6 sm:small-group:p-4 min-w-0" data-action="intersect:enter-&gt;analytics#push:once" data-analytics-values-param='{"event":"generic_product","event_name":"product.display","product_data":[{"product_id":"79326345","product_response_type":"ATS","product_list":"LO-Moteur-Exact","product_position":4,"product_category":"1","product_status":"Suivi de candidature"}]}' data-controller="intersect" data-cy="serpCard">
+<div class="flex flex-col">
+<header class="w-10/12">
+<span class="badge-m badge-purple mb-4 relative z-[2]" data-cy="followUpTag" title="Ce recruteur partage l’avancement des candidatures.">
+                    Suivi de candidature
+                </span>
+<div>
+<a aria-label="Voir offre de Business Developer Bilingue Allemand - Français H/F à Metz - 57, chez Spera Recrutement, pour un CDI, avec un salaire de 40 000 - 65 000 € / an, en temps plein" class="no-underline outline-none focus-within:underline forwarder inline" data-action="analytics#push" data-analytics-values-param='{"event":"generic_product","event_name":"productClick","product_data":[{"product_id":"79326345","product_response_type":"ATS","product_list":"LO-Moteur-Exact","product_position":4}],"app_version_array":{"one-time-password-V1.0":"Version_B"}}' data-cy="offerTitle" data-turbo="false" href="/fr-fr/emplois/79326345.html" title="Business Developer Bilingue Allemand - Français H/F - Spera Recrutement">
+<h3 class="inline">
+</h3><p class="typo-l sm:small-group:typo-l sm:typo-xl">Business Developer Bilingue Allemand - Français H/F</p>
+<p class="typo-s inline">Spera Recrutement</p>
+</a>
+</div>
+</header>
+<div class="mt-6 flex flex-col gap-3 sm:flex-row sm:small-group:flex-col">
+<div class="flex gap-3 flex-wrap">
+<div class="readonly tag-secondary-s w-fit border-0" data-cy="localisationCard">
+                            Metz - 57
+                        </div>
+<div class="readonly tag-secondary-s w-fit border-0" data-cy="contractCard">
+                            CDI
+                        </div>
+<div class="readonly tag-secondary-s typo-s-bold w-fit border-0">40 000 - 65 000 € / an</div>
+</div>
+</div>
+</div>
+<div class="mt-6 sm:mt-3 flex sm:flex-row-reverse items-end justify-between sm:small-group:mt-6 sm:small-group:flex-row flex-wrap">
+<span class="btn-outline-m group-hocus-within:bg-black group-hocus-within:border-transparent group-hocus-within:text-white group-hocus-within:opacity-100">Voir l’offre</span>
+<div class="typo-s text-grey-500 pl-1 pt-1">il y a 1 jour</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</li>
+<li data-hide-offer-item-id-value="70413930" data-hide-offer-target="item" data-id-storage-item-id="70413930" data-id-storage-target="item">
+<div>
+<div class="group h-full overflow-hidden bg-white rounded-sm border border-grey-100 hover:border-grey-500 focus-within:outline focus-within:transition-none transition-border-color duration-100">
+<div class="h-full relative flex flex-col sm:flex-row sm:small-group:flex-col">
+<div class="absolute right-6 sm:small-group:right-4 top-6 sm:small-group:top-[21px] z-[2] flex gap-4 sm:gap-0">
+<form action="/fr-fr/searchoffers/hideoffermodalframeview" data-turbo-frame="exclude-criteria-frame" method="GET">
+<input name="offerId" type="hidden" value="70413930"/>
+<input name="title" type="hidden" value="Business Developer Formation H/F"/>
+<input name="company" type="hidden" value="SOCOTEC"/>
+<button aria-label="Masquer l'offre Business Developer Formation H/F" class="btn-icon-no-outline-m sm:btn-icon-no-outline-l small-group:sm:btn-icon-no-outline-m" data-action="analytics#push" data-analytics-values-param="{&quot;event&quot;:&quot;generic&quot;,&quot;event_name&quot;:&quot;exclude_offer&quot;,&quot;event_info&quot;:&quot;Icône masquage d'offre&quot;}" data-cy="hideOfferBtn" type="submit">
+
+</button>
+</form>
+<turbo-frame id="bookmark-frame-card70413930">
+<form action="/fr-fr/candidat/tooglebookmark" data-action="fetch-account-data#refreshAfterNextTurboEvent" data-bookmark-bookmarked-class="text-pink-500" data-bookmark-bookmarked-icon-value="/svg/icons/bookmark.svg#bookmark-active" data-bookmark-offer-id-value="70413930" data-bookmark-unbookmarked-icon-value="/svg/icons/bookmark.svg#bookmark" data-controller="bookmark" data-fetch-account-data-event-param="turbo:submit-end" method="GET">
+<input name="idOffre" type="hidden" value="70413930"/>
+<input name="turboFrameId" type="hidden" value="bookmark-frame-card70413930"/>
+<input name="isFromToolbar" type="hidden" value="False"/>
+<button class="btn-icon-no-outline-m sm:btn-icon-no-outline-l small-group:sm:btn-icon-no-outline-m" data-action="analytics#push:stop" data-analytics-values-param='{"event": "generic", "EventName" : "bookmark_add", "EventLibelle": "" }' data-bookmark-target="button" data-cy="bookmarkBtn">
+
+</button>
+</form>
+</turbo-frame>
+</div>
+<header class="max-h-[74px] min-h-[74px] sm:max-h-none relative w-full overflow-hidden sm:max-w-64 sm:small-group:w-full sm:small-group:max-h-[74px] sm:small-group:max-w-none">
+<div class="absolute inset-0 bg-black/5 z-[1]"></div>
+<img alt="SOCOTEC recrutement" class="size-full object-cover object-center" loading="lazy" src="https://f.hellowork.com/media/companypage/202370/350_233/Socotec_9639_6381613219967385486685223.jpeg"/>
+<div class="z-[2] absolute sm:top-auto inset-4 sm:inset-6 flex justify-center items-center w-[5.75rem] h-11 rounded-xs bg-white sm:small-group:inset-4">
+<img alt="SOCOTEC recrutement" class="w-full h-full px-3 py-2 object-contain" loading="lazy" src="https://f.hellowork.com/img/entreprises/202370.png" title="Recrutement SOCOTEC"/>
+</div>
+</header>
+<div class="flex flex-col justify-between size-full p-4 sm:p-6 sm:small-group:p-4 min-w-0" data-action="intersect:enter-&gt;analytics#push:once" data-analytics-values-param='{"event":"generic_product","event_name":"product.display","product_data":[{"product_id":"70413930","product_response_type":"ATS","product_list":"LO-Moteur-Exact","product_position":5,"product_category":"1","product_status":"Suivi de candidature"}]}' data-controller="intersect" data-cy="serpCard">
+<div class="flex flex-col">
+<header class="w-10/12">
+<span class="badge-m badge-purple mb-4 relative z-[2]" data-cy="followUpTag" title="Ce recruteur partage l’avancement des candidatures.">
+                    Suivi de candidature
+                </span>
+<div>
+<a aria-label="Voir offre de Business Developer Formation H/F à Metz - 57, chez SOCOTEC, pour un CDI, avec un salaire de 32 000 - 35 000 € / an, en temps plein" class="no-underline outline-none focus-within:underline forwarder inline" data-action="analytics#push" data-analytics-values-param='{"event":"generic_product","event_name":"productClick","product_data":[{"product_id":"70413930","product_response_type":"ATS","product_list":"LO-Moteur-Exact","product_position":5}],"app_version_array":{"one-time-password-V1.0":"Version_B"}}' data-cy="offerTitle" data-turbo="false" href="/fr-fr/emplois/70413930.html" title="Business Developer Formation H/F - SOCOTEC">
+<h3 class="inline">
+</h3><p class="typo-l sm:small-group:typo-l sm:typo-xl">Business Developer Formation H/F</p>
+<p class="typo-s inline">SOCOTEC</p>
+</a>
+</div>
+</header>
+<div class="mt-6 flex flex-col gap-3 sm:flex-row sm:small-group:flex-col">
+<div class="flex gap-3 flex-wrap">
+<div class="readonly tag-secondary-s w-fit border-0" data-cy="localisationCard">
+                            Metz - 57
+                        </div>
+<div class="readonly tag-secondary-s w-fit border-0" data-cy="contractCard">
+                            CDI
+                        </div>
+<div class="readonly tag-secondary-s typo-s-bold w-fit border-0">32 000 - 35 000 € / an</div>
+</div>
+</div>
+</div>
+<div class="mt-6 sm:mt-3 flex sm:flex-row-reverse items-end justify-between sm:small-group:mt-6 sm:small-group:flex-row flex-wrap">
+<span class="btn-outline-m group-hocus-within:bg-black group-hocus-within:border-transparent group-hocus-within:text-white group-hocus-within:opacity-100">Voir l’offre</span>
+<div class="typo-s text-grey-500 pl-1 pt-1">il y a 1 jour</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</li>
+<li data-hide-offer-item-id-value="83571317" data-hide-offer-target="item" data-id-storage-item-id="83571317" data-id-storage-target="item">
+<div>
+<div class="group h-full overflow-hidden bg-white rounded-sm border border-grey-100 hover:border-grey-500 focus-within:outline focus-within:transition-none transition-border-color duration-100">
+<div class="h-full relative flex flex-col sm:flex-row sm:small-group:flex-col">
+<div class="absolute right-6 sm:small-group:right-4 top-6 sm:small-group:top-[21px] z-[2] flex gap-4 sm:gap-0">
+<form action="/fr-fr/searchoffers/hideoffermodalframeview" data-turbo-frame="exclude-criteria-frame" method="GET">
+<input name="offerId" type="hidden" value="83571317"/>
+<input name="title" type="hidden" value="Business Developer Btob Junior H/F"/>
+<input name="company" type="hidden" value="Voluntae"/>
+<button aria-label="Masquer l'offre Business Developer Btob Junior H/F" class="btn-icon-no-outline-m sm:btn-icon-no-outline-l small-group:sm:btn-icon-no-outline-m" data-action="analytics#push" data-analytics-values-param="{&quot;event&quot;:&quot;generic&quot;,&quot;event_name&quot;:&quot;exclude_offer&quot;,&quot;event_info&quot;:&quot;Icône masquage d'offre&quot;}" data-cy="hideOfferBtn" type="submit">
+
+</button>
+</form>
+<turbo-frame id="bookmark-frame-card83571317">
+<form action="/fr-fr/candidat/tooglebookmark" data-action="fetch-account-data#refreshAfterNextTurboEvent" data-bookmark-bookmarked-class="text-pink-500" data-bookmark-bookmarked-icon-value="/svg/icons/bookmark.svg#bookmark-active" data-bookmark-offer-id-value="83571317" data-bookmark-unbookmarked-icon-value="/svg/icons/bookmark.svg#bookmark" data-controller="bookmark" data-fetch-account-data-event-param="turbo:submit-end" method="GET">
+<input name="idOffre" type="hidden" value="83571317"/>
+<input name="turboFrameId" type="hidden" value="bookmark-frame-card83571317"/>
+<input name="isFromToolbar" type="hidden" value="False"/>
+<button class="btn-icon-no-outline-m sm:btn-icon-no-outline-l small-group:sm:btn-icon-no-outline-m" data-action="analytics#push:stop" data-analytics-values-param='{"event": "generic", "EventName" : "bookmark_add", "EventLibelle": "" }' data-bookmark-target="button" data-cy="bookmarkBtn">
+
+</button>
+</form>
+</turbo-frame>
+</div>
+<header class="max-h-[74px] min-h-[74px] sm:max-h-none relative w-full overflow-hidden sm:max-w-64 sm:small-group:w-full sm:small-group:max-h-[74px] sm:small-group:max-w-none">
+<div class="relative h-[74px] sm:h-full bg-purple-100 text-purple-200">
+
+</div>
+<div class="z-[2] absolute sm:top-auto inset-4 sm:inset-6 flex justify-center items-center w-[5.75rem] h-11 rounded-xs bg-white sm:small-group:inset-4">
+<img alt="Voluntae recrutement" class="w-full h-full px-3 py-2 object-contain" loading="lazy" src="https://f.hellowork.com/img/entreprises/203829.png" title="Recrutement Voluntae"/>
+</div>
+</header>
+<div class="flex flex-col justify-between size-full p-4 sm:p-6 sm:small-group:p-4 min-w-0" data-action="intersect:enter-&gt;analytics#push:once" data-analytics-values-param='{"event":"generic_product","event_name":"product.display","product_data":[{"product_id":"83571317","product_response_type":"Smartapply_v2","product_list":"LO-Moteur-Exact","product_position":6,"product_category":"1","product_status":"Suivi de candidature"}]}' data-controller="intersect" data-cy="serpCard">
+<div class="flex flex-col">
+<header class="w-10/12">
+<span class="badge-m badge-purple mb-4 relative z-[2]" data-cy="followUpTag" title="Ce recruteur partage l’avancement des candidatures.">
+                    Suivi de candidature
+                </span>
+<div>
+<a aria-label="Voir offre de Business Developer Btob Junior H/F à Metz - 57, chez Voluntae, pour un CDI, avec un salaire de 30 000 - 35 000 € / an, en temps plein" class="no-underline outline-none focus-within:underline forwarder inline" data-action="analytics#push" data-analytics-values-param='{"event":"generic_product","event_name":"productClick","product_data":[{"product_id":"83571317","product_response_type":"Smartapply_v2","product_list":"LO-Moteur-Exact","product_position":6}],"app_version_array":{"one-time-password-V1.0":"Version_B"}}' data-cy="offerTitle" data-turbo="false" href="/fr-fr/emplois/83571317.html" title="Business Developer Btob Junior H/F - Voluntae">
+<h3 class="inline">
+</h3><p class="typo-l sm:small-group:typo-l sm:typo-xl">Business Developer Btob Junior H/F</p>
+<p class="typo-s inline">Voluntae</p>
+</a>
+</div>
+</header>
+<div class="mt-6 flex flex-col gap-3 sm:flex-row sm:small-group:flex-col">
+<div class="flex gap-3 flex-wrap">
+<div class="readonly tag-secondary-s w-fit border-0" data-cy="localisationCard">
+                            Metz - 57
+                        </div>
+<div class="readonly tag-secondary-s w-fit border-0" data-cy="contractCard">
+                            CDI
+                        </div>
+<div class="readonly tag-secondary-s typo-s-bold w-fit border-0">30 000 - 35 000 € / an</div>
+</div>
+</div>
+</div>
+<div class="mt-6 sm:mt-3 flex sm:flex-row-reverse items-end justify-between sm:small-group:mt-6 sm:small-group:flex-row flex-wrap">
+<span class="btn-outline-m group-hocus-within:bg-black group-hocus-within:border-transparent group-hocus-within:text-white group-hocus-within:opacity-100">Voir l’offre</span>
+<div class="typo-s text-grey-500 pl-1 pt-1">il y a 2 jours</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</li>
+<li data-hide-offer-item-id-value="82502103" data-hide-offer-target="item" data-id-storage-item-id="82502103" data-id-storage-target="item">
+<div>
+<div class="group h-full overflow-hidden bg-white rounded-sm border border-grey-100 hover:border-grey-500 focus-within:outline focus-within:transition-none transition-border-color duration-100">
+<div class="h-full relative flex flex-col sm:flex-row sm:small-group:flex-col">
+<div class="absolute right-6 sm:small-group:right-4 top-6 sm:small-group:top-[21px] z-[2] flex gap-4 sm:gap-0">
+<form action="/fr-fr/searchoffers/hideoffermodalframeview" data-turbo-frame="exclude-criteria-frame" method="GET">
+<input name="offerId" type="hidden" value="82502103"/>
+<input name="title" type="hidden" value="Alternance - Business Developer H/F"/>
+<input name="company" type="hidden" value="Mbway Strasbourg"/>
+<button aria-label="Masquer l'offre Alternance - Business Developer H/F" class="btn-icon-no-outline-m sm:btn-icon-no-outline-l small-group:sm:btn-icon-no-outline-m" data-action="analytics#push" data-analytics-values-param="{&quot;event&quot;:&quot;generic&quot;,&quot;event_name&quot;:&quot;exclude_offer&quot;,&quot;event_info&quot;:&quot;Icône masquage d'offre&quot;}" data-cy="hideOfferBtn" type="submit">
+
+</button>
+</form>
+<turbo-frame id="bookmark-frame-card82502103">
+<form action="/fr-fr/candidat/tooglebookmark" data-action="fetch-account-data#refreshAfterNextTurboEvent" data-bookmark-bookmarked-class="text-pink-500" data-bookmark-bookmarked-icon-value="/svg/icons/bookmark.svg#bookmark-active" data-bookmark-offer-id-value="82502103" data-bookmark-unbookmarked-icon-value="/svg/icons/bookmark.svg#bookmark" data-controller="bookmark" data-fetch-account-data-event-param="turbo:submit-end" method="GET">
+<input name="idOffre" type="hidden" value="82502103"/>
+<input name="turboFrameId" type="hidden" value="bookmark-frame-card82502103"/>
+<input name="isFromToolbar" type="hidden" value="False"/>
+<button class="btn-icon-no-outline-m sm:btn-icon-no-outline-l small-group:sm:btn-icon-no-outline-m" data-action="analytics#push:stop" data-analytics-values-param='{"event": "generic", "EventName" : "bookmark_add", "EventLibelle": "" }' data-bookmark-target="button" data-cy="bookmarkBtn">
+
+</button>
+</form>
+</turbo-frame>
+</div>
+<header class="max-h-[74px] min-h-[74px] sm:max-h-none relative w-full overflow-hidden sm:max-w-64 sm:small-group:w-full sm:small-group:max-h-[74px] sm:small-group:max-w-none">
+<div class="relative h-[74px] sm:h-full bg-blue-100 text-blue-200">
+
+</div>
+<div class="z-[2] absolute sm:top-auto inset-4 sm:inset-6 flex justify-center items-center w-[5.75rem] h-11 rounded-xs bg-white sm:small-group:inset-4">
+<img alt="Mbway Strasbourg recrutement" class="w-full h-full px-3 py-2 object-contain" loading="lazy" src="https://f.hellowork.com/img/entreprises/207061.png" title="Recrutement Mbway Strasbourg"/>
+</div>
+</header>
+<div class="flex flex-col justify-between size-full p-4 sm:p-6 sm:small-group:p-4 min-w-0" data-action="intersect:enter-&gt;analytics#push:once" data-analytics-values-param='{"event":"generic_product","event_name":"product.display","product_data":[{"product_id":"82502103","product_response_type":"ATS","product_list":"LO-Moteur-Exact","product_position":7,"product_category":"1","product_status":"Suivi de candidature"}]}' data-controller="intersect" data-cy="serpCard">
+<div class="flex flex-col">
+<header class="w-10/12">
+<span class="badge-m badge-purple mb-4 relative z-[2]" data-cy="followUpTag" title="Ce recruteur partage l’avancement des candidatures.">
+                    Suivi de candidature
+                </span>
+<div>
+<a aria-label="Voir offre de Alternance - Business Developer H/F à Metz - 57, chez Mbway Strasbourg, pour un Alternance, avec un salaire de 800 - 1 867,02 € / mois, en temps plein, 2 ans" class="no-underline outline-none focus-within:underline forwarder inline" data-action="analytics#push" data-analytics-values-param='{"event":"generic_product","event_name":"productClick","product_data":[{"product_id":"82502103","product_response_type":"ATS","product_list":"LO-Moteur-Exact","product_position":7}],"app_version_array":{"one-time-password-V1.0":"Version_B"}}' data-cy="offerTitle" data-turbo="false" href="/fr-fr/emplois/82502103.html" title="Alternance - Business Developer H/F - Mbway Strasbourg">
+<h3 class="inline">
+</h3><p class="typo-l sm:small-group:typo-l sm:typo-xl">Alternance - Business Developer H/F</p>
+<p class="typo-s inline">Mbway Strasbourg</p>
+</a>
+</div>
+</header>
+<div class="mt-6 flex flex-col gap-3 sm:flex-row sm:small-group:flex-col">
+<div class="flex gap-3 flex-wrap">
+<div class="readonly tag-secondary-s w-fit border-0" data-cy="localisationCard">
+                            Metz - 57
+                        </div>
+<div class="readonly tag-secondary-s w-fit border-0" data-cy="contractCard">
+                            Alternance
+                        </div>
+<div class="readonly tag-secondary-s typo-s-bold w-fit border-0">800 - 1 867,02 € / mois</div>
+<div class="readonly tag-secondary-s border-0 w-fit" data-cy="contractTag">
+                                2 ans
+                            </div>
+</div>
+</div>
+</div>
+<div class="mt-6 sm:mt-3 flex sm:flex-row-reverse items-end justify-between sm:small-group:mt-6 sm:small-group:flex-row flex-wrap">
+<span class="btn-outline-m group-hocus-within:bg-black group-hocus-within:border-transparent group-hocus-within:text-white group-hocus-within:opacity-100">Voir l’offre</span>
+<div class="typo-s text-grey-500 pl-1 pt-1">il y a 3 jours</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</li>
+<li data-hide-offer-item-id-value="74578079" data-hide-offer-target="item" data-id-storage-item-id="74578079" data-id-storage-target="item">
+<div>
+<div class="group h-full overflow-hidden bg-white rounded-sm border border-grey-100 hover:border-grey-500 focus-within:outline focus-within:transition-none transition-border-color duration-100">
+<div class="h-full relative flex flex-col sm:flex-row sm:small-group:flex-col">
+<div class="absolute right-6 sm:small-group:right-4 top-6 sm:small-group:top-[21px] z-[2] flex gap-4 sm:gap-0">
+<form action="/fr-fr/searchoffers/hideoffermodalframeview" data-turbo-frame="exclude-criteria-frame" method="GET">
+<input name="offerId" type="hidden" value="74578079"/>
+<input name="title" type="hidden" value="Ingénieur Développeur C# Medior - Expert H/F"/>
+<input name="company" type="hidden" value="Astek"/>
+<button aria-label="Masquer l'offre Ingénieur Développeur C# Medior - Expert H/F" class="btn-icon-no-outline-m sm:btn-icon-no-outline-l small-group:sm:btn-icon-no-outline-m" data-action="analytics#push" data-analytics-values-param="{&quot;event&quot;:&quot;generic&quot;,&quot;event_name&quot;:&quot;exclude_offer&quot;,&quot;event_info&quot;:&quot;Icône masquage d'offre&quot;}" data-cy="hideOfferBtn" type="submit">
+
+</button>
+</form>
+<turbo-frame id="bookmark-frame-card74578079">
+<form action="/fr-fr/candidat/tooglebookmark" data-action="fetch-account-data#refreshAfterNextTurboEvent" data-bookmark-bookmarked-class="text-pink-500" data-bookmark-bookmarked-icon-value="/svg/icons/bookmark.svg#bookmark-active" data-bookmark-offer-id-value="74578079" data-bookmark-unbookmarked-icon-value="/svg/icons/bookmark.svg#bookmark" data-controller="bookmark" data-fetch-account-data-event-param="turbo:submit-end" method="GET">
+<input name="idOffre" type="hidden" value="74578079"/>
+<input name="turboFrameId" type="hidden" value="bookmark-frame-card74578079"/>
+<input name="isFromToolbar" type="hidden" value="False"/>
+<button class="btn-icon-no-outline-m sm:btn-icon-no-outline-l small-group:sm:btn-icon-no-outline-m" data-action="analytics#push:stop" data-analytics-values-param='{"event": "generic", "EventName" : "bookmark_add", "EventLibelle": "" }' data-bookmark-target="button" data-cy="bookmarkBtn">
+
+</button>
+</form>
+</turbo-frame>
+</div>
+<header class="max-h-[74px] min-h-[74px] sm:max-h-none relative w-full overflow-hidden sm:max-w-64 sm:small-group:w-full sm:small-group:max-h-[74px] sm:small-group:max-w-none">
+<div class="absolute inset-0 bg-black/5 z-[1]"></div>
+<img alt="Astek recrutement" class="size-full object-cover object-center" loading="lazy" src="https://f.hellowork.com/media/companypage/192878/350_233/519_63845409624817817147777332.jpeg"/>
+<div class="z-[2] absolute sm:top-auto inset-4 sm:inset-6 flex justify-center items-center w-[5.75rem] h-11 rounded-xs bg-white sm:small-group:inset-4">
+<img alt="Astek recrutement" class="w-full h-full px-3 py-2 object-contain" loading="lazy" src="https://f.hellowork.com/img/entreprises/192878.png" title="Recrutement Astek"/>
+</div>
+</header>
+<div class="flex flex-col justify-between size-full p-4 sm:p-6 sm:small-group:p-4 min-w-0" data-action="intersect:enter-&gt;analytics#push:once" data-analytics-values-param='{"event":"generic_product","event_name":"product.display","product_data":[{"product_id":"74578079","product_response_type":"UrlWithForm","product_list":"LO-Moteur-Exact","product_position":8,"product_category":"1","product_status":"NotDefined"}]}' data-controller="intersect" data-cy="serpCard">
+<div class="flex flex-col">
+<header class="w-10/12">
+<div>
+<a aria-label="Voir offre de Ingénieur Développeur C# Medior - Expert H/F à Nancy - 54, chez Astek, pour un CDI, avec un salaire de 35 000 € / an, en temps plein, Télétravail partiel" class="no-underline outline-none focus-within:underline forwarder inline" data-action="analytics#push" data-analytics-values-param='{"event":"generic_product","event_name":"productClick","product_data":[{"product_id":"74578079","product_response_type":"UrlWithForm","product_list":"LO-Moteur-Exact","product_position":8}],"app_version_array":{"one-time-password-V1.0":"Version_B"}}' data-cy="offerTitle" data-turbo="false" href="/fr-fr/emplois/74578079.html" title="Ingénieur Développeur C# Medior - Expert H/F - Astek">
+<h3 class="inline">
+</h3><p class="typo-l sm:small-group:typo-l sm:typo-xl">Ingénieur Développeur C# Medior - Expert H/F</p>
+<p class="typo-s inline">Astek</p>
+</a>
+</div>
+</header>
+<div class="mt-6 flex flex-col gap-3 sm:flex-row sm:small-group:flex-col">
+<div class="flex gap-3 flex-wrap">
+<div class="readonly tag-secondary-s w-fit border-0" data-cy="localisationCard">
+                            Nancy - 54
+                        </div>
+<div class="readonly tag-secondary-s w-fit border-0" data-cy="contractCard">
+                            CDI
+                        </div>
+<div class="readonly tag-secondary-s typo-s-bold w-fit border-0">35 000 € / an</div>
+<div class="readonly tag-secondary-s border-0 w-fit" data-cy="contractTag">
+                                Télétravail partiel
+                            </div>
+</div>
+</div>
+</div>
+<div class="mt-6 sm:mt-3 flex sm:flex-row-reverse items-end justify-between sm:small-group:mt-6 sm:small-group:flex-row flex-wrap">
+<span class="btn-outline-m group-hocus-within:bg-black group-hocus-within:border-transparent group-hocus-within:text-white group-hocus-within:opacity-100">Voir l’offre</span>
+<div class="typo-s text-grey-500 pl-1 pt-1">il y a 3 jours</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</ul>
+<div class="hidden" data-hide-offer-target="counterContainer">
+<div class="rounded-sm px-4 py-3 border border-grey-100 flex items-center gap-3">
+
+<span class="typo-s">
+                        Nous avons masqué <span data-hide-offer-target="counter">0 offre</span> que vous avez décidé de ne plus voir.
+                    </span>
+</div>
+</div>
+<turbo-frame id="exclude-criteria-frame"></turbo-frame>
+</div>
+</section>
+<section class="col-span-12 2xl:col-start-2 2xl:col-span-10 flex justify-center mt-10 sm:mt-12">
+<nav class="hidden sm:flex gap-2 typo-m flex-wrap">
+<button aria-disabled="true" class="flex items-center justify-center w-10 !h-10 !rounded-sm !bg-white !text-black hocus:!bg-black hocus:!text-white hocus:!opacity-100 transition-colors duration-100 focus-visible:duration-0 pointer-events-none opacity-40" data-turbo-frame="turboSerp" form="searchForm" formaction="" name="p" type="submit" value="0">
+
+</button>
+<button class="!block !min-w-[2.5rem] !h-10 !px-3 !rounded-sm !tracking-normal hocus:!bg-black hocus:!text-white hocus:!opacity-100 transition-colors duration-100 focus-visible:duration-0 !bg-black !text-white" data-turbo-frame="turboSerp" disabled="" form="searchForm" formaction="" name="p" type="submit" value="1">
+        1
+    </button>
+<button class="!block !min-w-[2.5rem] !h-10 !px-3 !rounded-sm !tracking-normal hocus:!bg-black hocus:!text-white hocus:!opacity-100 transition-colors duration-100 focus-visible:duration-0 !bg-white !text-black" data-turbo-frame="turboSerp" form="searchForm" formaction="" name="p" type="submit" value="2">
+        2
+    </button>
+<button class="!block !min-w-[2.5rem] !h-10 !px-3 !rounded-sm !tracking-normal hocus:!bg-black hocus:!text-white hocus:!opacity-100 transition-colors duration-100 focus-visible:duration-0 !bg-white !text-black" data-turbo-frame="turboSerp" form="searchForm" formaction="" name="p" type="submit" value="3">
+        3
+    </button>
+<button class="!block !min-w-[2.5rem] !h-10 !px-3 !rounded-sm !tracking-normal hocus:!bg-black hocus:!text-white hocus:!opacity-100 transition-colors duration-100 focus-visible:duration-0 !bg-white !text-black" data-turbo-frame="turboSerp" form="searchForm" formaction="" name="p" type="submit" value="4">
+        4
+    </button>
+<button class="!block !min-w-[2.5rem] !h-10 !px-3 !rounded-sm !tracking-normal hocus:!bg-black hocus:!text-white hocus:!opacity-100 transition-colors duration-100 focus-visible:duration-0 !bg-white !text-black" data-turbo-frame="turboSerp" form="searchForm" formaction="" name="p" type="submit" value="5">
+        5
+    </button>
+<button class="!block !min-w-[2.5rem] !h-10 !px-3 !rounded-sm !tracking-normal hocus:!bg-black hocus:!text-white hocus:!opacity-100 transition-colors duration-100 focus-visible:duration-0 !bg-white !text-black" data-turbo-frame="turboSerp" form="searchForm" formaction="" name="p" type="submit" value="6">
+        6
+    </button>
+<button class="!block !min-w-[2.5rem] !h-10 !px-3 !rounded-sm !tracking-normal hocus:!bg-black hocus:!text-white hocus:!opacity-100 transition-colors duration-100 focus-visible:duration-0 !bg-white !text-black" data-turbo-frame="turboSerp" form="searchForm" formaction="" name="p" type="submit" value="7">
+        7
+    </button>
+<div class="flex items-center justify-center w-10 h-10 rounded-sm bg-white">
+        ...
+    </div>
+<button class="!block !min-w-[2.5rem] !h-10 !px-3 !rounded-sm !tracking-normal hocus:!bg-black hocus:!text-white hocus:!opacity-100 transition-colors duration-100 focus-visible:duration-0 !bg-white !text-black" data-turbo-frame="turboSerp" form="searchForm" formaction="" name="p" type="submit" value="10">
+        10
+    </button>
+<button class="flex items-center justify-center w-10 !h-10 !rounded-sm !bg-white !text-black hocus:!bg-black hocus:!text-white hocus:!opacity-100 transition-colors duration-100 focus-visible:duration-0" data-turbo-frame="turboSerp" form="searchForm" formaction="" name="p" type="submit" value="2">
+
+</button>
+</nav>
+<nav class="flex sm:hidden typo-m flex-wrap">
+<button aria-disabled="true" class="flex items-center justify-center w-11 !h-11 !rounded-sm !bg-white !text-black hocus:!bg-black hocus:!text-white hocus:!opacity-100 transition-colors duration-100 focus-visible:duration-0 pointer-events-none opacity-40" data-turbo-frame="turboSerp" form="searchForm" formaction="" name="p" type="submit" value="0">
+
+</button>
+<div class="flex items-center h-11 !outline-1 !outline-black !outline rounded-sm ml-6 py-2 px-3" data-controller="resize toggle-attribute auto-submittable">
+<input class="rounded-sm input-number-no-spinner outline-none text-center min-w-[2ch]" data-action="resize#setWidth
+                     focusin-&gt;toggle-attribute#setAttribute
+                     blur-&gt;auto-submittable#formSubmit
+                     keypress.enter-&gt;auto-submittable#formSubmit" data-resize-target="input" data-toggle-attribute-attribute-param="name" data-toggle-attribute-target="element" data-toggle-attribute-value-param="p" form="searchForm" inputmode="numeric" max="10" min="1" type="number" value="1"/>
+<button class="hidden" data-auto-submittable-target="submitter" data-turbo-frame="turboSerp" form="searchForm" formaction="">
+</button>
+</div>
+<span class="flex items-center w-auto h-auto mx-3">
+        sur
+    </span>
+<span class="flex items-center w-auto h-auto mr-6">
+        10
+    </span>
+<button class="flex items-center justify-center w-11 !h-11 !rounded-sm !bg-white !text-black hocus:!bg-black hocus:!text-white hocus:!opacity-100 transition-colors duration-100 focus-visible:duration-0" data-turbo-frame="turboSerp" form="searchForm" formaction="" name="p" type="submit" value="2">
+
+</button>
+</nav>
+</section>
+</div>
+<div class="xl:col-span-1 xl:col-start-14 xl:relative">
+<div class="flex items-end xl:items-center flex-col fixed bottom-4 right-4 xl:sticky xl:top-[85%] z-10">
+<button class="btn-icon-primary-l text-white mb-3 transition-opacity opacity-25 duration-600 collapse ease-in-out hover:opacity-100" data-action="
+            analytics#push
+            scroll-to-top#scroll
+            intersect:buttonsBar:exit@document-&gt;toggle#add 
+            intersect:buttonsBar:enter@document-&gt;toggle#remove
+        " data-analytics-values-param='{"event": "generic", "EventName": "top"}' data-controller="toggle" data-scroll-to-top-behavior-param="smooth" data-toggle-target="toToggle" data-toggle-toggled-class="!visible">
+
+</button>
+<button class="btn-primary-l flex lg:hidden justify-end w-auto max-w-96 bg-yellow-300 transition-all text-black duration-600 ease-in-out overflow-hidden whitespace-nowrap" data-action="
+            analytics#push
+            input-checker#check
+            intersect:buttonsBar:exit@document-&gt;toggle#add
+            intersect:buttonsBar:enter@document-&gt;toggle#remove
+        " data-analytics-values-param='{"event": "generic", "EventName": "alert_load", "EventLibelle": "serp-sticky" }' data-controller="input-checker toggle" data-cy="createAlertBtn" data-input-checker-input-value="#alert-modal" data-toggle-target="toToggle" data-toggle-toggled-class="!flex !max-w-[44px] pr-[14px]">
+<span class="opacity-100 transition-opacity duration-100 ease-in-out" data-action="
+                intersect:buttonsBar:exit@document-&gt;toggle#add 
+                intersect:buttonsBar:enter@document-&gt;toggle#remove
+            " data-controller="toggle" data-toggle-target="toToggle" data-toggle-toggled-class="!opacity-0">
+            Créer mon alerte
+        </span>
+<div class="block">
+
+</div>
+</button>
+</div>
+</div>
+</section>
+
+
+</turbo-frame>
+<turbo-frame data-controller="service-adaptation" data-service-adaptation-hide-message-class="hidden" data-service-adaptation-url-value="/fr-fr/country/getpopinframeview" id="service-adaptation" src="">
+</turbo-frame>
+<div class="layout-grid" id="breadcrumb">
+<nav class="asSection pt-12 sm:pt-20 sm:bg-white">
+<ol class="flex flex-wrap sm:inline-block gap-x-2 text-grey-500 text-sm -mt-5">
+<li class="py-1 inline-block">
+<a class="link-text" href="https://www.hellowork.com/fr-fr/" title="Accueil">
+                    Accueil
+                </a>
+</li>
+<li class="py-1 inline-block before:content-['&gt;']">
+<a class="link-text" href="https://www.hellowork.com/fr-fr/emploi.html" title="Emploi">
+                            Emploi
+                        </a>
+</li>
+<li class="py-1 inline-block before:content-['&gt;']">
+<span class="no-underline font-semibold text-black">
+                            Recherche
+                        </span>
+</li>
+</ol>
+</nav>
+</div>
+<div class="mt-10">
+<footer class="sm:layout-grid 2xl:mx-auto typo-s 2xl:mb-20 sm:mb-6 m-0">
+<div class="bg-grey-50 sm:rounded-sm !col-[full] grid grid-cols-subgrid py-6 xl:py-12 sm:py-14 px-4 sm:px-0">
+<div class="layout-inner-grid sm:col-[main]">
+<div class="xl:col-span-3 col-span-5 sm:col-start-2 xl:col-start-1">
+<span class="typo-l">
+                    Les sites
+                </span>
+<ul class="flex flex-col gap-6 mt-4 mb-6 sm:mt-6 sm:mb-10">
+<li><a class="link-text" href="https://hellocv.com/" rel="noopener" target="_blank">HelloCV</a></li>
+<li><a class="link-text" href="https://www.helloworkplace.fr/" rel="noopener" target="_blank">Helloworkplace</a></li>
+<li><a class="link-text" href="https://www.blogdumoderateur.com/" rel="noopener" target="_blank">BDM</a></li>
+<li><a class="link-text" href="https://www.jobijoba.com/fr/" rel="noopener" target="_blank">Jobijoba</a></li>
+<li>
+<span class="atc-text" data-atc-l-value="xuggcf://jjj=pt=znsbezngvba=pt=se/f" data-atc-t-value="x_oynaxf" data-controller="atc">
+                            Maformation
+                        </span>
+</li>
+<li><a class="link-text" href="https://diplomeo.com/" rel="noopener" target="_blank">Diplomeo</a></li>
+</ul>
+</div>
+<div class="xl:col-span-3 col-span-5 sm:col-start-7 xl:col-start-4">
+<span class="typo-l">L'emploi</span>
+<ul class="flex flex-col gap-6 mt-4 mb-6 sm:mt-6 sm:mb-10">
+<li>
+<span class="atc-text" data-atc-l-value="x/se-se/rzcybv/vaqrk-pngrtbevr=pt=ugzyf" data-controller="atc">
+                                Offres d'emploi par métier
+                            </span>
+</li>
+<li>
+<span class="atc-text" data-atc-l-value="x/se-se/rzcybv/vaqrk-ybpnyvgr=pt=ugzyf" data-controller="atc">
+                                Offres d'emploi par ville
+                            </span>
+</li>
+<li>
+<span class="atc-text" data-atc-l-value="x/se-se/ragercevfr=pt=ugzyf" data-controller="atc">
+                                Offres d'emploi par entreprise
+                            </span>
+</li>
+<li>
+<span class="atc-text" data-atc-l-value="x/se-se/rzcybv/vaqrk-zbg-pyr=pt=ugzyf" data-controller="atc">
+                                Offres d'emploi par mots clés
+                            </span>
+</li>
+</ul>
+</div>
+<div class="xl:col-span-3 col-span-5 sm:col-start-2 xl:col-start-7">
+<span class="typo-l">
+                    L'entreprise
+                </span>
+<ul class="flex flex-col gap-6 mt-4 mb-6 sm:mt-6 sm:mb-10">
+<li>
+<span class="atc-text" data-atc-l-value="xuggcf://jjj=pt=uryybjbex-tebhc=pt=pbzf" data-atc-t-value="x_oynaxf" data-controller="atc">
+                            Qui sommes-nous ?
+                        </span>
+</li>
+<li>
+<span class="atc-text" data-atc-l-value="xuggcf://pneevrerf=pt=uryybjbex-tebhc=pt=pbzf" data-atc-t-value="x_oynaxf" data-controller="atc">
+                            On recrute
+                        </span>
+</li>
+<li>
+<span class="atc-text" data-atc-l-value="xuggcf://ohqqv=pt=uryybjbex=pt=pbzf" data-controller="atc">
+                            Accès client
+                        </span>
+</li>
+</ul>
+</div>
+<div class="xl:col-span-3 col-span-5 sm:col-start-7 xl:col-start-10">
+<span class="typo-l">
+                    Les apps
+                </span>
+<div class="flex flex-wrap items-left flex-row sm:flex-col mt-4 sm:mt-6 mb-6 sm:mb-10 gap-6 sm:gap-4 sm:w-36 text-white">
+<span data-atc-l-value="xuggcf://cynl=pt=tbbtyr=pt=pbz/fgber/nccf/qrgnvyf?vq=pbz=pt=ertvbafwbo=pt=naqebvqf" data-atc-t-value="x_oynaxf" data-controller="atc">
+
+</span>
+<span data-atc-l-value="xuggcf://nccf=pt=nccyr=pt=pbz/se/ncc/ertvbafwbo-rzcybv/vq408615037?zg=8f" data-atc-t-value="x_oynaxf" data-controller="atc">
+
+</span>
+</div>
+</div>
+<div class="col-span-full sm:col-start-2 xl:col-start-1 flex flex-col gap-4 flex-wrap justify-between">
+<div class="flex flex-col sm:flex-row gap-x-4 gap-y-2">
+<div>Nous suivre sur :</div>
+<ul aria-label="Liste de nos réseaux sociaux" class="flex gap-4">
+<li class="flex">
+<span class="m-auto hocus:text-grey-500 cursor-pointer" data-atc-l-value="xuggcf://jjj=pt=snprobbx=pt=pbz/uryybjbexpbzf" data-atc-t-value="x_oynaxf" data-controller="atc">
+
+</span>
+</li>
+<li class="flex">
+<span class="m-auto hocus:text-grey-500 cursor-pointer" data-atc-l-value="xuggcf://jjj=pt=lbhghor=pt=pbz/punaary/HPel7GvA8-qSXDHtlHZLNAGDf" data-atc-t-value="x_oynaxf" data-controller="atc">
+
+</span>
+</li>
+<li class="flex">
+<span class="m-auto hocus:text-grey-500 cursor-pointer" data-atc-l-value="xuggcf://gjvggre=pt=pbz/uryybjbexf" data-atc-t-value="x_oynaxf" data-controller="atc">
+
+</span>
+</li>
+<li class="flex">
+<span class="m-auto hocus:text-grey-500 cursor-pointer" data-atc-l-value="xuggcf://jjj=pt=gvxgbx=pt=pbz/@uryybjbexpbzf" data-atc-t-value="x_oynaxf" data-controller="atc">
+
+</span>
+</li>
+<li class="flex">
+<span class="m-auto hocus:text-grey-500 cursor-pointer" data-atc-l-value="xuggcf://jjj=pt=vafgntenz=pt=pbz/uryybjbex_/f" data-atc-t-value="x_oynaxf" data-controller="atc">
+
+</span>
+</li>
+<li class="flex">
+<span class="m-auto hocus:text-grey-500 cursor-pointer" data-atc-l-value="xuggcf://jjj=pt=yvaxrqva=pt=pbz/pbzcnal/uryybjbexpbz/f" data-atc-t-value="x_oynaxf" data-controller="atc">
+
+</span>
+</li>
+<li class="flex">
+<span class="m-auto hocus:text-grey-500 cursor-pointer" data-atc-l-value="xuggcf://cebsvyr=pt=tbbtyr=pt=pbz/pc/Pt0iMl8kZJM5ZKSeL3cef" data-atc-t-value="x_oynaxf" data-controller="atc">
+
+</span>
+</li>
+<li class="flex">
+<span class="m-auto hocus:text-grey-500 cursor-pointer" data-atc-l-value="xuggcf://se=pt=cvagrerfg=pt=pbz/Uryybjbex_/f" data-atc-t-value="x_oynaxf" data-controller="atc">
+
+</span>
+</li>
+</ul>
+</div>
+<div class="flex flex-wrap gap-x-2 sm:gap-x-4 gap-y-4">
+<span class="atc-text" data-atc-l-value="x/se-se/cntr/vasbf-yrtnyrf=pt=ugzyf" data-atc-t-value="x_oynaxf" data-controller="atc">
+                            Informations légales
+                        </span>
+<span class="atc-text" data-atc-l-value="xuggcf://jjj=pt=uryybjbex-tebhc=pt=pbz/se/yrtny/pth-uryybjbex/f" data-atc-t-value="x_oynaxf" data-controller="atc">
+                        CGU
+                    </span>
+<span class="atc-text" data-atc-l-value="xuggcf://jjj=pt=uryybjbex-tebhc=pt=pbz/se/yrtny/cqp-uryybjbex/f" data-atc-t-value="x_oynaxf" data-controller="atc">
+                        Politique de confidentialité
+                    </span>
+<span class="link-text" data-hw-cc-btn-toggle-modal="">
+                        Gérer les traceurs
+                    </span>
+<span class="atc-text" data-atc-l-value="xuggcf://jjj=pt=uryybjbex-tebhc=pt=pbz/se/yrtny/qrpynengvba-npprffvovyvgr-uryybjbex/f" data-atc-t-value="x_oynaxf" data-controller="atc">
+                        Accessibilité : non conforme
+                    </span>
+<span class="atc-text" data-atc-l-value="xuggcf://uryybjbex-pnaqvqng=pt=mraqrfx=pt=pbz/up/sef" data-atc-t-value="x_oynaxf" data-controller="atc">
+                        Aide et contact
+                    </span>
+</div>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<section class="fixed flex flex-col gap-y-4 z-50 w-full -top-[90px] px-4 sm:px-0 sm:w-auto sm:top-24 sm:-right-[388px] xl:-right-[448px]" data-content-missing-target="container" data-display-toast-message-target="turboStreamToastMessage" id="turboStreamToastMessage">
+</section>
+<turbo-frame id="dynamic-toast-messages" src="/fr-fr/toastmessages">
+</turbo-frame>
+<template data-content-missing-target="template" data-display-toast-message-target="errorTemplate">
+<div data-content-missing-target="instance">
+<div class="rounded-sm flex items-center bg-blackToast shadow-toast p-4 gap-4 w-full min-h-[90px] sm:min-h-fit sm:w-[388px] xl:w-[448px] toast-scale" data-action="intersect:notification:enter-&gt;timer#start:once
+    intersect:notification:enter-&gt;toggle#add
+    timer:timeout-&gt;removable#remove
+    mouseover-&gt;timer#pause
+    mouseout-&gt;timer#pause" data-controller="removable intersect toggle timer" data-intersect-name-value="notification" data-removable-animation-class="slideout" data-timer-timeout-value="5000" data-toggle-target="toToggle" data-toggle-toggled-class="slidein" role="alert">
+
+<div class="flex flex-col gap-2 text-white w-full">
+<p class="typo-s-bold">{{title}}</p>
+<div class="typo-s overflow-wrap-anywhere">
+                    {{message}}
+                </div>
+<span class="typo-s-bold atc-underline hover:no-underline" data-atc-l-value="{{link}}" data-controller="atc">
+                    {{linkLabel}}
+                </span>
+</div>
+<button aria-label="Fermer la notification" class="block" data-action="removable#remove">
+
+</button>
+</div>
+</div>
+</template>
+</main>
+
+
+</body>
+</html>

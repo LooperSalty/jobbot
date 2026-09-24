@@ -1,0 +1,38 @@
+[
+ {
+  "lieuDisplay": "Metz - 57",
+  "lieuId": 582374,
+  "lieuType": "FR_COMMUNE",
+  "latitude": 49.1082122,
+  "longitude": 6.1960061,
+  "citycode": "57463",
+  "lieuxParentsIds": [
+   "57",
+   "20074"
+  ]
+ },
+ {
+  "lieuDisplay": "Metz-en-Couture - 62",
+  "lieuId": 585376,
+  "lieuType": "FR_COMMUNE",
+  "latitude": 50.0624751,
+  "longitude": 3.0630977,
+  "citycode": "62572",
+  "lieuxParentsIds": [
+   "62",
+   "20073"
+  ]
+ },
+ {
+  "lieuDisplay": "Metz-le-Comte - 58",
+  "lieuId": 582829,
+  "lieuType": "FR_COMMUNE",
+  "latitude": 47.392967,
+  "longitude": 3.6357728,
+  "citycode": "58165",
+  "lieuxParentsIds": [
+   "58",
+   "20071"
+  ]
+ }
+]

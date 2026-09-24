@@ -1,0 +1,28 @@
+{
+  "alternance_fullstack_metz": {
+    "source": "lba",
+    "external_id": "lba-66f1c0a2e7",
+    "title": "Alternant Développeur Web Fullstack (H/F)",
+    "company": "Lorraine Digital Services",
+    "location": "Metz (57)",
+    "postal_code": "57000",
+    "latitude": 49.1167,
+    "longitude": 6.1755,
+    "contract_type": "alternance",
+    "apply_method": "lba",
+    "description": "Lorraine Digital Services est une ESN messine de 45 collaborateurs qui conçoit et maintient des applications web métier pour des collectivités, des hôpitaux et des industriels du Grand Est. Notre pôle Produits développe un portail de gestion des interventions techniques utilisé chaque jour par plus de 2 000 agents.\n\nDans le cadre de la rentrée d'octobre 2026, nous recrutons un(e) alternant(e) développeur web fullstack pour une durée de 24 mois, en préparation d'un diplôme de niveau Bac+5 (Master ou titre RNCP niveau 7).\n\nVos missions :\n- Développer de nouvelles fonctionnalités sur nos applications (front-end React / TypeScript, back-end Node.js)\n- Concevoir et documenter des API REST consommées par nos applications web et mobiles\n- Modéliser et faire évoluer nos bases de données PostgreSQL\n- Participer aux revues de code, aux daily meetings et aux sprints (méthode Scrum)\n- Écrire des tests unitaires et d'intégration (Jest) et contribuer à notre chaîne CI/CD sous GitLab CI\n- Conteneuriser les services avec Docker et participer aux mises en production\n- Rédiger la documentation technique et assurer le support auprès des utilisateurs\n\nProfil recherché :\nTitulaire d'un Bac+3 en informatique (BUT, licence), vous intégrez une formation Bac+5 en alternance.\nVous maîtrisez JavaScript / TypeScript et React ; une première expérience avec Node.js et SQL est indispensable.\nLa connaissance de Docker et de Git est requise. Des notions de NestJS ou de Kubernetes seraient un plus.\nVous êtes autonome, rigoureux(se), curieux(se) et à l'aise dans le travail en équipe.\nAnglais technique (lecture de documentation) apprécié.\n\nInformations complémentaires :\nRythme : 3 semaines en entreprise / 1 semaine en formation. Poste basé à Metz (Technopôle), 1 jour de télétravail par semaine après la période d'intégration. Tickets restaurant, mutuelle prise en charge à 60 %."
+  },
+  "cdi_dotnet_nancy": {
+    "source": "france_travail",
+    "external_id": "207QKLM",
+    "title": "Développeur .NET / C# junior (H/F)",
+    "company": "Logistix Est",
+    "location": "54 - NANCY",
+    "postal_code": "54000",
+    "latitude": 48.688135,
+    "longitude": 6.171263,
+    "contract_type": "cdi",
+    "apply_method": "external",
+    "description": "Logistix Est édite un ERP pour les transporteurs du Grand Est. Au sein d'une équipe de 6 développeurs, vous faites évoluer nos applications métier.\n\nVos missions :\n- Développement de nouvelles fonctionnalités en C# / .NET 8 (WPF côté client lourd, ASP.NET Core pour les API)\n- Requêtes et procédures stockées SQL Server, Entity Framework\n- Correction de bugs et support aux utilisateurs\n- Utilisation d'Azure DevOps et Git au quotidien\n\nVotre profil :\nIssu(e) d'une formation Bac+3 à Bac+5 en informatique, vous avez idéalement une première expérience (stage ou alternance) en développement .NET. Débutant accepté.\nVous êtes rigoureux(se), autonome et avez le sens du service.\n\nCDI, 35h, poste basé à Nancy, 2 jours de télétravail par semaine."
+  }
+}

@@ -1,0 +1,63 @@
+{
+ "_comment": "Schema-derived API Apprentissage /job/v1/search response (docs/research/la-bonne-alternance.md 3.1 + OpenAPI JobOfferRead/JobRecruiter). Values reuse live path-B items. Not a live response (no key).",
+ "jobs": [
+  {
+   "identifier": {"id": "6a064773687b65f199a02f5f", "partner_label": "Hellowork", "partner_job_id": "79006307"},
+   "workplace": {"name": "Chausséa", "brand": null, "legal_name": null, "description": "Groupe lorrain de distribution de chaussures.", "website": null, "siret": "33026769100377", "size": "2 000 à 4 999 salariés",
+    "location": {"address": "57000 Metz", "geopoint": {"type": "Point", "coordinates": [6.194897, 49.108385]}},
+    "domain": {"idcc": null, "opco": "L'Opcommerce", "naf": {"code": "47.72A", "label": "Commerce de détail de la chaussure"}}},
+   "apply": {"url": "https://www.hellowork.com/fr-fr/emplois/79006307.html?utm_source=bonnealternance", "phone": null, "recipient_id": null},
+   "contract": {"start": null, "duration": 24, "type": ["Apprentissage"], "remote": "onsite"},
+   "offer": {"title": "Alternant - Developpeur Web Fullstack H/F", "description": "Tu développes des applications web.", "desired_skills": ["Vue.js, Node.js, SQL, Git"], "to_be_acquired_skills": [], "access_conditions": [], "opening_count": 1,
+    "publication": {"creation": "2026-09-13T20:05:40.000Z", "expiration": "2026-11-13T20:05:40.000Z"}, "rome_codes": ["M1855"],
+    "target_diploma": {"european": "7", "label": "Master, titre ingénieur, grande école (Bac+5)"}, "status": "Active"},
+   "is_delegated": false
+  },
+  {
+   "identifier": {"id": "6b1111111111111111111111", "partner_label": "offres_emploi_lba", "partner_job_id": "6b1111111111111111111111"},
+   "workplace": {"name": "EFLUID", "description": null, "website": "https://www.efluid.fr", "siret": "78887652200038", "size": "250-499",
+    "location": {"address": "2B RUE ARDANT DU PICQ 57000 METZ", "geopoint": {"type": "Point", "coordinates": [6.174426, 49.128894]}},
+    "domain": {"idcc": null, "opco": "OPCO 2i", "naf": {"code": "58.29C", "label": "Edition de logiciels applicatifs"}}},
+   "apply": {"url": "https://labonnealternance.apprentissage.beta.gouv.fr/emploi/offres_emploi_lba/6b1111111111111111111111/developpeur", "phone": null, "recipient_id": "recruiters_6b1111111111111111111111"},
+   "contract": {"start": "2026-10-01T00:00:00.000Z", "duration": 24, "type": ["Apprentissage"], "remote": "hybrid"},
+   "offer": {"title": "Développeur / Développeuse web", "description": "Développement de notre suite logicielle Java / Angular.", "desired_skills": ["Rigueur"], "to_be_acquired_skills": ["Développer une application web"], "access_conditions": ["Bac+3"], "opening_count": 1,
+    "publication": {"creation": "2026-09-19T09:00:00.000Z", "expiration": null}, "rome_codes": ["M1855"], "target_diploma": null, "status": "Active"},
+   "is_delegated": false
+  },
+  {
+   "identifier": {"id": null, "partner_label": "France Travail", "partner_job_id": "212ABCD"},
+   "workplace": {"name": "ACME LOGICIELS", "description": null, "website": null, "siret": null, "size": null,
+    "location": {"address": "57000 METZ", "geopoint": {"type": "Point", "coordinates": [6.1757, 49.1193]}}, "domain": null},
+   "apply": {"url": "https://candidat.francetravail.fr/offres/recherche/detail/212ABCD", "phone": null, "recipient_id": null},
+   "contract": {"start": null, "duration": null, "type": ["Apprentissage"], "remote": null},
+   "offer": {"title": "Développeur Full-Stack React / Node.js en alternance (H/F)", "description": "Télétravail partiel possible.", "desired_skills": [], "to_be_acquired_skills": [], "access_conditions": [], "opening_count": 1,
+    "publication": {"creation": "2026-09-20T08:15:42.000Z", "expiration": null}, "rome_codes": ["M1855"], "target_diploma": null, "status": "Active"},
+   "is_delegated": false
+  },
+  {
+   "identifier": {"id": "6c2222222222222222222222", "partner_label": "recruteurs_lba", "partner_job_id": "6c2222222222222222222222"},
+   "workplace": {"name": "IGNORED", "location": {"address": "57000 METZ", "geopoint": {"type": "Point", "coordinates": [6.17, 49.11]}}},
+   "apply": {"url": "https://labonnealternance.apprentissage.beta.gouv.fr/", "phone": null, "recipient_id": null},
+   "contract": {"type": ["Apprentissage"]},
+   "offer": {"title": "IGNORED", "description": ""},
+   "is_delegated": false
+  }
+ ],
+ "recruiters": [
+  {
+   "identifier": {"id": "6a003c349a6be614e48aa5db"},
+   "workplace": {"name": "EFLUID", "brand": null, "legal_name": "EFLUID SAS", "description": "Éditeur de logiciels pour les métiers de l'énergie.", "website": "https://www.efluid.fr", "siret": "78887652200038", "size": "250-499",
+    "location": {"address": "2B RUE ARDANT DU PICQ 57000 METZ", "geopoint": {"type": "Point", "coordinates": [6.174426, 49.128894]}},
+    "domain": {"idcc": null, "opco": "OPCO 2i", "naf": {"code": "58.29C", "label": "Edition de logiciels applicatifs"}}},
+   "apply": {"url": "https://labonnealternance.apprentissage.beta.gouv.fr/emploi/recruteurs_lba/78887652200038/efluid", "phone": "0387000000", "recipient_id": "partners_6a003c349a6be614e48aa5db"}
+  },
+  {
+   "identifier": {"id": "6d3333333333333333333333"},
+   "workplace": {"name": "NANCY CODE", "description": null, "website": null, "siret": "12345678900011", "size": "10-19",
+    "location": {"address": "1 RUE DU CODE 54000 NANCY", "geopoint": {"type": "Point", "coordinates": [6.1844, 48.6921]}},
+    "domain": {"idcc": null, "opco": null, "naf": {"code": "62.01Z", "label": "Programmation informatique"}}},
+   "apply": {"url": "https://labonnealternance.apprentissage.beta.gouv.fr/emploi/recruteurs_lba/12345678900011/nancy-code", "phone": null, "recipient_id": null}
+  }
+ ],
+ "warnings": [{"code": "FRANCE_TRAVAIL_API_ERROR", "message": "Les offres France Travail sont partielles."}]
+}

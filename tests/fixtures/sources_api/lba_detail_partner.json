@@ -1,0 +1,75 @@
+{
+ "ideaType": "offres_emploi_partenaires",
+ "title": "Alternant - Developpeur Web Fullstack H/F",
+ "contact": {
+  "email": "",
+  "hasEmail": false,
+  "phone": null,
+  "url": "https://www.hellowork.com/fr-fr/emplois/79006307.html?utm_campaign=alternance+-+bonnealternance+-+informatique&utm_content=fluxbonnealternance&utm_medium=metamoteurs-free&utm_source=bonnealternance&utm_term=79006307"
+ },
+ "place": {
+  "distance": null,
+  "fullAddress": "57000 Metz",
+  "latitude": 49.108385,
+  "longitude": 6.194897,
+  "numberAndStreet": "57000 Metz",
+  "city": "Metz",
+  "zipCode": "57000",
+  "remoteOnly": false
+ },
+ "company": {
+  "name": "Chausséa",
+  "siret": "33026769100377",
+  "size": "2 000 à 4 999 salariés",
+  "url": null,
+  "opco": {
+   "label": "L'Opcommerce",
+   "url": null
+  },
+  "elligibleHandicap": false,
+  "isGeiq": false,
+  "hiringCount3Years": 62
+ },
+ "id": "6a064773687b65f199a02f5f",
+ "target_diploma_level": "Master, titre ingénieur, grande école (Bac+5)",
+ "job": {
+  "description": "Tu es passionné(e) par le développement web et tu as envie d'évoluer au sein d'une équipe dynamique, bienveillante et pleine de projets ? Rejoins-nous pour vivre une expérience enrichissante au coeur de projets variés et du quotidien d'une équipe tech dynamique !\n\nDécouvre tes futures missions juste ici :\n\n- Tu analyses les besoins des utilisateurs afin de proposer des solutions adaptées\n\n- Tu rédiges les spécifications techniques des projets\n\n- Tu développes et codes des applications en utilisant les langages de programmation appropriés\n\n- Tu assures la maintenance et l'amélioration des applications existantes\n\n- Tu documentes le code et les différents process mis en place\n\n- Tu apportes un support technique aux utilisateurs en cas de besoin\n\n- Tu effectues une veille technologique afin de suivre les évolutions et les bonnes pratiques du secteur",
+  "employeurDescription": "Tu cherches chaussure à ton pied ? Rejoins notre groupe labellisé « Capital Meilleur Employeur 2025 » et « Meilleure Chaîne de Magasins de l'Année 2025 » pour partager notre culture de la mode ! Nos équipes au siège social à Valleroy (54), proche de Metz, n'attendent que toi !\n\nCHAUSSEA en un coup d'oeil :\n\n- Un groupe français basé en Lorraine\n\n- + de 35 ans d'expérience dans la distribution de chaussure\n\n- + de 4200 collaborateurs\n\n- + de 650 magasins dans 3 pays : France, Belgique, Luxembourg\n\n- + 30 millions de paires vendues par an\n\n- Des 10ènes d'ouvertures de magasins chaque année\n\n- Une approche familiale : « La mode, le choix, le prix ! »",
+  "creationDate": "2026-09-13T20:05:40.000Z",
+  "id": "202a76a3-1873-4df6-bbfd-31d5959d9ee7",
+  "jobStartDate": null,
+  "jobExpirationDate": "2026-11-13T20:05:40.000Z",
+  "elligibleHandicap": false,
+  "dureeContrat": "24 mois",
+  "quantiteContrat": 1,
+  "status": "Active",
+  "type": [
+   "Apprentissage",
+   "Professionnalisation"
+  ],
+  "partner_label": "Hellowork",
+  "offer_desired_skills": [
+   "Qui es-tu ?\n\nTu es en recherche d'une alternance (Master) en développement informatique pour la rentrée 2026.\n\nL'esprit d'équipe, la force de proposition, l'esprit d'analyse et de synthèse sont tes supers pouvoirs.\n\nTu connais des technologies Web du type : Vue.js, Node.js, POO, SQL, GIT, API REST...\n\nLe petit +, tu connais Flutter (développement web mobile)\n\nL'engagement CHAUSSEA :\n\n- Pour ne pas te sentir à côté de tes pompes : un parcours d'intégration sur mesure\n\n- Une ambiance de travail à l'image de nos valeurs : Passion, Respect, Esprit d'équipe, Fidélité\n\nChez CHAUSSEA, seul le talent compte, ce poste est ouvert aux personnes en situation de handicap.\n\nRef: 8wvzi9yi36"
+  ],
+  "offer_to_be_acquired_skills": [],
+  "offer_access_conditions": [],
+  "contract_rythm": null,
+  "startType": null,
+  "startDateFlexible": null,
+  "isCfaEntreprise": false
+ },
+ "romes": [
+  {
+   "code": "M1855",
+   "label": null
+  }
+ ],
+ "nafs": [
+  {
+   "code": "47.72A",
+   "label": "Commerce de détail de la chaussure"
+  }
+ ],
+ "token": "REDACTED.JWT.TOKEN",
+ "recipient_id": "partners_6a064773687b65f199a02f5f"
+}

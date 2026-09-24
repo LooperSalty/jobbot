@@ -1,0 +1,32 @@
+{
+ "_comment": "Synthetic France Travail CDI page. 213XYZ1 carries a real recruiter address in contact.courriel (edge case); 213XYZ2 is an alternance CDI that the CDI query must drop. Not a live response.",
+ "resultats": [
+  {
+   "id": "213XYZ1",
+   "intitule": "Développeur Python junior (H/F)",
+   "description": "Rejoignez notre équipe data. Full remote possible.",
+   "dateCreation": "2026-09-22T07:00:00Z",
+   "lieuTravail": {"libelle": "57 - THIONVILLE", "codePostal": "57100"},
+   "entreprise": {"nom": "LORRAINE SOFT", "url": "https://www.lorraine-soft.fr/"},
+   "typeContrat": "CDI",
+   "typeContratLibelle": "Contrat à durée indéterminée",
+   "natureContrat": "Contrat travail",
+   "alternance": false,
+   "salaire": {"libelle": "Annuel de 32000.00 Euros à 36000.00 Euros sur 12 mois"},
+   "contact": {"nom": "M. Dupont", "courriel": "rh@lorraine-soft.fr"},
+   "origineOffre": {"origine": "1", "urlOrigine": "https://candidat.francetravail.fr/offres/recherche/detail/213XYZ1"}
+  },
+  {
+   "id": "213XYZ2",
+   "intitule": "Développeur web en apprentissage",
+   "description": "Contrat d'apprentissage en CDI.",
+   "dateCreation": "2026-09-22T07:00:00Z",
+   "lieuTravail": {"libelle": "57 - METZ", "codePostal": "57000"},
+   "entreprise": {"nom": "WEB EST"},
+   "typeContrat": "CDI",
+   "natureContrat": "Contrat apprentissage",
+   "alternance": true,
+   "origineOffre": {"origine": "1"}
+  }
+ ]
+}

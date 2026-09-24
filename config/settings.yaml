@@ -1,0 +1,44 @@
+# Réglages jobbot — toutes les clés sont optionnelles (valeurs par défaut dans src/jobbot/config.py).
+
+# auto   : candidature automatique si score ≥ thresholds.auto_apply_min_score, sinon file "à valider"
+# review : tout passe par la file "à valider" du dashboard
+mode: auto
+
+headless: false          # navigateur visible pour LinkedIn/HelloWork (plus sûr, tu peux regarder)
+browser_channel: chrome  # utilise ton Chrome installé ; null = Chromium de Playwright
+
+llm:
+  provider: claude_cli   # claude_cli (ton abonnement Claude Code) | anthropic (clé API) | none
+  model: claude-sonnet-5
+  fast_model: claude-haiku-4-5-20251001
+  timeout_s: 240
+
+limits:                  # quotas journaliers prudents (LinkedIn bannit les comptes trop actifs)
+  linkedin_per_day: 15
+  hellowork_per_day: 10
+  lba_per_day: 20
+  email_applications_per_day: 30
+  spontaneous_per_day: 20
+  followups_per_day: 10
+  min_delay_s: 40
+  max_delay_s: 140
+
+thresholds:
+  min_match_score: 45      # en dessous : offre écartée
+  auto_apply_min_score: 60 # au-dessus (mode auto) : candidature sans validation
+  target_ats_score: 80     # le CV est réécrit jusqu'à atteindre ce score (sans rien inventer)
+  max_tailor_iterations: 3
+
+followup:
+  first_after_days: 7
+  second_after_days: 8
+  max_followups: 2
+  give_up_after_days: 30
+
+search:
+  sources: [lba, france_travail, linkedin, hellowork, indeed, wttj, free_work, apec]
+  max_results_per_query: 100
+  max_age_days: 30
+
+notify_jarvis: false     # annonce vocale des réponses/entretiens via Jarvis
+jarvis_script:           # chemin de ton jarvis_notify.py, ex. "C:/chemin/vers/jarvis_notify.py" (vide = désactivé)

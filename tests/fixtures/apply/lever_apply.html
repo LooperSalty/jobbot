@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Acme - Full-Stack Developer (Apprenticeship)</title></head>
+<!-- Lever-like application page (jobs.lever.co/{company}/{id}/apply): named inputs, hidden resume input
+     (class invisible-resume-upload), labels rendered as divs (docs/research/ats-and-documents.md §2.1, §5.19). -->
+<body>
+<form id="application-form">
+  <div class="application-question"><div class="application-label">Full name ✱</div><input type="text" name="name" required></div>
+  <div class="application-question"><div class="application-label">Email ✱</div><input type="email" name="email" required></div>
+  <div class="application-question"><div class="application-label">Phone</div><input type="text" name="phone"></div>
+  <div class="application-question"><div class="application-label">Current company</div><input type="text" name="org"></div>
+  <div class="application-question"><div class="application-label">LinkedIn URL</div><input type="text" name="urls[LinkedIn]"></div>
+  <div class="application-question"><div class="application-label">GitHub URL</div><input type="text" name="urls[GitHub]"></div>
+  <input type="file" name="resume" class="invisible-resume-upload" style="display:none">
+  <div class="application-question"><div class="application-label">Additional information</div><textarea name="comments"></textarea></div>
+  <button type="submit" id="btn-submit">Submit application</button>
+</form>
+<script>
+document.getElementById('application-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  fetch('/__test/submit', {method: 'POST', body: '{}'});
+});
+</script>
+</body>
+</html>

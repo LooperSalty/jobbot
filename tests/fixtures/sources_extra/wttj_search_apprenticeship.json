@@ -1,0 +1,199 @@
+{
+ "hits": [
+  {
+   "contract_duration_maximum": 24,
+   "summary": "Rejoins Chargemap, une entreprise engagée dans la mobilité électrique. En tant qu'alternant Data Scientist, tu travailleras en étroite collaboration avec les équipes Tech et Produit pour développer et déployer des solutions IA. Tu participeras au développement de modèles de Machine Learning, à l'exploitation de la base de connaissance de Chargemap, à la synergie avec les équipes Produit et Tech, et à l'analyse métier et à la visualisation de la donnée.",
+   "_geoloc": [
+    {
+     "lat": 48.59438,
+     "lng": 7.71416
+    }
+   ],
+   "has_benefits": true,
+   "has_remote": true,
+   "language": "fr",
+   "sectors": [
+    {
+     "name": "Mobilité",
+     "reference": "mobility-1",
+     "parent_name": "Mobilité / Transport",
+     "parent_reference": "mobility-transport"
+    },
+    {
+     "name": "Média",
+     "reference": "media-1",
+     "parent_name": "Culture / Média / Divertissement",
+     "parent_reference": "culture-media-entertainment"
+    },
+    {
+     "name": "E-commerce",
+     "reference": "e-commerce-1",
+     "parent_name": "Distribution",
+     "parent_reference": "distribution-1"
+    }
+   ],
+   "wk_reference": "GBCMES_jXQD8ZQ",
+   "new_profession": {
+    "sub_category_reference": "data-business-intelligence-yZjY1",
+    "sub_category_name": "Données/Business Intelligence",
+    "category_reference": "tech-engineering-3NjUy",
+    "category_name": "Technologie et ingénierie",
+    "pivot_name": "Scientifique des données",
+    "pivot_reference": "data-scientist-iZWQy"
+   },
+   "published_at_timestamp": 1789723248,
+   "is_boosted": false,
+   "salary_period": "yearly",
+   "slug": "data-scientist-h-f-chargemap_strasbourg",
+   "source_stage": "production",
+   "published_at": "2026-09-18T09:20:48Z",
+   "has_salary_yearly_minimum": false,
+   "published_at_date": "2026-09-18",
+   "salary_yearly_minimum": null,
+   "remote": "partial",
+   "experience_level_minimum": null,
+   "contract_type": "apprenticeship",
+   "has_education_level": false,
+   "organization": {
+    "name": "Groupe Brakson (Chargemap, Mister EV, Saabre)",
+    "slug": "chargemap",
+    "reference": "R1pLKRA",
+    "summary": "Solutions de recharge et médias pour transports écologiques et énergies renouvelables.",
+    "nb_employees": 140,
+    "creation_year": 2015
+   },
+   "offices": [
+    {
+     "state": "Grand Est",
+     "city": "Strasbourg",
+     "country": "France",
+     "country_code": "FR",
+     "district": "Bas-Rhin",
+     "local_district": "Bas-Rhin",
+     "local_city": "Strasbourg",
+     "local_state": "Grand Est"
+    }
+   ],
+   "profile": "Vous avez réalisé des projets autour de la data science ou de l’IA, et vous cherchez à développer vos compétences dans une entreprise où vos idées comptent ? Bienvenue chez nous !\n\nVous avez acquis de bonnes bases en Python et en manipulation de données grâce à vos projets académiques ou lors d’une expérience en entreprise, et vous êtes à l’aise avec des bibliothèques comme Pandas ou Scikit-learn ;\n\nVous possédez une compréhension générale des principaux algorithmes de Machine Learning (régression, classification, clustering…) et de leur logique d’application, même si vous n’avez pas encore eu l’occasion de les industrialiser ;\n\nVous avez un bon esprit d’analyse, aimez structurer vos réflexions et êtes capable d’expliquer vos choix de manière claire, même à des interlocuteurs non techniques ;\n\nVotre aisance relationnelle et votre sens de la communication facilitent le partage de vos connaissances au sein de l’équipe ;\n\nVous utilisez déjà l’IA dans vos projets ou votre quotidien (génération de code, création d’analyses, automatisation de tâches répétitives…), pour gagner en efficacité.\n\nLes compétences techniques sont importantes, mais pour pouvoir vous intégrer au sein des équipes, vous devez avoir des qualités humaines qui sont chères à nos yeux :\n\n* **Savoir travailler efficacement en équipe :** Nous sommes une équipe de 4 personnes et pour nous, travailler efficacement dans un climat de confiance est primordial !\n    \n* **Être dynamique, autonome et faire preuve d’initiative :** Pour faire face à une concurrence de plus en plus importante, nous devons réagir rapidement auprès de notre communauté avec les solutions les plus adaptées et novatrices.\n    \n* **Avoir l’envie constante d’apprendre et de s’améliorer :** L’électromobilité est un secteur en plein essor où il est important de coupler les savoirs de chacun, c’est comme cela que nous maintiendrons notre avance sur nos concurrents",
+   "name": "Data Scientist en alternance (H/F) @Chargemap",
+   "key_missions": [
+    "Participer au développement de modèles de Machine Learning appliqués aux problématiques métier de Chargemap.",
+    "Exploiter la base de connaissance de Chargemap et participer à son enrichissement.",
+    "Travailler en synergie avec les équipes Produit et Tech pour identifier les cas d’usage les plus pertinents."
+   ],
+   "has_contract_duration": true,
+   "has_experience_level_minimum": false,
+   "reference": "3f34075b-b7b1-4fbb-8980-211584f6dd03",
+   "contract_duration_minimum": 12,
+   "salary_maximum": null,
+   "salary_minimum": null,
+   "salary_currency": "EUR",
+   "education_level": null,
+   "objectID": "3f34075b-b7b1-4fbb-8980-211584f6dd03"
+  },
+  {
+   "salary_maximum": null,
+   "wk_reference": "RF_yDPyybQ",
+   "sectors": [
+    {
+     "name": "Logistique",
+     "reference": "logistics",
+     "parent_name": "Mobilité / Transport",
+     "parent_reference": "mobility-transport"
+    },
+    {
+     "name": "Energie",
+     "reference": "energy",
+     "parent_name": "Industrie",
+     "parent_reference": "industry-1"
+    },
+    {
+     "name": "Distribution sélective",
+     "reference": "selective-distribution",
+     "parent_name": "Distribution",
+     "parent_reference": "distribution-1"
+    }
+   ],
+   "language": "fr",
+   "slug": "alternant-ingenieur-applications-et-services-digitaux-h-f-reims_reims",
+   "published_at_timestamp": 1785794530,
+   "has_education_level": false,
+   "has_experience_level_minimum": true,
+   "experience_level_minimum": 0.0,
+   "has_remote": true,
+   "salary_period": "yearly",
+   "has_salary_yearly_minimum": false,
+   "remote": "unknown",
+   "contract_duration_maximum": null,
+   "salary_currency": "EUR",
+   "summary": "Rejoins Rexel, un leader de la distribution multicanale dédiée à l'énergie. En tant qu'alternant ingénieur applications et services digitaux, tu auras l'opportunité de développer tes compétences dans un environnement dynamique et engagé envers la durabilité.",
+   "published_at_date": "2026-08-03",
+   "organization": {
+    "name": "Rexel France",
+    "slug": "rexel-france",
+    "reference": "6eKcf9",
+    "summary": "Distribution de solutions d'électrification et d'optimisation énergétique.",
+    "nb_employees": 5500,
+    "creation_year": 1967
+   },
+   "contract_type": "apprenticeship",
+   "new_profession": {
+    "sub_category_reference": "software-web-development-iMzA4",
+    "sub_category_name": "Développement de logiciels et de sites Web",
+    "category_reference": "tech-engineering-3NjUy",
+    "category_name": "Technologie et ingénierie",
+    "pivot_name": "Ingénieur logiciel",
+    "pivot_reference": "software-engineer-zYWFh"
+   },
+   "key_missions": [
+    "Développement du chiffre d'affaires et du parc client pour la solution Esabora.",
+    "Construction et suivi des plans d'actions avec les managers transverses pour atteindre les objectifs.",
+    "Commercialisation et réalisation des prestations d'Expertise Digitale, y compris les formations et l'accompagnement personnalisé."
+   ],
+   "salary_minimum": null,
+   "profile": "\n\n<p><strong>Profil rechercher :&#xa0;</strong></p><p><strong>Niveau de formation souhaité :</strong><br>\n<br>\nÉtudiant(e) en&#xa0;<strong>Master 1 ou Master 2</strong>, idéalement dans une formation en lien avec le&#xa0;<strong>digital</strong>, le&#xa0;<strong>commerce</strong>&#xa0;ou le&#xa0;<strong>marketing</strong>.</p><p>Plus qu’un diplôme ou un niveau d’expérience, c’est avant tout la pertinence de votre parcours commercial, doublé de votre intérêt certain pour le Digital, qui feront la différence, en particulier :</p><ul><li>Votre sens de la relation et de la satisfaction client,</li><li>Votre esprit d’équipe,</li><li>Votre curiosité et votre rigueur,</li><li>Votre esprit de conquête,</li><li>Votre disponibilité pour une mobilité sur votre région.</li></ul>\n\n<h2>Additional Information</h2>\n\n<div sr-tagline=\"\"></p><p><strong>POURQUOI NOUS REJOINDRE :</strong></p><p>Rejoindre Rexel, c’est intégrer un groupe qui valorise les talents et offre de réelles opportunités d’évolution, en France comme à l’international, avec 588 mobilités internes réalisées en 2025 (85 % de nos collaborateurs recommandent REXEL comme employeur).</p><p>Vous bénéficiez d’un package de rémunération attractif avec un salaire de base sur 13 mois. Vous profitez également de la participation, de l’intéressement et de solutions d’épargne avantageuses.</p><p>Notre politique sociale favorise l’équilibre entre vie professionnelle et personnelle. Vous pouvez bénéficier jusqu’à 12 jours de RTT par an, ainsi qu’un cadre de travail flexible avec une journée de télétravail par semaine selon le poste.</p><p>Enfin, nous enrichissons la vie de nos équipes par des avantages sociaux (chèques vacances, ticket de cinéma à tarif réduit, activités et voyages organisés par le CSE…).</p><p><strong>Postulez maintenant et devenez un acteur clé du déploiement de l’expertise et des solutions Rexel.</strong></p><p>&#xa0;</p><p><strong>A propos de REXEL :</strong></p><p>Avec un chiffre d’affaires de <strong>3,2 </strong>Mds€ en 2025, Rexel est le leader français de la distribution professionnelle de produits et services pour le monde de l’énergie. L’entreprise conçoit et distribue des solutions d'électrification sur 3 marchés : résidentiel, tertiaire et industriel et couvre 4 domaines d’expertises principaux&#xa0;: distribution d’énergie, génie climatique, automatismes industriels, data-communication et sécurité.</p><p>Forts d’un important maillage territorial comptant 435 agences, 8 centres logistiques régionaux, et d’une offre digitale puissante, les experts Rexel accompagnent et conseillent les professionnels dans le choix et l’installation de solutions électriques conciliant performance et responsabilité, avec un objectif en tête : distribuer les bonnes énergies sur l’ensemble de l’Hexagone.</p><p>Rexel s’engage en faveur de l’éducation à la transition énergétique au travers de la <a href=\"https://www.rexel.com/fr/engagements/fondation-rexel/\" rel=\"noopener noreferrer\">Fondation Rexel</a>, abritée par la Fondation de France<strong>.&#xa0;</strong></p><p>Le Groupe Rexel est présent dans 17 pays, à travers un réseau de plus de 1 950 agences, et compte plus de 26 500 collaborateurs. La Société est cotée sur le marché Eurolist d’Euronext Paris.</p><p>Pour plus d’information, rendez-vous sur <a href=\"https://courant-positif.rexel.fr/\" rel=\"noopener noreferrer\">Courant Positif</a>, le média de Rexel France.</p>",
+   "name": "Alternant(e) Ingénieur Applications et Services Digitaux (H/F) - Reims",
+   "education_level": null,
+   "contract_duration_minimum": null,
+   "has_contract_duration": false,
+   "source_stage": "production",
+   "_geoloc": [
+    {
+     "lat": 49.28985,
+     "lng": 4.01882
+    }
+   ],
+   "is_boosted": false,
+   "has_benefits": true,
+   "salary_yearly_minimum": null,
+   "offices": [
+    {
+     "state": "Grand Est",
+     "city": "Reims",
+     "country": "France",
+     "country_code": "FR",
+     "district": "Marne",
+     "local_district": "Marne",
+     "local_city": "Reims",
+     "local_state": "Grand Est"
+    }
+   ],
+   "published_at": "2026-08-03T22:02:10Z",
+   "reference": "252e1fe6-301e-471c-aa38-592d445f5098",
+   "objectID": "252e1fe6-301e-471c-aa38-592d445f5098"
+  }
+ ],
+ "nbHits": 2,
+ "page": 0,
+ "nbPages": 1,
+ "hitsPerPage": 3,
+ "exhaustiveNbHits": true,
+ "exhaustiveTypo": true,
+ "exhaustive": {
+  "nbHits": true,
+  "typo": true
+ },
+ "query": "",
+ "processingTimeMS": 2,
+ "serverTimeMS": 4
+}

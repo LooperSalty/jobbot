@@ -1,0 +1,19 @@
+{
+ "_comment": "Synthetic France Travail page 2 (HTML-doc casing: codepostal / appellationLibelle). Not a live response.",
+ "resultats": [
+  {
+   "id": "6927986",
+   "intitule": "Apprenti développeur .NET (H/F)",
+   "description": "PME messine recherche un apprenti développeur C# / .NET. Pas de télétravail.\nEnvoyez votre CV et votre lettre à recrutement@metz-digital.fr ou via francetravail.",
+   "dateCreation": "2026-09-18T10:00:00Z",
+   "lieuTravail": {"libelle": "54 - NANCY", "latitude": 48.6921, "longitude": 6.1844, "codepostal": "54000"},
+   "appellationLibelle": "Développeur / Développeuse .NET",
+   "entreprise": {"nom": "METZ DIGITAL SARL"},
+   "typeContrat": "CDD",
+   "natureContrat": "Contrat apprentissage",
+   "alternance": true,
+   "contact": {"nom": "Service RH", "courriel": "Pour postuler, utiliser le lien suivant : https://candidat.francetravail.fr/offres/recherche/detail/6927986"},
+   "origineOffre": {"origine": "1", "urlOrigine": "https://candidat.francetravail.fr/offres/recherche/detail/6927986"}
+  }
+ ]
+}

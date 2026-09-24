@@ -1,0 +1,97 @@
+{
+ "ideaType": "offres_emploi_lba",
+ "title": "Aide maçon / Aide maçonne Voiries et Réseaux Divers VRD",
+ "contact": {
+  "email": "",
+  "hasEmail": true,
+  "phone": "0600000000",
+  "url": "https://labonnealternance.apprentissage.beta.gouv.fr/emploi/offres_emploi_lba/6aaa5a821124e472788457aa/aide-maçon-aide-maçonne-voiries-et-réseaux-divers-vrd"
+ },
+ "place": {
+  "distance": null,
+  "fullAddress": "1 RUE DE L'EXEMPLE 57930 GOSSELMING",
+  "latitude": 48.79,
+  "longitude": 7.0,
+  "numberAndStreet": "1 RUE DE L'EXEMPLE 57930 GOSSELMING",
+  "city": "GOSSELMING",
+  "zipCode": "57930",
+  "remoteOnly": false
+ },
+ "company": {
+  "name": "BASTIEN EXEMPLE - TERRASSEMENT",
+  "siret": "90000000100018",
+  "size": "0 salarié",
+  "url": null,
+  "mandataire": false,
+  "opco": {
+   "label": "inconnu",
+   "url": null
+  },
+  "elligibleHandicap": false,
+  "isGeiq": false,
+  "hiringCount3Years": null
+ },
+ "id": "6aaa5a821124e472788457aa",
+ "target_diploma_level": "CAP, BEP (Infrabac)",
+ "job": {
+  "description": "Prépare le terrain, les outils et les matériaux nécessaires à l'exécution de travaux de construction, de réparation ou d'entretien dans le bâtiment, sur les routes ou voiries, dans les ports ou voies navigables, selon les règles de sécurité. Peut réaliser divers travaux simples.",
+  "employeurDescription": null,
+  "creationDate": "2026-09-16T08:59:46.300Z",
+  "id": "6aaa5a821124e472788457aa",
+  "jobStartDate": "2026-09-16T08:59:46.300Z",
+  "jobExpirationDate": "2026-11-16T00:00:00.000Z",
+  "elligibleHandicap": false,
+  "dureeContrat": "12 mois",
+  "quantiteContrat": 1,
+  "status": "Active",
+  "type": [
+   "Apprentissage",
+   "Professionnalisation"
+  ],
+  "partner_label": "offres_emploi_lba",
+  "offer_desired_skills": [
+   "Avoir l'esprit d'équipe",
+   "Faire preuve d'autonomie",
+   "Faire preuve de rigueur et de précision"
+  ],
+  "offer_to_be_acquired_skills": [
+   "Production, Fabrication\tAssembler les structures porteuses lourdes d'un ouvrage",
+   "Production, Fabrication\tCouper à dimension des bordures de trottoirs",
+   "Production, Fabrication\tDébiter du bois de coffrage",
+   "Production, Fabrication\tDécouper du métal"
+  ],
+  "offer_to_be_acquired_knowledge": [
+   "Domaines d'expertise\tDosage de mortier",
+   "Domaines d'expertise\tGestes et postures de manutention",
+   "Domaines d'expertise\tTronçonnage de ferrailles",
+   "Domaines d'expertise\tTronçonnage de béton"
+  ],
+  "offer_access_conditions": [
+   "Ce métier est accessible sans diplôme ni expérience professionnelle. Une bonne condition physique est requise."
+  ],
+  "contract_rythm": "",
+  "startType": "des_que_possible",
+  "startDateFlexible": false,
+  "isCfaEntreprise": false,
+  "to_applicant_questions": [
+   "Pourquoi souhaitez-vous rejoindre notre entreprise ?",
+   "Qu’auriez-vous envie d’accomplir ou de mener à bien durant cette alternance ?",
+   "Quelles compétences souhaitez-vous développer grâce à cette expérience ?"
+  ]
+ },
+ "romes": [
+  {
+   "code": "F1704",
+   "label": null
+  }
+ ],
+ "nafs": [
+  {
+   "code": "43.12B",
+   "label": "Travaux de terrassement spécialisés ou de grande masse"
+  }
+ ],
+ "token": "REDACTED.JWT.TOKEN",
+ "recipient_id": "recruiters_6aaa5a821124e472788457aa",
+ "applicationCount": 0
+}
