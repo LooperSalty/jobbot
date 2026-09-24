@@ -211,6 +211,8 @@ class SearchSettings(Frozen):
     )
     max_results_per_query: int = 100
     max_age_days: int = 30
+    # « score » step: short offers (search cards) completed through their source before scoring, per run
+    max_detail_fetches_per_run: int = Field(default=60, ge=0)
 
 
 _NTFY_TOPIC_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")

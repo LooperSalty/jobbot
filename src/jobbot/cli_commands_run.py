@@ -32,13 +32,13 @@ def search(
 
 
 def score(ctx: typer.Context) -> None:
-    """Note les nouvelles offres (0-100) et garde les pertinentes."""
+    """Note les nouvelles offres (0-100) et garde les pertinentes (annonces courtes lues en entier d'abord)."""
     from jobbot.cli_tools import jobs_table
-    from jobbot.matching.match import score_new_jobs
     from jobbot.models import JobStatus
+    from jobbot.pipeline import score_new_offers
 
     state = state_of(ctx)
-    print_report(state.console, STEP_TITLES["score"], score_new_jobs(state.app))
+    print_report(state.console, STEP_TITLES["score"], score_new_offers(state.app))
     best = state.app.repo.list_jobs(JobStatus.SHORTLISTED, limit=15)
     if best:
         state.console.print(jobs_table(best, "Meilleures offres retenues"))

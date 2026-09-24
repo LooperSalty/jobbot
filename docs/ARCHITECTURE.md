@@ -436,3 +436,31 @@ The school posts apprenticeship offers in a Google Classroom course (private URL
   reach the PC; the purge list excludes any folder holding a kept service. Tests: `tests/test_deploy_kit.py`,
   `tests/test_deploy_replace.py` with `tests/fixtures/deploy/fakes.py` (fake executor, placeholders only).
 - `scripts/dashboard_serveur.ps1`: SSH tunnel `8501 → 127.0.0.1:8501` of `PROJECT_SSH_HOST_ALIAS`, opens the browser.
+
+## v5 — Matching precision (region-level places, thin descriptions)
+
+- `matching/regions.py` (new; `REGIONS`, `OLD_REGIONS`, `region_of`, `key` moved here from `target_rules`, still
+  re-exported there): `vague_place(location) -> VaguePlace | None` (label as written, departments, city centre) for a
+  whole region (13 current regions, pre-2016 regions, « Région parisienne », « Paris et périphérie », « Région X »)
+  or a big-city area (« Lyon et périphérie », « Grand Lyon », « Toulouse Métropole », « Région lyonnaise »…,
+  `METRO_DEPARTMENTS` + `geo.KNOWN_PLACES`); `place_label` (location without its trailing ", France");
+  `is_country_only` (« France », « France entière », empty).
+- `matching/location.py`: a big-city area gets the city's coordinates (`job_coordinates`); a whole region with no own
+  coordinates / postal code (`job_region`) is kept with `LocationFit.penalty` = 10 (« Localisation : lieu imprécis
+  (Grand Est), -10 points ») when it contains a French search area's department (or an area's department is
+  unknown), else filtered. Every out-of-zone filter reads « Écartée : trop loin : <lieu> (hors de tes zones) » (+
+  « — N km de <ville>, rayon R km » / « — département NN »). Country-only place, not remote → penalty 15
+  (« Localisation : lieu non précisé (France), -15 points »). For a vague place, `JobOffer.remote=True` counts as
+  full remote only from `FULL_REMOTE_FLAG_SOURCES` (France Travail / LBA / Indeed also flag hybrid work).
+  `target_rules`: foreign regions in `_COUNTRY_WORDS` (Wallonie, Bruxelles, Saarland, Bade-Wurtemberg…);
+  `offer_country` = FR for a French region / area; relocation needs the whole region in `relocation_regions`.
+  `match._locate` never geocodes a region.
+- `matching/match.py`: description < `THIN_DESCRIPTION_CHARS` (400 = `registry.DETAILS_MIN_CHARS`) → skills
+  component × min(1, skills found / 3) and « Annonce incomplète, descriptif court : score provisoire »;
+  `match_jobs(jobs, profile)`; `MatchReport.completed`.
+- `registry.complete_new_offers(ctx)`: NEW offers with a short description from `DETAIL_SOURCES` (every source but
+  Indeed) read through `ensure_details`, best provisional score first, at most
+  `settings.search.max_detail_fetches_per_run` (60) per run; `pipeline.score_new_offers` (step « score » and
+  `jobbot score`) runs it before `score_new_jobs` (a failure never blocks the scoring). `prepare` scores every
+  SHORTLISTED offer again after `ensure_details` and drops it (FILTERED_OUT) below `thresholds.min_match_score`.
+  Tests: `tests/test_matching_regions.py`, `tests/test_matching_details.py`.

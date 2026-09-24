@@ -130,18 +130,21 @@ def _label(job: JobOffer) -> str:
 
 
 def _rescore(ctx: AppContext, before: JobOffer, job: JobOffer) -> str | None:
-    """Offers collected from a search card / alert e-mail were scored on the title only: once the full
-    description is known, score again. Returns the French reason when the offer no longer qualifies."""
-    if (job.description or "") == (before.description or ""):
+    """Score a shortlisted offer (search card, older rules) or a just completed one again before its documents;
+    the French reason when it no longer qualifies (it then leaves the queue: FILTERED_OUT)."""
+    completed = (job.description or "") != (before.description or "")
+    if not completed and job.status != JobStatus.SHORTLISTED:
         return None
     from jobbot.matching.match import match_job
 
-    score, reasons = match_job(job, ctx.profile)
-    keep = score >= ctx.settings.thresholds.min_match_score
+    (score, reasons), threshold = match_job(job, ctx.profile), ctx.settings.thresholds.min_match_score
+    keep = score >= threshold
     ctx.repo.set_job_match(job.id, score, reasons, job.status if keep else JobStatus.FILTERED_OUT)
     if keep:
         return None
-    return f"écartée après lecture de l'annonce complète ({reasons[0] if reasons else f'score {score:.0f}'})"
+    why = reasons[0] if score <= 0 and reasons else f"score {score:.0f} < {threshold:.0f}"
+    when = "après lecture de l'annonce complète" if completed else "à la nouvelle notation"
+    return f"écartée {when} ({why})"
 
 
 def _prepare_one(ctx: AppContext, job: JobOffer) -> tuple[str, str]:
@@ -228,10 +231,21 @@ def _collect(ctx: AppContext, shared: _Shared) -> CollectReport:
     return collect_jobs(ctx)
 
 
-def _score(ctx: AppContext, shared: _Shared) -> MatchReport:
+def score_new_offers(ctx: AppContext) -> MatchReport:
+    """« score » step: short search cards read in full first (capped per run, never blocking), then scoring."""
     from jobbot.matching.match import score_new_jobs
+    from jobbot.sources.registry import complete_new_offers
 
-    return score_new_jobs(ctx)
+    try:
+        completed = complete_new_offers(ctx)
+    except Exception:
+        log.exception("Lecture des annonces complètes impossible avant la notation")
+        completed = 0
+    return score_new_jobs(ctx).model_copy(update={"completed": completed})
+
+
+def _score(ctx: AppContext, shared: _Shared) -> MatchReport:
+    return score_new_offers(ctx)
 
 
 def _prepare(ctx: AppContext, shared: _Shared) -> PrepareReport:

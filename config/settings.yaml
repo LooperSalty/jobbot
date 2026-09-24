@@ -39,6 +39,7 @@ search:
   sources: [lba, france_travail, linkedin, hellowork, indeed, wttj, free_work, apec]
   max_results_per_query: 100
   max_age_days: 30
+  max_detail_fetches_per_run: 60  # annonces courtes complétées (page de l'offre) avant la notation, par exécution
 
 notify_jarvis: false     # annonce vocale des réponses/entretiens via Jarvis
 jarvis_script:           # chemin de ton jarvis_notify.py, ex. "C:/chemin/vers/jarvis_notify.py" (vide = désactivé)

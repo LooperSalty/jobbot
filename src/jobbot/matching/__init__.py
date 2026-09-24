@@ -3,6 +3,7 @@
 Public modules (see docs/ARCHITECTURE.md "matching/"):
 - ``lexicon``  — ``SKILLS``, ``SOFT_SKILLS``, ``canonicalize``, ``find_skills``
 - ``geo``      — ``haversine_km``, ``geocode``
+- ``regions``  — ``REGIONS``, ``vague_place`` (« Île-de-France », « Lyon et périphérie »…)
 - ``keywords`` — ``extract_keywords``
 - ``ats``      — ``score_document``, ``keyword_coverage``
 - ``match``    — ``match_job``, ``MatchReport``, ``score_new_jobs``

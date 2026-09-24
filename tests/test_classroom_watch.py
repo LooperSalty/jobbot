@@ -91,7 +91,8 @@ def test_edited_post_is_processed_again_and_failures_are_bounded(cctx, notes, mo
     changed["offers"][1]["target_level"] = "BTS SIO ou Bac+3 à Bac+5"
     ctx2 = dataclasses.replace(cctx, llm=FakeLLM(responder(changed)))
     report = run_classroom(ctx2, backend=FakeBackend([edited]), now=NOON)
-    assert report.new_posts == 1 and cctx.repo.get_job(beta.id).status != JobStatus.FILTERED_OUT
+    rescored = cctx.repo.get_job(beta.id)  # level now compatible: scored again (a short support offer stays low)
+    assert report.new_posts == 1 and not any("BTS SIO" in r for r in rescored.match_reasons)
     import jobbot.classroom.watch as watch
 
     def broken(c, post):

@@ -149,7 +149,7 @@ def test_location_rules(profile, make_job):
     unknown = match_job(make_job(location="Quelque-Part", postal_code=None, **no_coords), profile)
     assert any("à vérifier" in r for r in unknown[1])
     nowhere = match_job(make_job(location="", postal_code=None, **no_coords), profile)
-    assert any("non précisée" in r for r in nowhere[1])
+    assert any("lieu non précisé" in r for r in nowhere[1])
     linkedin = match_job(make_job(location="Metz, Grand Est, France", postal_code=None, **no_coords), profile)
     assert any("km de Metz" in r for r in linkedin[1])
 

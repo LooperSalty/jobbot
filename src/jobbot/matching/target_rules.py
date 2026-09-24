@@ -18,7 +18,15 @@ import re
 from jobbot.config import LocationPref, Profile
 from jobbot.matching._text import norm
 from jobbot.matching.geo import department_from_location, department_from_postal, haversine_km, lookup_known_place
-from jobbot.matching.location import LocationFit, assess_location, job_coordinates, job_department
+from jobbot.matching.location import (
+    LocationFit,
+    assess_location,
+    job_coordinates,
+    job_department,
+    job_departments,
+    job_region,
+)
+from jobbot.matching.regions import DEPARTMENT_REGION, REGION_KEYS, REGIONS, key, region_of  # noqa: F401
 from jobbot.models import ContractType, JobOffer
 from jobbot.sources.countries import COUNTRY_NAMES, FRANCE, location_country
 
@@ -40,8 +48,11 @@ _IN_COUNTRY = {
     "ES": "en Espagne", "IT": "en Italie", "NL": "aux Pays-Bas", "GB": "au Royaume-Uni", "MC": "à Monaco",
 }
 _COUNTRY_WORDS = tuple((code, re.compile(r"(?<![a-z])(?:" + words + r")(?![a-z])")) for code, words in (
-    ("LU", "luxembourg|luxemburg|letzebuerg"), ("BE", "belgique|belgium|belgie"),
-    ("DE", "allemagne|germany|deutschland"), ("CH", "suisse|switzerland|schweiz"), ("ES", "espagne|spain|espana"),
+    ("LU", "luxembourg|luxemburg|letzebuerg"),
+    ("BE", "belgique|belgium|belgie|wallonie|wallonia|bruxelles|brussels|vlaanderen"),
+    ("DE", ("allemagne|germany|deutschland|saarland|rheinland pfalz|rhenanie palatinat|baden wurttemberg|"
+            "bade wurtemberg|bayern|baviere|nordrhein westfalen")),
+    ("CH", "suisse|switzerland|schweiz|romandie"), ("ES", "espagne|spain|espana"),
     ("IT", "italie|italy|italia"), ("NL", "pays bas|netherlands|nederland"),
     ("GB", "royaume uni|united kingdom|angleterre|england"), ("MC", "monaco"), ("FR", "france"),
 ))
@@ -49,49 +60,7 @@ _CODE_SUFFIX = re.compile(r",\s*([a-z]{2})\s*$")
 _ABROAD = re.compile(r"^\s*99\s*-")
 
 # --------------------------------------------------------------------------- regions (relocation)
-
-REGIONS: dict[str, tuple[str, ...]] = {
-    "Auvergne-Rhône-Alpes": ("01", "03", "07", "15", "26", "38", "42", "43", "63", "69", "73", "74"),
-    "Bourgogne-Franche-Comté": ("21", "25", "39", "58", "70", "71", "89", "90"),
-    "Bretagne": ("22", "29", "35", "56"),
-    "Centre-Val de Loire": ("18", "28", "36", "37", "41", "45"),
-    "Corse": ("2A", "2B"),
-    "Grand Est": ("08", "10", "51", "52", "54", "55", "57", "67", "68", "88"),
-    "Hauts-de-France": ("02", "59", "60", "62", "80"),
-    "Île-de-France": ("75", "77", "78", "91", "92", "93", "94", "95"),
-    "Normandie": ("14", "27", "50", "61", "76"),
-    "Nouvelle-Aquitaine": ("16", "17", "19", "23", "24", "33", "40", "47", "64", "79", "86", "87"),
-    "Occitanie": ("09", "11", "12", "30", "31", "32", "34", "46", "48", "65", "66", "81", "82"),
-    "Pays de la Loire": ("44", "49", "53", "72", "85"),
-    "Provence-Alpes-Côte d'Azur": ("04", "05", "06", "13", "83", "84"),
-    "Guadeloupe": ("971",), "Martinique": ("972",), "Guyane": ("973",), "La Réunion": ("974",),
-    "Mayotte": ("976",),
-}
-_OLD_REGIONS = {  # pre-2016 regions and usual short names
-    "alsace": ("67", "68"), "lorraine": ("54", "55", "57", "88"), "champagne ardenne": ("08", "10", "51", "52"),
-    "aquitaine": ("24", "33", "40", "47", "64"), "limousin": ("19", "23", "87"),
-    "poitou charentes": ("16", "17", "79", "86"), "auvergne": ("03", "15", "43", "63"),
-    "rhone alpes": ("01", "07", "26", "38", "42", "69", "73", "74"), "bourgogne": ("21", "58", "71", "89"),
-    "franche comte": ("25", "39", "70", "90"), "languedoc roussillon": ("11", "30", "34", "48", "66"),
-    "midi pyrenees": ("09", "12", "31", "32", "46", "65", "81", "82"), "nord pas de calais": ("59", "62"),
-    "picardie": ("02", "60", "80"), "basse normandie": ("14", "50", "61"), "haute normandie": ("27", "76"),
-    "paca": REGIONS["Provence-Alpes-Côte d'Azur"], "sud": REGIONS["Provence-Alpes-Côte d'Azur"],
-    "idf": REGIONS["Île-de-France"], "centre": REGIONS["Centre-Val de Loire"],
-    "ara": REGIONS["Auvergne-Rhône-Alpes"], "bfc": REGIONS["Bourgogne-Franche-Comté"], "reunion": ("974",),
-}
-_DEPARTMENT_REGION = {dept: name for name, depts in REGIONS.items() for dept in depts}
-
-
-def _key(text: str) -> str:
-    return " ".join(re.sub(r"[^a-z0-9]+", " ", norm(text)).split())
-
-
-_REGION_KEYS = {**{_key(name): depts for name, depts in REGIONS.items()}, **_OLD_REGIONS}
-
-
-def region_of(department: str | None) -> str | None:
-    """Current region name of a French department code, None when unknown."""
-    return _DEPARTMENT_REGION.get((department or "").upper())
+# REGIONS, region_of… live in ``matching.regions`` (re-exported here).
 
 
 def accepted_departments(entries: list[str]) -> dict[str, str]:
@@ -104,12 +73,12 @@ def accepted_departments(entries: list[str]) -> dict[str, str]:
 
 
 def _entry_departments(entry: str) -> tuple[str, ...]:
-    key = _key(entry)
-    if key in _REGION_KEYS:
-        return _REGION_KEYS[key]
+    entry_key = key(entry)
+    if entry_key in REGION_KEYS:
+        return REGION_KEYS[entry_key]
     code = entry.strip().upper()
-    department = code if code in _DEPARTMENT_REGION else department_from_location(entry)
-    return (department,) if department in _DEPARTMENT_REGION else ()
+    department = code if code in DEPARTMENT_REGION else department_from_location(entry)
+    return (department,) if department in DEPARTMENT_REGION else ()
 
 
 # --------------------------------------------------------------------------- country of an offer
@@ -130,7 +99,7 @@ def offer_country(job: JobOffer) -> str | None:
         return max(found)[1]  # the country is usually the last component ("Arlon, Luxembourg, Belgique")
     if _ABROAD.match(flat):
         return UNKNOWN_FOREIGN
-    return FRANCE if region_of(job_department(job)) else None
+    return FRANCE if region_of(job_department(job)) or job_region(job) is not None else None
 
 
 def in_country(code: str, place: str = "") -> str:
@@ -253,22 +222,24 @@ def relocation_fit(job: JobOffer, profile: Profile) -> LocationFit | None:
     target = profile.target
     if not target.willing_to_relocate:
         return None
-    country, department = offer_country(job), job_department(job)
-    if country not in (None, FRANCE) or (country != FRANCE and region_of(department) is None):
+    country, departments = offer_country(job), job_departments(job)
+    if country not in (None, FRANCE) or (country != FRANCE and not any(region_of(d) for d in departments)):
         return None  # abroad, or no evidence that the offer is in France
-    label = "toute la France" if not target.relocation_regions else _accepted_region(job, department,
+    label = "toute la France" if not target.relocation_regions else _accepted_region(job, departments,
                                                                                       target.relocation_regions)
     if label is None:
         return None
     return LocationFit(RELOCATION_SCORE, f"Hors des zones de recherche, mais déménagement accepté ({label})")
 
 
-def _accepted_region(job: JobOffer, department: str | None, entries: list[str]) -> str | None:
+def _accepted_region(job: JobOffer, departments: tuple[str, ...], entries: list[str]) -> str | None:
+    """The ``relocation_regions`` entry covering the offer: its department, or every department of the whole
+    region it names (« Île-de-France » needs the whole region accepted)."""
     accepted = accepted_departments(entries)
-    if department and department.upper() in accepted:
-        return accepted[department.upper()]
-    text = f" {_key(job.location)} "
-    return next((entry.strip() for entry in entries if _key(entry) and f" {_key(entry)} " in text), None)
+    if departments and all(d.upper() in accepted for d in departments):
+        return accepted[departments[0].upper()]
+    text = f" {key(job.location)} "
+    return next((entry.strip() for entry in entries if key(entry) and f" {key(entry)} " in text), None)
 
 
 # --------------------------------------------------------------------------- salary floor

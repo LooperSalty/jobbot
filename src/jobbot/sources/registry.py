@@ -40,6 +40,8 @@ ALIASES = {
     "pole_emploi": "france_travail", "welcome_to_the_jungle": "wttj", "freework": "free_work",
 }
 DETAILS_MIN_CHARS = 400
+# Sources whose ``fetch_details`` completes a search card (Indeed via JobSpy already returns the full text).
+DETAIL_SOURCES = frozenset({"linkedin", "hellowork", "lba", "wttj", "apec", "free_work", "france_travail"})
 MAX_ERROR_CHARS = 300
 # Politeness caps (queries per run) for scraped boards — docs/research: LinkedIn guest ≈ 9 keywords × 3 geos
 # a day, HelloWork "a handful of queries, page 1 only", Indeed via JobSpy a few searches. APIs are uncapped.
@@ -324,3 +326,30 @@ def ensure_details(ctx: AppContext, job: JobOffer) -> JobOffer:
     except Exception as exc:
         log.warning("Offre %s complétée mais non enregistrée : %s", job.id, exc)
     return merged
+
+
+def needs_details(job: JobOffer) -> bool:
+    """Short description (search card) that the owning source can complete."""
+    return len(job.description or "") < DETAILS_MIN_CHARS and canonical_name(job.source) in DETAIL_SOURCES
+
+
+def complete_new_offers(ctx: AppContext) -> int:
+    """Before scoring: full description of the NEW offers only known by a short card, most promising first
+    (provisional score), at most ``settings.search.max_detail_fetches_per_run`` per run — the sources keep their
+    own politeness delays. The others keep a provisional score. Returns the number of offers completed."""
+    from jobbot.matching.match import match_jobs
+
+    cap = ctx.settings.search.max_detail_fetches_per_run
+    pending = [job for job in ctx.repo.list_jobs(JobStatus.NEW) if needs_details(job)]
+    if not pending or cap <= 0:
+        return 0
+    scores = [score for score, _ in match_jobs(pending, ctx.profile)]
+    ranked = [job for _, job in sorted(zip(scores, pending, strict=True), key=lambda pair: -pair[0])]
+    if len(ranked) > cap:
+        log.info("Annonces courtes : %d complétées sur %d (limite par exécution)", cap, len(ranked))
+    completed = 0
+    for job in ranked[:cap]:
+        done = ensure_details(ctx, job)
+        completed += int((done.description or "") != (job.description or "") or done.status != job.status)
+    log.info("Annonces courtes complétées avant notation : %d", completed)
+    return completed

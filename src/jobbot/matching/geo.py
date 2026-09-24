@@ -42,6 +42,15 @@ KNOWN_PLACES: dict[str, tuple[float, float]] = {
     "montpellier": (43.6108, 3.8767), "nice": (43.7102, 7.2620), "grenoble": (45.1885, 5.7245),
     "sarrebruck": (49.2402, 6.9969), "saarbrucken": (49.2402, 6.9969), "treves": (49.7499, 6.6371),
     "trier": (49.7499, 6.6371),
+    # other big French cities (also used for "<ville> et périphérie" areas — matching.regions)
+    "troyes": (48.2973, 4.0744), "besancon": (47.2378, 6.0241), "saint etienne": (45.4397, 4.3872),
+    "clermont ferrand": (45.7772, 3.0870), "aix en provence": (43.5297, 5.4474), "toulon": (43.1242, 5.9280),
+    "avignon": (43.9493, 4.8055), "nimes": (43.8367, 4.3601), "perpignan": (42.6887, 2.8948),
+    "pau": (43.2951, -0.3708), "la rochelle": (46.1603, -1.1511), "poitiers": (46.5802, 0.3404),
+    "limoges": (45.8336, 1.2611), "angers": (47.4784, -0.5632), "le mans": (48.0061, 0.1996),
+    "brest": (48.3904, -4.4861), "tours": (47.3941, 0.6848), "orleans": (47.9030, 1.9093),
+    "rouen": (49.4432, 1.0999), "le havre": (49.4944, 0.1079), "caen": (49.1829, -0.3707),
+    "amiens": (49.8941, 2.2958),
     # Luxembourg business areas often given without coordinates (distinctive names only: no French homonym)
     "kirchberg": (49.6280, 6.1620), "luxembourg kirchberg": (49.6280, 6.1620), "gasperich": (49.5856, 6.1236),
     "strassen": (49.6206, 6.0733), "howald": (49.5822, 6.1447), "hesperange": (49.5728, 6.1506),

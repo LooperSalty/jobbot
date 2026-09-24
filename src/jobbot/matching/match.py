@@ -1,8 +1,11 @@
 """Relevance of an offer for the candidate: hard filters, then a deterministic 0-100 score with French reasons.
 
 Score = title 30 + skills 30 + location 15 + contract 15 + freshness 10, then adjustments (non-dev title,
-experience asked, alternance level / duration). Hard filters return 0 with the reason. Country / per-area
-contract types, relocation and the salary floor live in ``target_rules``.
+experience asked, alternance level / duration, imprecise place). Hard filters return 0 with the reason. Country /
+per-area contract types, relocation and the salary floor live in ``target_rules``.
+
+A short description (< ``THIN_DESCRIPTION_CHARS``, usually a search card) is weak evidence: its skill overlap only
+gets full credit with ``THIN_EVIDENCE_SKILLS`` skills found, and the score is flagged as provisional.
 """
 
 from __future__ import annotations
@@ -21,7 +24,7 @@ from jobbot.config import Profile
 from jobbot.matching import filters, lexicon, relayed, target_rules
 from jobbot.matching._text import GENDER_RX, family_of, norm, normalize_title
 from jobbot.matching.geo import geocode, is_place
-from jobbot.matching.location import job_coordinates, job_department
+from jobbot.matching.location import job_coordinates, job_department, job_region
 from jobbot.matching.target_rules import CONTRACT_LABELS  # noqa: F401  (re-exported)
 from jobbot.models import ContractType, JobOffer, JobStatus
 
@@ -33,6 +36,9 @@ log = logging.getLogger(__name__)
 WEIGHTS = {"title": 30.0, "skills": 30.0, "location": 15.0, "contract": 15.0, "freshness": 10.0}
 NON_DEV_FACTOR = 0.6  # titles outside software development are kept only when everything else fits
 EXPERIENCE_PENALTY = 10.0
+THIN_DESCRIPTION_CHARS = 400  # = sources.registry.DETAILS_MIN_CHARS: below, the offer is a search card
+THIN_EVIDENCE_SKILLS = 3  # skills a short description must name before its skill overlap gets full credit
+THIN_REASON = "Annonce incomplète, descriptif court : score provisoire"
 HANDLED_STATUSES = frozenset(
     {JobStatus.SHORTLISTED, JobStatus.DOCS_READY, JobStatus.PENDING_REVIEW, JobStatus.APPROVED, JobStatus.APPLIED,
      JobStatus.NEEDS_MANUAL}
@@ -46,6 +52,7 @@ class MatchReport(BaseModel):
     scored: int = 0
     shortlisted: int = 0
     filtered_out: int = 0
+    completed: int = 0  # short offers completed through their source before scoring (pipeline « score » step)
 
 
 @dataclass(frozen=True)
@@ -71,6 +78,12 @@ def match_job(job: JobOffer, profile: Profile) -> tuple[float, list[str]]:
     return _match(job, profile, profile_skills(profile))
 
 
+def match_jobs(jobs: list[JobOffer], profile: Profile) -> list[tuple[float, list[str]]]:
+    """``match_job`` for many offers (the profile's skills are computed once)."""
+    skills = profile_skills(profile)
+    return [_match(job, profile, skills) for job in jobs]
+
+
 def _match(job: JobOffer, profile: Profile, skills: ProfileSkills) -> tuple[float, list[str]]:
     contract = filters.detect_contract(job)
     text = f"{job.title}\n{job.description or ''}\n{job.raw.get('experienceLibelle') or ''}"
@@ -89,6 +102,7 @@ def _match(job: JobOffer, profile: Profile, skills: ProfileSkills) -> tuple[floa
     score = sum(WEIGHTS[name] * part.score for name, part in parts.items())
     reasons = [part.reason for part in parts.values() if part.reason]
     score, extra = _adjust(job, profile, contract, years, text, score, title)
+    score -= location.penalty  # imprecise place: the points announced in the reason, whatever the factors
     bonus = relayed.school_bonus(job)
     if bonus:
         score, extra = score + bonus, [relayed.BONUS_REASON.format(bonus=bonus), *extra]
@@ -186,6 +200,11 @@ def _skill_credit(skill: str, skills: ProfileSkills) -> float:
     return 0.3 if lexicon.related(skill) & skills.direct else 0.0
 
 
+def is_thin(job: JobOffer) -> bool:
+    """Short description (search card / alert): the skill overlap is weak evidence, the score provisional."""
+    return len(job.description or "") < THIN_DESCRIPTION_CHARS
+
+
 def _skills_part(job: JobOffer, skills: ProfileSkills) -> _Part:
     wanted = lexicon.count_skills(f"{job.title}\n{job.description or ''}")
     if not wanted:
@@ -201,7 +220,8 @@ def _skills_part(job: JobOffer, skills: ProfileSkills) -> _Part:
     reason = f"Compétences en commun ({len(have)}/{len(wanted)}) : " + (", ".join(have[:8]) or "aucune")
     if lack:
         reason += " — à renforcer : " + ", ".join(lack[:5])
-    return _Part(earned / total, reason)
+    evidence = min(1.0, len(wanted) / THIN_EVIDENCE_SKILLS) if is_thin(job) else 1.0
+    return _Part(earned / total * evidence, reason)
 
 
 def _contract_part(profile: Profile, contract: ContractType) -> _Part:
@@ -226,7 +246,7 @@ def _freshness_part(job: JobOffer) -> _Part:
 def _adjust(
     job: JobOffer, profile: Profile, contract: ContractType, years: int | None, text: str, score: float, title: _Part
 ) -> tuple[float, list[str]]:
-    reasons: list[str] = []
+    reasons: list[str] = [THIN_REASON] if is_thin(job) else []
     if title.score < 0.4 and family_of(normalize_title(job.title)) is None:
         score *= NON_DEV_FACTOR
         reasons.append("Intitulé hors développement logiciel")
@@ -317,8 +337,11 @@ def _handled_duplicate(ctx: AppContext, job: JobOffer) -> JobOffer | None:
 
 def _locate(ctx: AppContext, job: JobOffer) -> JobOffer:
     """Best-effort coordinates for offers whose place is neither known offline nor tied to a department.
-    The Géoplateforme only knows France: a foreign place ("Belval, Luxembourg") is never geocoded."""
+    The Géoplateforme only knows France: a foreign place ("Belval, Luxembourg") is never geocoded, nor a whole
+    region ("Île-de-France, France") that it would turn into a random town."""
     if job_coordinates(job) is not None or job_department(job) is not None or not is_place(job.location):
+        return job
+    if job_region(job) is not None:
         return job
     if target_rules.offer_country(job) not in (None, target_rules.FRANCE):
         return job
