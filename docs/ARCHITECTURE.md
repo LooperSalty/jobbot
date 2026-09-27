@@ -629,23 +629,38 @@ ever sent at night**. The day campaign works through the queue by priority, unde
   `companies.fetch_registry_page` = shared 4 req/s throttle, 3 failures in a row stop it; `plan` → `resolve`, first
   confident answer wins: `departement` `q=<name>&departement=<offer's dept or target depts>`, `code_postal` only when
   ≥ 2 plausible companies answered, `variante:<q>` for ≤ 2 `query_variants`, `sans_lieu` `q=<cleaned name>`; 20
-  results, 20 matching establishments), scored by `night/siren_match.py` (pure: `words`/`cleaned_name`/
-  `query_variants` — « H/F », legal forms, groupe, France, trailing region / city, acronym dots, ampersands;
-  `registry_names` = raison sociale, sigle, nom complet, enseignes, noms commerciaux; `pair_score` = 100 without
-  punctuation, ratio / token_sort_ratio, contained name (token_set_ratio) 88 - 4 per extra word, initials 90;
+  results, 20 matching establishments), scored by `night/siren_match.py` (pure; names in `night/siren_names.py`:
+  `words`/`cleaned_name`/`query_variants` — « H/F », legal forms, groupe, France, trailing region / city, acronym
+  dots, ampersands; `registry_names` = raison sociale, sigle, nom complet, enseignes, noms commerciaux; `pair_score`
+  = 100 without punctuation, ratio / token_sort_ratio, contained name (token_set_ratio) 88 - 4 per extra word,
+  initials 90; `base_name` / `is_regional` (« Acme Est » → « acme »), `sigle_match`;
   `best_place` = best active establishment in the zone: same postal code / commune +8, ≤ 15 km +6, ≤ 40 km +3,
-  same dept +2; IT NAF / Syntec +4, ETI/GE +3, ≥ 10 employees +1; a ≤ 4-character name of a non-IT company counts
-  84 at most; `decide`: ≥ 96 and ≥ 6 ahead of any other SIREN, name ≥ 85 to be a candidate). `local_company`: the
+  same dept +2; IT NAF (62, 63.1, 58.2, 71.12B, 70.22Z) or Syntec outside a holding +4, ETI/GE +3, ≥ 10 employees
+  +1; a holding (64, 70.10Z) is never IT; a ≤ 4-character name of a non-IT company counts 84 at most; `decide`:
+  holdings dropped when an operating IT company with a strong name (≥ 88) answers, then ≥ 96 and ≥ 6 ahead of any
+  other SIREN, else the tie-breaks of `night/siren_prefer.py` — `Traits` compared in order: IT group siblings'
+  head office ≥ 50 km closer to the offer (one of them regional), name ≥ 5 points, tier IT > other > holding, open
+  establishments (×2 and +2), headcount tranche (≥ 2 steps), head office in the target region — the winner must
+  beat every close candidate, score ≥ 96, name ≥ 88; name ≥ 85 to be a candidate). No operating IT company with a
+  local establishment (`blocks_remote`) → after `sans_lieu`, `night/siren_remote.decide_remote` on its results:
+  the tie-break winner (holdings dropped) if IT NAF, name ≥ 88 and — for a common name (≥ 4 namesakes or more
+  results than the page, in ≥ 3 NAF divisions, holdings aside) — matched by its sigle; strategy `siege`.
+  `local_company`: the
   group SIREN at the chosen establishment (address, city, postal code, coordinates — else its city's
-  `KNOWN_PLACES` — `raw.siret`, `raw.local_establishment`). Cache kv **`night:siren:<country>:<name>`**: found →
-  `{siren, siret, place, strategy, at}` (`with_cached_place` re-applies the establishment to the stored company, no
-  query); unresolved after every query → `{siren: null, tried, at, retry_after}` (7 days); an entry without `tried`
-  (older resolver) is retried at once, a lookup cut by the cap is not cached. Luxembourg → company
+  `KNOWN_PLACES` — `raw.siret`, `raw.local_establishment`); `remote_company`: the head office's address and SIRET,
+  the offer's city / postal code / coordinates, `raw.agency = "absente"`, `raw.agency_notes` (« Pas d'agence
+  locale enregistrée : candidature au siège (recrute pour <ville>) », « Entité du groupe la plus proche de
+  l'offre : … plutôt que … »), shown among the priority reasons. Cache kv **`night:siren:<country>:<name>`**:
+  found → `{siren, siret, place, strategy, at}` (`with_cached_place` re-applies the establishment — or the offer's
+  place with `agency` / `agency_notes` — to the stored company, no query); unresolved after every query →
+  `{siren: null, tried, at, retry_after}` (7 days); an entry without `tried` (older resolver) is retried at once, a
+  lookup cut by the cap is not cached. Luxembourg → company
   `stable_id("company", "lu", name)`, `source="offre_emploi"`, `raw.country`, website from the offer's
   `company_domain`. Signals `raw.hiring_signal = [{title, source, date}]` (≤ 10, merged by `store.merge_signals`).
 - `night/store.py`: `combine` (one candidate per id), `merge_company` (registry merge + signals + website; a
-  version marked `raw.local_establishment` — fresh first — keeps its address / city / postal code / coordinates /
-  SIRET / distance over a head office),
+  version marked `raw.local_establishment` — fresh first, a real establishment before the offer's place of a
+  company without local agency — keeps its address / city / postal code / coordinates / SIRET / distance /
+  `agency` / `agency_notes` over a head office),
   `store_candidates(ctx, candidates, deadline) -> HarvestResult` — relevance gate on the merged company (stored
   waiting ones set aside), blacklist / excluded skipped, an `irrelevant` company made relevant (developer offer) is
   reopened (`new`), unchanged ones not rewritten.

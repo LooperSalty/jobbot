@@ -1,0 +1,79 @@
+{
+  "results": [
+    {
+      "siren": "900600001",
+      "nom_complet": "VEXLINK",
+      "nom_raison_sociale": "VEXLINK",
+      "sigle": null,
+      "nombre_etablissements": 1,
+      "nombre_etablissements_ouverts": 1,
+      "activite_principale": "64.30Z",
+      "activite_principale_naf25": "64.30Y",
+      "section_activite_principale": "K",
+      "categorie_entreprise": "PME",
+      "tranche_effectif_salarie": "NN",
+      "nature_juridique": "5710",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90060000100015", "activite_principale": "64.30Z",
+        "adresse": "20 AVENUE DE L'EXEMPLE 75008 PARIS", "code_postal": "75008", "commune": "75108",
+        "libelle_commune": "PARIS", "departement": "75", "region": "11",
+        "latitude": "48.8720", "longitude": "2.3080", "liste_enseignes": null, "nom_commercial": null,
+        "liste_idcc": ["1486"], "tranche_effectif_salarie": "NN", "est_siege": true, "etat_administratif": "A"
+      },
+      "matching_etablissements": [
+        {
+          "siret": "90060000100015", "adresse": "20 AVENUE DE L'EXEMPLE 75008 PARIS", "code_postal": "75008",
+          "commune": "75108", "libelle_commune": "PARIS", "latitude": "48.8720", "longitude": "2.3080",
+          "activite_principale": "64.30Z", "est_siege": true, "etat_administratif": "A", "liste_enseignes": null,
+          "nom_commercial": null
+        }
+      ],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false, "liste_idcc": ["1486"]}
+    },
+    {
+      "siren": "900600002",
+      "nom_complet": "VEXLINK FRANCE",
+      "nom_raison_sociale": "VEXLINK FRANCE",
+      "sigle": null,
+      "nombre_etablissements": 14,
+      "nombre_etablissements_ouverts": 9,
+      "activite_principale": "62.02A",
+      "activite_principale_naf25": "62.20G",
+      "section_activite_principale": "J",
+      "categorie_entreprise": "ETI",
+      "tranche_effectif_salarie": "41",
+      "nature_juridique": "5710",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90060000200013", "activite_principale": "62.02A",
+        "adresse": "3 ESPLANADE DE L'EXEMPLE 92800 PUTEAUX", "code_postal": "92800", "commune": "92062",
+        "libelle_commune": "PUTEAUX", "departement": "92", "region": "11",
+        "latitude": "48.8840", "longitude": "2.2380", "liste_enseignes": null, "nom_commercial": null,
+        "liste_idcc": ["1486"], "tranche_effectif_salarie": "41", "est_siege": true, "etat_administratif": "A"
+      },
+      "matching_etablissements": [
+        {
+          "siret": "90060000200013", "adresse": "3 ESPLANADE DE L'EXEMPLE 92800 PUTEAUX", "code_postal": "92800",
+          "commune": "92062", "libelle_commune": "PUTEAUX", "latitude": "48.8840", "longitude": "2.2380",
+          "activite_principale": "62.02A", "est_siege": true, "etat_administratif": "A", "liste_enseignes": null,
+          "nom_commercial": null
+        },
+        {
+          "siret": "90060000200047", "adresse": "8 RUE DE L'EXEMPLE 59000 LILLE", "code_postal": "59000",
+          "commune": "59350", "libelle_commune": "LILLE", "latitude": "50.6320", "longitude": "3.0580",
+          "activite_principale": "62.02A", "est_siege": false, "etat_administratif": "A", "liste_enseignes": null,
+          "nom_commercial": null
+        }
+      ],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false, "convention_collective_renseignee": true,
+                      "liste_idcc": ["1486"]}
+    }
+  ],
+  "total_results": 2,
+  "page": 1,
+  "per_page": 20,
+  "total_pages": 1
+}

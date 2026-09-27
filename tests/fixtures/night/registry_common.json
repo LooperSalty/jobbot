@@ -1,0 +1,118 @@
+{
+  "results": [
+    {
+      "siren": "901000001",
+      "nom_complet": "EXEMPLE SERVICES",
+      "nom_raison_sociale": "EXEMPLE SERVICES",
+      "sigle": null,
+      "nombre_etablissements": 6,
+      "nombre_etablissements_ouverts": 5,
+      "activite_principale": "62.02A",
+      "section_activite_principale": "J",
+      "categorie_entreprise": "PME",
+      "tranche_effectif_salarie": "21",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90100000100016", "adresse": "11 RUE DE L'EXEMPLE 75011 PARIS", "code_postal": "75011",
+        "commune": "75111", "libelle_commune": "PARIS", "departement": "75", "region": "11",
+        "latitude": "48.8590", "longitude": "2.3790", "est_siege": true, "etat_administratif": "A",
+        "liste_enseignes": null, "nom_commercial": null, "liste_idcc": ["1486"]
+      },
+      "matching_etablissements": [],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false, "liste_idcc": ["1486"]}
+    },
+    {
+      "siren": "901000002",
+      "nom_complet": "EXEMPLE SERVICES",
+      "nom_raison_sociale": "EXEMPLE SERVICES",
+      "sigle": null,
+      "nombre_etablissements": 3,
+      "nombre_etablissements_ouverts": 3,
+      "activite_principale": "81.21Z",
+      "section_activite_principale": "N",
+      "categorie_entreprise": "PME",
+      "tranche_effectif_salarie": "12",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90100000200014", "adresse": "4 RUE DE L'EXEMPLE 69007 LYON", "code_postal": "69007",
+        "commune": "69387", "libelle_commune": "LYON", "departement": "69", "region": "84",
+        "latitude": "45.7450", "longitude": "4.8420", "est_siege": true, "etat_administratif": "A",
+        "liste_enseignes": null, "nom_commercial": null
+      },
+      "matching_etablissements": [],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false}
+    },
+    {
+      "siren": "901000003",
+      "nom_complet": "EXEMPLE SERVICES",
+      "nom_raison_sociale": "EXEMPLE SERVICES",
+      "sigle": null,
+      "nombre_etablissements": 1,
+      "nombre_etablissements_ouverts": 1,
+      "activite_principale": "49.41A",
+      "section_activite_principale": "H",
+      "categorie_entreprise": "PME",
+      "tranche_effectif_salarie": "03",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90100000300012", "adresse": "2 CHEMIN DE L'EXEMPLE 59000 LILLE", "code_postal": "59000",
+        "commune": "59350", "libelle_commune": "LILLE", "departement": "59", "region": "32",
+        "latitude": "50.6280", "longitude": "3.0550", "est_siege": true, "etat_administratif": "A",
+        "liste_enseignes": null, "nom_commercial": null
+      },
+      "matching_etablissements": [],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false}
+    },
+    {
+      "siren": "901000004",
+      "nom_complet": "EXEMPLE SERVICES",
+      "nom_raison_sociale": "EXEMPLE SERVICES",
+      "sigle": null,
+      "nombre_etablissements": 1,
+      "nombre_etablissements_ouverts": 1,
+      "activite_principale": "43.21A",
+      "section_activite_principale": "F",
+      "categorie_entreprise": "PME",
+      "tranche_effectif_salarie": "02",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90100000400010", "adresse": "8 ALLEE DE L'EXEMPLE 31000 TOULOUSE", "code_postal": "31000",
+        "commune": "31555", "libelle_commune": "TOULOUSE", "departement": "31", "region": "76",
+        "latitude": "43.6050", "longitude": "1.4450", "est_siege": true, "etat_administratif": "A",
+        "liste_enseignes": null, "nom_commercial": null
+      },
+      "matching_etablissements": [],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false}
+    },
+    {
+      "siren": "901000005",
+      "nom_complet": "EXEMPLE SERVICES",
+      "nom_raison_sociale": "EXEMPLE SERVICES",
+      "sigle": null,
+      "nombre_etablissements": 1,
+      "nombre_etablissements_ouverts": 1,
+      "activite_principale": "96.02A",
+      "section_activite_principale": "S",
+      "categorie_entreprise": "PME",
+      "tranche_effectif_salarie": "01",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90100000500018", "adresse": "3 RUE DE L'EXEMPLE 44000 NANTES", "code_postal": "44000",
+        "commune": "44109", "libelle_commune": "NANTES", "departement": "44", "region": "52",
+        "latitude": "47.2180", "longitude": "-1.5540", "est_siege": true, "etat_administratif": "A",
+        "liste_enseignes": null, "nom_commercial": null
+      },
+      "matching_etablissements": [],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false}
+    }
+  ],
+  "total_results": 143,
+  "page": 1,
+  "per_page": 20,
+  "total_pages": 8
+}

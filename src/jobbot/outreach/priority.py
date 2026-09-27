@@ -12,6 +12,8 @@ Points (the night stores them in ``raw["priority"]`` / ``raw["priority_reasons"]
 - 10-249 employees (an apprentice needs a tutor) +10;
 - profile skills named on the company website: +2 each, 10 max.
 
+Notes on where the company was located (``raw["agency_notes"]``, :mod:`jobbot.night.siren` — e.g. « Pas d'agence
+locale enregistrée : candidature au siège (recrute pour Metz) ») are added to the reasons, without points.
 Already contacted, blacklisted, excluded, set aside or recently applied → excluded (0).
 """
 
@@ -35,6 +37,7 @@ from jobbot.outreach.selection import is_guess, is_nominative, is_role_address, 
 from jobbot.textutil import normalize_company, truncate
 
 PRIORITY_KEY, REASONS_KEY, AT_KEY = "priority", "priority_reasons", "priority_at"
+AGENCY_NOTES_KEY = "agency_notes"  # French notes on the company's place (no local agency, closer group entity…)
 CORE_POINTS, ADJACENT_POINTS, LARGE_POINTS = 30, 15, 10
 HIRING_POINTS, HIRING_DAYS = 25, 60
 RECRUITMENT_POINTS, NAMED_POINTS, LEARNED_GUESS_POINTS, UNVERIFIED_GUESS_POINTS = 20, 15, 5, -10
@@ -190,7 +193,13 @@ def company_priority(company: Company, profile: Profile, repo: Repository, *, cf
     parts = [_sector(company, profile), _hiring(company, now or clock.now()), _contact(company, contact),
              _distance(company, profile), _size(company), _skills(company, profile)]
     score = max(1.0, min(100.0, float(sum(points for points, _ in parts))))
-    return score, [text for _, text in parts if text]
+    return score, [text for _, text in parts if text] + place_notes(company)
+
+
+def place_notes(company: Company) -> list[str]:
+    """French notes on where the company was located (no local agency…), from the night's SIREN resolution."""
+    notes = company.raw.get(AGENCY_NOTES_KEY)
+    return [str(n) for n in notes if isinstance(n, str) and n.strip()] if isinstance(notes, list) else []
 
 
 def with_priority(company: Company, score: float, reasons: list[str]) -> Company:

@@ -7,7 +7,9 @@ search area (+ ``settings.night.extra_radius_km``). French employers are resolve
 scored by :mod:`jobbot.night.siren_match`; only a confident match, never a guess), most offers first, at most
 ``settings.night.max_siren_lookups`` registry queries per night; the answer is cached in kv
 (``night:siren:<pays>:<nom>``; not identified → looked up again after 7 days). A company is located at its
-establishment near the offers (the local agency of a group, not its head office). Luxembourg has no SIREN: its
+establishment near the offers (the local agency of a group, not its head office); an IT company without any local
+agency (ESN, consulting) is kept at its head office but works at the offer's place (``raw["agency"] =
+"absente"``, :mod:`jobbot.night.siren_remote`). Luxembourg has no SIREN: its
 employers are kept by name (domain discovery only at enrichment). Each company gets
 ``raw["hiring_signal"] = [{title, source, date}]`` (merged with what is stored).
 """
@@ -167,15 +169,17 @@ def _french_company(ctx: AppContext, client: httpx.Client, group: OfferGroup, zo
     if siren.missing_is_fresh(entry) or _excluded(ctx, group) or not lookups.available():
         return None  # not identified recently / excluded / no query left tonight (the rest next night)
     result = siren.resolve(client, group, zone, lookups)
-    company = siren.local_company(result.match) if result.match is not None else None
+    company = siren.company_of(result.match, group) if result.match is not None else None
     if company is None:
         if result.complete:
             siren.remember_missing(ctx.repo, group, result.tried)
             log.info("Employeur « %s » non identifié avec certitude (%s)", group.name, ", ".join(result.tried))
         return None
     siren.remember_found(ctx.repo, group, result, company)
-    log.info("Employeur « %s » → SIREN %s, établissement de %s (%s)", group.name, company.siren, company.city,
-             result.strategy)
+    where = f"siège ({company.address}), recrute pour {company.city}" if result.match.remote else \
+        f"établissement de {company.city}"
+    log.info("Employeur « %s » → SIREN %s, %s (%s)%s", group.name, company.siren, where, result.strategy,
+             "".join(f" — {n}" for n in result.match.notes))
     return _with_signals(company, group)
 
 

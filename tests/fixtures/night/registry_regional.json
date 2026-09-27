@@ -1,0 +1,104 @@
+{
+  "results": [
+    {
+      "siren": "900700001",
+      "nom_complet": "KALIDO",
+      "nom_raison_sociale": "KALIDO",
+      "sigle": null,
+      "nombre_etablissements": 1,
+      "nombre_etablissements_ouverts": 1,
+      "activite_principale": "70.10Z",
+      "activite_principale_naf25": "70.10Y",
+      "section_activite_principale": "M",
+      "categorie_entreprise": "PME",
+      "tranche_effectif_salarie": "01",
+      "nature_juridique": "5710",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90070000100011", "activite_principale": "70.10Z",
+        "adresse": "15 RUE DE L'EXEMPLE 75008 PARIS", "code_postal": "75008", "commune": "75108",
+        "libelle_commune": "PARIS", "departement": "75", "region": "11",
+        "latitude": "48.8730", "longitude": "2.3100", "liste_enseignes": null, "nom_commercial": null,
+        "liste_idcc": [], "tranche_effectif_salarie": "01", "est_siege": true, "etat_administratif": "A"
+      },
+      "matching_etablissements": [
+        {
+          "siret": "90070000100011", "adresse": "15 RUE DE L'EXEMPLE 75008 PARIS", "code_postal": "75008",
+          "commune": "75108", "libelle_commune": "PARIS", "latitude": "48.8730", "longitude": "2.3100",
+          "activite_principale": "70.10Z", "est_siege": true, "etat_administratif": "A", "liste_enseignes": null,
+          "nom_commercial": null
+        }
+      ],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false, "liste_idcc": []}
+    },
+    {
+      "siren": "900700002",
+      "nom_complet": "KALIDO NORD",
+      "nom_raison_sociale": "KALIDO NORD",
+      "sigle": null,
+      "nombre_etablissements": 5,
+      "nombre_etablissements_ouverts": 4,
+      "activite_principale": "62.02A",
+      "activite_principale_naf25": "62.20G",
+      "section_activite_principale": "J",
+      "categorie_entreprise": "PME",
+      "tranche_effectif_salarie": "12",
+      "nature_juridique": "5710",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90070000200019", "activite_principale": "62.02A",
+        "adresse": "40 BOULEVARD DE L'EXEMPLE 59000 LILLE", "code_postal": "59000", "commune": "59350",
+        "libelle_commune": "LILLE", "departement": "59", "region": "32",
+        "latitude": "50.6310", "longitude": "3.0600", "liste_enseignes": null, "nom_commercial": null,
+        "liste_idcc": ["1486"], "tranche_effectif_salarie": "12", "est_siege": true, "etat_administratif": "A"
+      },
+      "matching_etablissements": [
+        {
+          "siret": "90070000200019", "adresse": "40 BOULEVARD DE L'EXEMPLE 59000 LILLE", "code_postal": "59000",
+          "commune": "59350", "libelle_commune": "LILLE", "latitude": "50.6310", "longitude": "3.0600",
+          "activite_principale": "62.02A", "est_siege": true, "etat_administratif": "A", "liste_enseignes": null,
+          "nom_commercial": null
+        }
+      ],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false, "liste_idcc": ["1486"]}
+    },
+    {
+      "siren": "900700003",
+      "nom_complet": "KALIDO EST",
+      "nom_raison_sociale": "KALIDO EST",
+      "sigle": null,
+      "nombre_etablissements": 3,
+      "nombre_etablissements_ouverts": 3,
+      "activite_principale": "62.02A",
+      "activite_principale_naf25": "62.20G",
+      "section_activite_principale": "J",
+      "categorie_entreprise": "PME",
+      "tranche_effectif_salarie": "12",
+      "nature_juridique": "5710",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90070000300017", "activite_principale": "62.02A",
+        "adresse": "2 RUE DE L'EXEMPLE 67300 SCHILTIGHEIM", "code_postal": "67300", "commune": "67447",
+        "libelle_commune": "SCHILTIGHEIM", "departement": "67", "region": "44",
+        "latitude": "48.6070", "longitude": "7.7500", "liste_enseignes": null, "nom_commercial": null,
+        "liste_idcc": ["1486"], "tranche_effectif_salarie": "12", "est_siege": true, "etat_administratif": "A"
+      },
+      "matching_etablissements": [
+        {
+          "siret": "90070000300017", "adresse": "2 RUE DE L'EXEMPLE 67300 SCHILTIGHEIM", "code_postal": "67300",
+          "commune": "67447", "libelle_commune": "SCHILTIGHEIM", "latitude": "48.6070", "longitude": "7.7500",
+          "activite_principale": "62.02A", "est_siege": true, "etat_administratif": "A", "liste_enseignes": null,
+          "nom_commercial": null
+        }
+      ],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false, "liste_idcc": ["1486"]}
+    }
+  ],
+  "total_results": 3,
+  "page": 1,
+  "per_page": 20,
+  "total_pages": 1
+}

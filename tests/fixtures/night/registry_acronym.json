@@ -1,0 +1,122 @@
+{
+  "results": [
+    {
+      "siren": "900800001",
+      "nom_complet": "KZB",
+      "nom_raison_sociale": "KZB",
+      "sigle": null,
+      "nombre_etablissements": 1,
+      "nombre_etablissements_ouverts": 1,
+      "activite_principale": "68.20B",
+      "section_activite_principale": "L",
+      "categorie_entreprise": "PME",
+      "tranche_effectif_salarie": "NN",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90080000100010", "adresse": "5 RUE DE L'EXEMPLE 69006 LYON", "code_postal": "69006",
+        "commune": "69386", "libelle_commune": "LYON", "departement": "69", "region": "84",
+        "latitude": "45.7680", "longitude": "4.8500", "est_siege": true, "etat_administratif": "A",
+        "liste_enseignes": null, "nom_commercial": null
+      },
+      "matching_etablissements": [],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false}
+    },
+    {
+      "siren": "900800002",
+      "nom_complet": "SOCIETE POUR L'INFORMATIQUE KZB (KZB)",
+      "nom_raison_sociale": "SOCIETE POUR L'INFORMATIQUE KZB",
+      "sigle": "KZB",
+      "nombre_etablissements": 41,
+      "nombre_etablissements_ouverts": 30,
+      "activite_principale": "62.02A",
+      "activite_principale_naf25": "62.20G",
+      "section_activite_principale": "J",
+      "categorie_entreprise": "ETI",
+      "tranche_effectif_salarie": "32",
+      "nature_juridique": "5710",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90080000200018", "activite_principale": "62.02A",
+        "adresse": "12 COURS DE L'EXEMPLE 69003 LYON", "code_postal": "69003", "commune": "69383",
+        "libelle_commune": "LYON", "departement": "69", "region": "84",
+        "latitude": "45.7600", "longitude": "4.8550", "liste_enseignes": null, "nom_commercial": null,
+        "liste_idcc": ["1486"], "tranche_effectif_salarie": "32", "est_siege": true, "etat_administratif": "A"
+      },
+      "matching_etablissements": [],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false, "convention_collective_renseignee": true,
+                      "liste_idcc": ["1486"]}
+    },
+    {
+      "siren": "900800003",
+      "nom_complet": "SAS K.Z.B. (KZB)",
+      "nom_raison_sociale": "SAS K.Z.B.",
+      "sigle": "KZB",
+      "nombre_etablissements": 1,
+      "nombre_etablissements_ouverts": 1,
+      "activite_principale": "62.02A",
+      "section_activite_principale": "J",
+      "categorie_entreprise": "PME",
+      "tranche_effectif_salarie": "01",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90080000300016", "adresse": "9 QUAI DE L'EXEMPLE 33000 BORDEAUX", "code_postal": "33000",
+        "commune": "33063", "libelle_commune": "BORDEAUX", "departement": "33", "region": "75",
+        "latitude": "44.8410", "longitude": "-0.5700", "est_siege": true, "etat_administratif": "A",
+        "liste_enseignes": null, "nom_commercial": null
+      },
+      "matching_etablissements": [],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false}
+    },
+    {
+      "siren": "900800004",
+      "nom_complet": "KZB",
+      "nom_raison_sociale": "KZB",
+      "sigle": null,
+      "nombre_etablissements": 2,
+      "nombre_etablissements_ouverts": 2,
+      "activite_principale": "47.11B",
+      "section_activite_principale": "G",
+      "categorie_entreprise": "PME",
+      "tranche_effectif_salarie": "02",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90080000400014", "adresse": "1 PLACE DE L'EXEMPLE 13008 MARSEILLE", "code_postal": "13008",
+        "commune": "13208", "libelle_commune": "MARSEILLE", "departement": "13", "region": "93",
+        "latitude": "43.2700", "longitude": "5.3900", "est_siege": true, "etat_administratif": "A",
+        "liste_enseignes": null, "nom_commercial": null
+      },
+      "matching_etablissements": [],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false}
+    },
+    {
+      "siren": "900800005",
+      "nom_complet": "KZB",
+      "nom_raison_sociale": "KZB",
+      "sigle": null,
+      "nombre_etablissements": 1,
+      "nombre_etablissements_ouverts": 1,
+      "activite_principale": "43.22A",
+      "section_activite_principale": "F",
+      "categorie_entreprise": "PME",
+      "tranche_effectif_salarie": "01",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90080000500012", "adresse": "7 IMPASSE DE L'EXEMPLE 35000 RENNES", "code_postal": "35000",
+        "commune": "35238", "libelle_commune": "RENNES", "departement": "35", "region": "53",
+        "latitude": "48.1100", "longitude": "-1.6800", "est_siege": true, "etat_administratif": "A",
+        "liste_enseignes": null, "nom_commercial": null
+      },
+      "matching_etablissements": [],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false}
+    }
+  ],
+  "total_results": 48,
+  "page": 1,
+  "per_page": 20,
+  "total_pages": 3
+}

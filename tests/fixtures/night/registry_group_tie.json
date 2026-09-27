@@ -1,0 +1,105 @@
+{
+  "results": [
+    {
+      "siren": "900900001",
+      "nom_complet": "ZORGANO PARTICIPATION 2",
+      "nom_raison_sociale": "ZORGANO PARTICIPATION 2",
+      "sigle": null,
+      "nombre_etablissements": 1,
+      "nombre_etablissements_ouverts": 1,
+      "activite_principale": "64.20Z",
+      "activite_principale_naf25": "64.21Y",
+      "section_activite_principale": "K",
+      "categorie_entreprise": "GE",
+      "tranche_effectif_salarie": "NN",
+      "nature_juridique": "5710",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90090000100012", "activite_principale": "64.20Z",
+        "adresse": "30 AVENUE DE L'EXEMPLE 57070 METZ", "code_postal": "57070", "commune": "57463",
+        "libelle_commune": "METZ", "departement": "57", "region": "44",
+        "latitude": "49.1060", "longitude": "6.2200", "liste_enseignes": ["ZORGANO GROUPE"], "nom_commercial": null,
+        "liste_idcc": [], "tranche_effectif_salarie": "NN", "est_siege": true, "etat_administratif": "A"
+      },
+      "matching_etablissements": [
+        {
+          "siret": "90090000100012", "adresse": "30 AVENUE DE L'EXEMPLE 57070 METZ", "code_postal": "57070",
+          "commune": "57463", "libelle_commune": "METZ", "latitude": "49.1060", "longitude": "6.2200",
+          "activite_principale": "64.20Z", "est_siege": true, "etat_administratif": "A",
+          "liste_enseignes": ["ZORGANO GROUPE"], "nom_commercial": null
+        }
+      ],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false, "liste_idcc": []}
+    },
+    {
+      "siren": "900900002",
+      "nom_complet": "ZORGANO FRANCE",
+      "nom_raison_sociale": "ZORGANO FRANCE",
+      "sigle": null,
+      "nombre_etablissements": 52,
+      "nombre_etablissements_ouverts": 35,
+      "activite_principale": "62.02A",
+      "activite_principale_naf25": "62.20G",
+      "section_activite_principale": "J",
+      "categorie_entreprise": "GE",
+      "tranche_effectif_salarie": "42",
+      "nature_juridique": "5710",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90090000200010", "activite_principale": "62.02A",
+        "adresse": "100 RUE DE L'EXEMPLE 75015 PARIS", "code_postal": "75015", "commune": "75115",
+        "libelle_commune": "PARIS", "departement": "75", "region": "11",
+        "latitude": "48.8410", "longitude": "2.3000", "liste_enseignes": null, "nom_commercial": null,
+        "liste_idcc": ["1486"], "tranche_effectif_salarie": "32", "est_siege": true, "etat_administratif": "A"
+      },
+      "matching_etablissements": [
+        {
+          "siret": "90090000200044", "adresse": "4 RUE DE L'EXEMPLE 54000 NANCY", "code_postal": "54000",
+          "commune": "54395", "libelle_commune": "NANCY", "latitude": "48.6900", "longitude": "6.1800",
+          "activite_principale": "62.02A", "est_siege": false, "etat_administratif": "A", "liste_enseignes": null,
+          "nom_commercial": null, "tranche_effectif_salarie": "21"
+        }
+      ],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false, "convention_collective_renseignee": true,
+                      "liste_idcc": ["1486"]}
+    },
+    {
+      "siren": "900900003",
+      "nom_complet": "ZORGANO MANAGEMENT",
+      "nom_raison_sociale": "ZORGANO MANAGEMENT",
+      "sigle": null,
+      "nombre_etablissements": 2,
+      "nombre_etablissements_ouverts": 2,
+      "activite_principale": "70.10Z",
+      "activite_principale_naf25": "70.10Y",
+      "section_activite_principale": "M",
+      "categorie_entreprise": "GE",
+      "tranche_effectif_salarie": "12",
+      "nature_juridique": "5710",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90090000300018", "activite_principale": "70.10Z",
+        "adresse": "6 RUE DE L'EXEMPLE 57000 METZ", "code_postal": "57000", "commune": "57463",
+        "libelle_commune": "METZ", "departement": "57", "region": "44",
+        "latitude": "49.1200", "longitude": "6.1770", "liste_enseignes": null, "nom_commercial": null,
+        "liste_idcc": ["1486"], "tranche_effectif_salarie": "12", "est_siege": true, "etat_administratif": "A"
+      },
+      "matching_etablissements": [
+        {
+          "siret": "90090000300018", "adresse": "6 RUE DE L'EXEMPLE 57000 METZ", "code_postal": "57000",
+          "commune": "57463", "libelle_commune": "METZ", "latitude": "49.1200", "longitude": "6.1770",
+          "activite_principale": "70.10Z", "est_siege": true, "etat_administratif": "A", "liste_enseignes": null,
+          "nom_commercial": null
+        }
+      ],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false, "liste_idcc": ["1486"]}
+    }
+  ],
+  "total_results": 3,
+  "page": 1,
+  "per_page": 20,
+  "total_pages": 1
+}

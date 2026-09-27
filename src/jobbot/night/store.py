@@ -4,7 +4,9 @@ waiting are set aside), never touching status / contacts / domain found by enric
 
 Hiring signals (``raw["hiring_signal"] = [{title, source, date}]``) are merged, not replaced. A company located
 at the establishment near its offers (``raw["local_establishment"]``, :mod:`jobbot.night.hiring`) keeps that place
-(address, city, postal code, coordinates, SIRET) over a head office or another establishment.
+(address, city, postal code, coordinates, SIRET) over a head office or another establishment; a real local
+establishment wins over the offer's place given to a company without local agency (``raw["agency"] =
+"absente"``, its notes ``raw["agency_notes"]``).
 """
 
 from __future__ import annotations
@@ -16,6 +18,7 @@ from jobbot.models import Company
 from jobbot.night.budget import Deadline
 from jobbot.night.models import HarvestResult
 from jobbot.outreach.companies import merge_company as _merge_registry
+from jobbot.outreach.priority import AGENCY_NOTES_KEY
 from jobbot.outreach.relevance import IRRELEVANT_STATUS, REASON_KEY, is_relevant_employer, set_aside_copy
 from jobbot.textutil import normalize, normalize_company
 
@@ -23,9 +26,10 @@ log = logging.getLogger(__name__)
 
 SIGNAL_KEY = "hiring_signal"
 LOCAL_KEY = "local_establishment"  # True: the place is the establishment near the employer's offers
+AGENCY_KEY, AGENCY_ABSENT = "agency", "absente"  # no local agency: head office, working at the offer's place
 MAX_SIGNALS = 10
 PLACE_FIELDS = ("address", "city", "postal_code", "latitude", "longitude")
-PLACE_RAW = ("siret", "distance_km")
+PLACE_RAW = ("siret", "distance_km", AGENCY_KEY, AGENCY_NOTES_KEY)
 
 
 def _valid_signals(*lists: object) -> list[dict]:
@@ -44,10 +48,11 @@ def merge_signals(*lists: object) -> list[dict]:
 
 
 def _local_source(existing: Company, fresh: Company) -> Company | None:
-    """The version located at the establishment near the offers (the fresh one first), None when neither is."""
-    if fresh.raw.get(LOCAL_KEY):
-        return fresh
-    return existing if existing.raw.get(LOCAL_KEY) else None
+    """The version located at the establishment near the offers (the fresh one first; a real establishment before
+    the offer's place of a company without local agency), None when neither is."""
+    located = [c for c in (fresh, existing) if c.raw.get(LOCAL_KEY)]
+    real = [c for c in located if c.raw.get(AGENCY_KEY) != AGENCY_ABSENT]
+    return (real or located or [None])[0]
 
 
 def _with_local_place(merged: Company, source: Company | None) -> Company:
