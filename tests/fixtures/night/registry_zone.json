@@ -1,0 +1,52 @@
+{
+  "results": [
+    {
+      "siren": "900500001",
+      "nom_complet": "EXEMPLE STUDIO WEB",
+      "nom_raison_sociale": "EXEMPLE STUDIO WEB",
+      "sigle": null,
+      "nombre_etablissements": 1,
+      "nombre_etablissements_ouverts": 1,
+      "activite_principale": "62.01Z",
+      "section_activite_principale": "J",
+      "categorie_entreprise": "PME",
+      "tranche_effectif_salarie": "11",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90050000100017", "adresse": "7 QUAI DE L'EXEMPLE 69002 LYON", "code_postal": "69002",
+        "commune": "69382", "libelle_commune": "LYON", "departement": "69", "latitude": "45.7600",
+        "longitude": "4.8300", "est_siege": true, "etat_administratif": "A", "liste_enseignes": null,
+        "nom_commercial": null
+      },
+      "matching_etablissements": [],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false}
+    },
+    {
+      "siren": "900500002",
+      "nom_complet": "EXEMPLE STUDIO WEB",
+      "nom_raison_sociale": "EXEMPLE STUDIO WEB",
+      "sigle": null,
+      "nombre_etablissements": 1,
+      "nombre_etablissements_ouverts": 1,
+      "activite_principale": "62.01Z",
+      "section_activite_principale": "J",
+      "categorie_entreprise": "PME",
+      "tranche_effectif_salarie": "03",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90050000200015", "adresse": "3 RUE DE L'EXEMPLE 54000 NANCY", "code_postal": "54000",
+        "commune": "54395", "libelle_commune": "NANCY", "departement": "54", "latitude": null,
+        "longitude": null, "est_siege": true, "etat_administratif": "A", "liste_enseignes": null,
+        "nom_commercial": null
+      },
+      "matching_etablissements": [],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false}
+    }
+  ],
+  "total_results": 2,
+  "page": 1,
+  "per_page": 20,
+  "total_pages": 1
+}

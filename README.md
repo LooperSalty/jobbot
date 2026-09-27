@@ -339,8 +339,12 @@ suivantes) et l'ensemble arrêté proprement à `night.until` (06:30) ou après 
 2. **Collecte** : toutes les entreprises du numérique autour de chacune de tes zones (rayon + `night.extra_radius_km`,
    50 km au plus), les « recruteurs » La Bonne Alternance, et **les employeurs des offres déjà en base** (même
    écartées pour l'expérience : une entreprise qui recrute des développeurs est une excellente cible pour une
-   alternance), identifiés dans le registre avec une correspondance de nom sûre ; au Luxembourg (pas de SIREN), par
-   leur nom. Tout passe par le filtre « hors cible ».
+   alternance), identifiés dans le registre avec une correspondance sûre (plusieurs recherches : département puis
+   code postal de l'offre, nom nettoyé — « H/F », forme juridique, « Groupe », « France », ponctuation —, puis sans
+   lieu ; sigles et enseignes comparés ; en cas de doute, rien), à l'**établissement local** de l'entreprise (l'agence
+   près de l'offre, pas le siège parisien) ; au plus `night.max_siren_lookups` (200) recherches par nuit, un employeur
+   non identifié est recherché de nouveau 7 jours plus tard ; au Luxembourg (pas de SIREN), par leur nom. Tout passe
+   par le filtre « hors cible ».
 3. **Contacts** : sites, pages carrières, personnes, format d'adresse, sur `night.workers` (4) fils, jamais deux à la
    fois sur le même site ; résumés du site par le modèle rapide, `night.max_llm_summaries` (80) au plus.
 4. **Priorités** (0-100, raisons en français) : numérique cœur +30 / proche +15 / grande structure +10, offre de

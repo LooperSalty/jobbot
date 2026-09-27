@@ -1,0 +1,37 @@
+{
+  "results": [
+    {
+      "siren": "900400001",
+      "nom_complet": "QZ IT (Q&Z INFORMATIQUE ET TECHNOLOGIES)",
+      "nom_raison_sociale": "QZ IT",
+      "sigle": null,
+      "nombre_etablissements": 2,
+      "nombre_etablissements_ouverts": 2,
+      "activite_principale": "62.02A",
+      "section_activite_principale": "J",
+      "categorie_entreprise": "PME",
+      "tranche_effectif_salarie": "12",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90040000100014", "adresse": "6 RUE DE L'EXEMPLE 57050 METZ", "code_postal": "57050",
+        "commune": "57463", "libelle_commune": "METZ", "departement": "57", "latitude": "49.1300",
+        "longitude": "6.1600", "est_siege": true, "etat_administratif": "A",
+        "liste_enseignes": ["Q&Z INFORMATIQUE ET TECHNOLOGIES"], "nom_commercial": null, "liste_idcc": ["1486"]
+      },
+      "matching_etablissements": [
+        {
+          "siret": "90040000100014", "adresse": "6 RUE DE L'EXEMPLE 57050 METZ", "code_postal": "57050",
+          "commune": "57463", "libelle_commune": "METZ", "latitude": "49.1300", "longitude": "6.1600",
+          "est_siege": true, "etat_administratif": "A", "liste_enseignes": ["Q&Z INFORMATIQUE ET TECHNOLOGIES"],
+          "nom_commercial": null
+        }
+      ],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false, "liste_idcc": ["1486"]}
+    }
+  ],
+  "total_results": 1,
+  "page": 1,
+  "per_page": 20,
+  "total_pages": 1
+}

@@ -2,24 +2,23 @@
 seniority still means the company recruits developers: a great spontaneous target for an apprenticeship).
 
 Offers kept: a developer title (never a school / CFA offer or a sales job), a named employer, a place inside a
-search area (+ ``settings.night.extra_radius_km``). French employers are resolved to their SIREN through
-``recherche-entreprises /search`` (name + department; rapidfuzz, high confidence only — an ambiguous or weak match
-is dropped); the answer is cached in kv (``night:siren:<pays>:<nom>``). Luxembourg has no SIREN: its employers
-are kept by name (domain discovery only at enrichment). Each company gets
+search area (+ ``settings.night.extra_radius_km``). French employers are resolved to their SIREN by
+:mod:`jobbot.night.siren` (several registry queries — department, postal code, cleaned name variants, no place —
+scored by :mod:`jobbot.night.siren_match`; only a confident match, never a guess), most offers first, at most
+``settings.night.max_siren_lookups`` registry queries per night; the answer is cached in kv
+(``night:siren:<pays>:<nom>``; not identified → looked up again after 7 days). A company is located at its
+establishment near the offers (the local agency of a group, not its head office). Luxembourg has no SIREN: its
+employers are kept by name (domain discovery only at enrichment). Each company gets
 ``raw["hiring_signal"] = [{title, source, date}]`` (merged with what is stored).
 """
 
 from __future__ import annotations
 
-import json
 import logging
 import re
 from collections import Counter
-from dataclasses import dataclass
-from datetime import timedelta
 
 import httpx
-from rapidfuzz import fuzz
 
 from jobbot import clock
 from jobbot.context import AppContext
@@ -28,41 +27,21 @@ from jobbot.matching.filters import sales_title_reason, school_offer_reason
 from jobbot.matching.geo import department_from_location, department_from_postal, haversine_km
 from jobbot.matching.target_rules import offer_country
 from jobbot.models import Company, JobOffer
+from jobbot.night import siren
 from jobbot.night.budget import Deadline
 from jobbot.night.harvest import harvest_radius
+from jobbot.night.siren_match import OfferGroup, Zone
 from jobbot.night.store import SIGNAL_KEY, merge_signals
-from jobbot.outreach._registry import company_from_result, name_candidates
-from jobbot.outreach.companies import fetch_registry_page
 from jobbot.outreach.relevance import is_dev_title
 from jobbot.sources.countries import location_country
 from jobbot.textutil import normalize_company, stable_id, strip_accents, truncate
 
+__all__ = ["OfferGroup", "eligible", "foreign_company", "hiring_companies", "job_zone", "offer_groups", "zone_of"]
+
 log = logging.getLogger(__name__)
 
-CACHE_KEY = "night:siren:"
-RECHECK_DAYS = 30  # unresolved (or not stored) employers are looked up again after this
-ACCEPT_SCORE = 90.0  # name similarity needed to accept a registry match…
-PLACE_SCORE = 85.0  # …or this much when the establishment is in the offer's postal code / city
-MARGIN = 5.0  # a second company this close to the best one = ambiguous → rejected
-SEARCH_RESULTS = 10
 _ANONYMOUS = re.compile(r"confidenti|anonyme|non (?:communiqu|renseign|precis|divulgu)|entreprise du secteur|"
                         r"cabinet de recrutement|^(?:n/?a|-+|\?+|x+)$")
-
-
-@dataclass(frozen=True)
-class OfferGroup:
-    """Offers of one employer (normalised name + country) inside the search areas."""
-
-    name: str
-    key: str
-    country: str
-    department: str | None
-    postal_code: str | None
-    city: str
-    latitude: float | None
-    longitude: float | None
-    domain: str | None
-    signals: tuple[dict, ...]
 
 
 # --------------------------------------------------------------------------- offers → groups
@@ -87,6 +66,15 @@ def _target_departments(ctx: AppContext) -> set[str]:
     deps = {d.upper() for d in ctx.profile.target.departments}
     deps.update(d for loc in ctx.profile.target.locations if (d := department_from_postal(loc.postal_code)))
     return deps
+
+
+def zone_of(ctx: AppContext) -> Zone:
+    """Where an employer's establishment counts as local: target departments + French areas (radius + extra)."""
+    extra = ctx.settings.night.extra_radius_km
+    areas = tuple((loc.latitude, loc.longitude, float(harvest_radius(loc, extra)))
+                  for loc in ctx.profile.target.locations
+                  if loc.latitude is not None and loc.longitude is not None and location_country(loc) == "FR")
+    return Zone(departments=frozenset(_target_departments(ctx)), areas=areas)
 
 
 def job_zone(ctx: AppContext, job: JobOffer) -> str | None:
@@ -136,77 +124,7 @@ def offer_groups(ctx: AppContext) -> list[OfferGroup]:
     return [_group(jobs, country) for (_, country), jobs in grouped.items()]
 
 
-# --------------------------------------------------------------------------- SIREN resolution
-
-
-def _names(item: dict) -> list[str]:
-    return [n for n in [*name_candidates(item), str(item.get("nom_complet") or "")] if n]
-
-
-def name_score(name: str, item: dict) -> float:
-    wanted = normalize_company(name)
-    scores = [max(fuzz.ratio(wanted, other), fuzz.token_sort_ratio(wanted, other))
-              for other in (normalize_company(n) for n in _names(item)) if other]
-    return max(scores, default=0.0)
-
-
-def _same_place(group: OfferGroup, item: dict) -> bool:
-    places = [*(item.get("matching_etablissements") or []), item.get("siege") or {}]
-    city = normalize_company(group.city)
-    return any((group.postal_code and p.get("code_postal") == group.postal_code)
-               or (city and normalize_company(str(p.get("libelle_commune") or "")) == city) for p in places)
-
-
-def best_match(group: OfferGroup, items: list[dict]) -> dict | None:
-    """The registry result naming this employer, only with high confidence (clear winner, high similarity)."""
-    best: dict[str, tuple[float, dict]] = {}
-    for item in items:
-        siren = str(item.get("siren") or "") if isinstance(item, dict) else ""
-        if re.fullmatch(r"\d{9}", siren):
-            score = name_score(group.name, item)
-            if siren not in best or score > best[siren][0]:
-                best[siren] = (score, item)
-    ranked = sorted(best.values(), key=lambda pair: -pair[0])
-    if not ranked:
-        return None
-    top_score, top = ranked[0]
-    if top_score < (PLACE_SCORE if _same_place(group, top) else ACCEPT_SCORE):
-        return None
-    if len(ranked) > 1 and ranked[1][0] >= top_score - MARGIN:
-        return None  # two companies answer to that name: never guess
-    return top
-
-
-def resolve(client: httpx.Client, group: OfferGroup) -> dict | None:
-    params: dict[str, str | int] = {"q": group.name, "etat_administratif": "A", "per_page": SEARCH_RESULTS}
-    if group.department:
-        params["departement"] = group.department
-    data = fetch_registry_page(client, params)
-    return best_match(group, [r for r in data.get("results") or [] if isinstance(r, dict)])
-
-
 # --------------------------------------------------------------------------- groups → companies
-
-
-def _cache_key(group: OfferGroup) -> str:
-    return f"{CACHE_KEY}{group.country.lower()}:{group.key}"
-
-
-def _cached(ctx: AppContext, group: OfferGroup) -> dict | None:
-    try:
-        data = json.loads(ctx.repo.kv_get(_cache_key(group)) or "null")
-    except ValueError:
-        return None
-    return data if isinstance(data, dict) else None
-
-
-def _remember(ctx: AppContext, group: OfferGroup, siren: str | None) -> None:
-    ctx.repo.kv_set(_cache_key(group), json.dumps({"siren": siren, "at": clock.iso(clock.now())}))
-
-
-def _fresh_cache(entry: dict | None) -> bool:
-    at = clock.parse_dt(str(entry.get("at") or "")) if entry else None
-    return at is not None and clock.now() - at < timedelta(days=RECHECK_DAYS)
 
 
 def _with_signals(company: Company, group: OfferGroup) -> Company:
@@ -227,41 +145,58 @@ def foreign_company(group: OfferGroup) -> Company:
     )
 
 
-def _french_company(ctx: AppContext, client: httpx.Client, group: OfferGroup) -> Company | None:
-    entry = _cached(ctx, group)
-    siren = entry.get("siren") if entry else None
-    if siren:
-        stored = ctx.repo.get_company(stable_id("company", str(siren)))
-        if stored is not None:
-            return _with_signals(stored, group)  # known employer: no registry call
-    elif _fresh_cache(entry):
-        return None  # not identified recently: looked up again after RECHECK_DAYS
-    if ctx.repo.is_blacklisted(group.name) or group.key in {normalize_company(x) for x in
-                                                            ctx.profile.target.exclude_companies}:
+def _excluded(ctx: AppContext, group: OfferGroup) -> bool:
+    return ctx.repo.is_blacklisted(group.name) or group.key in {normalize_company(x) for x in
+                                                                ctx.profile.target.exclude_companies}
+
+
+def _known(ctx: AppContext, entry: dict | None) -> Company | None:
+    """The stored company of a cached SIREN, at its cached establishment (no registry query)."""
+    if not entry or not entry.get("siren"):
         return None
-    item = resolve(client, group)
-    _remember(ctx, group, str(item["siren"]) if item else None)
-    if item is None:
-        log.info("Employeur « %s » non identifié avec certitude dans le registre", group.name)
+    stored = ctx.repo.get_company(stable_id("company", str(entry["siren"])))
+    return siren.with_cached_place(stored, entry) if stored is not None else None
+
+
+def _french_company(ctx: AppContext, client: httpx.Client, group: OfferGroup, zone: Zone,
+                    lookups: siren.Lookups) -> Company | None:
+    entry = siren.cached(ctx.repo, group)
+    known = _known(ctx, entry)
+    if known is not None:
+        return _with_signals(known, group)
+    if siren.missing_is_fresh(entry) or _excluded(ctx, group) or not lookups.available():
+        return None  # not identified recently / excluded / no query left tonight (the rest next night)
+    result = siren.resolve(client, group, zone, lookups)
+    company = siren.local_company(result.match) if result.match is not None else None
+    if company is None:
+        if result.complete:
+            siren.remember_missing(ctx.repo, group, result.tried)
+            log.info("Employeur « %s » non identifié avec certitude (%s)", group.name, ", ".join(result.tried))
         return None
-    company = company_from_result(item, {group.department} if group.department else set()) \
-        or company_from_result(item, set())
-    return _with_signals(company, group) if company is not None else None
+    siren.remember_found(ctx.repo, group, result, company)
+    log.info("Employeur « %s » → SIREN %s, établissement de %s (%s)", group.name, company.siren, company.city,
+             result.strategy)
+    return _with_signals(company, group)
 
 
 def hiring_companies(ctx: AppContext, deadline: Deadline) -> list[Company]:
-    """Companies (new or stored) carrying the hiring signals of the stored offers; stops at the deadline."""
+    """Companies (new or stored) carrying the hiring signals of the stored offers, employers with the most offers
+    first; stops at the deadline."""
     out: list[Company] = []
+    zone, lookups = zone_of(ctx), siren.Lookups(ctx.settings.night.max_siren_lookups)
     with make_client() as client:
-        for group in offer_groups(ctx):
+        for group in sorted(offer_groups(ctx), key=lambda g: -len(g.signals)):
             if deadline.expired():
                 break
             try:
-                company = foreign_company(group) if group.country != "FR" else _french_company(ctx, client, group)
+                company = foreign_company(group) if group.country != "FR" else \
+                    _french_company(ctx, client, group, zone, lookups)
             except Exception as exc:  # one employer never stops the others
                 log.warning("Employeur « %s » : résolution impossible (%s)", group.name, exc)
                 continue
             if company is not None:
                 out.append(company)
-    log.info("Employeurs des offres : %d entreprise(s) avec un signal de recrutement", len(out))
+    capped = " — plafond atteint, la suite la nuit prochaine" if lookups.capped else ""
+    log.info("Employeurs des offres : %d entreprise(s) avec un signal de recrutement, %d recherche(s) au registre%s",
+             len(out), lookups.used, capped)
     return out

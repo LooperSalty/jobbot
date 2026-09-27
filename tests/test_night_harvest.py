@@ -15,7 +15,7 @@ import respx
 from jobbot import clock
 from jobbot.http import HostThrottle
 from jobbot.models import Company, ContactEmail
-from jobbot.night import hiring
+from jobbot.night import hiring, siren_match
 from jobbot.night.budget import Deadline
 from jobbot.night.harvest import harvest, harvest_nafs, near_point
 from jobbot.night.store import combine, merge_signals, store_candidates
@@ -174,16 +174,17 @@ def _group(name: str = "Exemple Logiciels", **kw) -> hiring.OfferGroup:
     return hiring.OfferGroup(**{**base, **kw})
 
 
-def test_best_match_accepts_only_high_confidence():
+def test_pick_accepts_only_high_confidence():
+    zone = siren_match.Zone(departments=frozenset({"57", "54"}))
     exact = registry_item("900000001", "EXEMPLE LOGICIELS SAS")
     other = registry_item("900000002", "EXEMPLE CONSTRUCTION")
-    assert hiring.best_match(_group(), [other, exact])["siren"] == "900000001"
-    assert hiring.best_match(_group("Exemple"), [other, registry_item("900000003", "EXEMPLE LOGISTIQUE")]) is None
+    assert siren_match.pick(_group(), zone, [other, exact]).siren == "900000001"
+    assert siren_match.pick(_group("Exemple"), zone, [other, registry_item("900000003", "EXEMPLE LOGISTIQUE")]) is None
     twins = [registry_item("900000004", "EXEMPLE LOGICIELS"), registry_item("900000005", "EXEMPLE LOGICIEL")]
-    assert hiring.best_match(_group(), twins) is None  # ambiguous: never guess
+    assert siren_match.pick(_group(), zone, twins) is None  # ambiguous: never guess
     near_name = registry_item("900000006", "EXEMPLE LOGICIELS METZ", cp="57000")
-    assert hiring.best_match(_group(), [near_name])["siren"] == "900000006"  # same postal code: 85+ is enough
-    assert hiring.best_match(_group(postal_code="54000", city="Nancy"), [near_name]) is None
+    assert siren_match.pick(_group(), zone, [near_name]).siren == "900000006"  # name contained + same postal code
+    assert siren_match.pick(_group(department="54", postal_code="54000", city="Nancy"), zone, [near_name]) is None
 
 
 @respx.mock
@@ -211,7 +212,7 @@ def test_hiring_companies_resolve_cache_and_luxembourg(ctx):
     ctx.repo.upsert_company(french)  # what store_candidates does
     calls = route.call_count
     again = hiring.hiring_companies(ctx, LATER)
-    assert route.call_count == calls  # resolutions cached (unresolved employer retried after 30 days)
+    assert route.call_count == calls  # resolutions cached (unresolved employer retried after 7 days)
     assert {c.name for c in again} == {"EXEMPLE LOGICIELS", "Exemple Luxembourg Tech"}
     cached = json.loads(ctx.repo.kv_get("night:siren:fr:inconnue totale"))
     assert cached["siren"] is None

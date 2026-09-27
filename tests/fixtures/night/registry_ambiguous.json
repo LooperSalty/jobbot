@@ -1,0 +1,64 @@
+{
+  "results": [
+    {
+      "siren": "900300001",
+      "nom_complet": "EXEMPLE DIGITAL",
+      "nom_raison_sociale": "EXEMPLE DIGITAL",
+      "sigle": null,
+      "nombre_etablissements": 1,
+      "nombre_etablissements_ouverts": 1,
+      "activite_principale": "62.01Z",
+      "section_activite_principale": "J",
+      "categorie_entreprise": "PME",
+      "tranche_effectif_salarie": "03",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90030000100012", "adresse": "4 RUE DE L'EXEMPLE 57000 METZ", "code_postal": "57000",
+        "commune": "57463", "libelle_commune": "METZ", "departement": "57", "latitude": "49.1180",
+        "longitude": "6.1720", "est_siege": true, "etat_administratif": "A", "liste_enseignes": null,
+        "nom_commercial": null
+      },
+      "matching_etablissements": [
+        {
+          "siret": "90030000100012", "adresse": "4 RUE DE L'EXEMPLE 57000 METZ", "code_postal": "57000",
+          "commune": "57463", "libelle_commune": "METZ", "latitude": "49.1180", "longitude": "6.1720",
+          "est_siege": true, "etat_administratif": "A", "liste_enseignes": null, "nom_commercial": null
+        }
+      ],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false}
+    },
+    {
+      "siren": "900300002",
+      "nom_complet": "EXEMPLE DIGITAL",
+      "nom_raison_sociale": "EXEMPLE DIGITAL",
+      "sigle": null,
+      "nombre_etablissements": 1,
+      "nombre_etablissements_ouverts": 1,
+      "activite_principale": "62.01Z",
+      "section_activite_principale": "J",
+      "categorie_entreprise": "PME",
+      "tranche_effectif_salarie": "03",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90030000200010", "adresse": "9 AVENUE DE L'EXEMPLE 57000 METZ", "code_postal": "57000",
+        "commune": "57463", "libelle_commune": "METZ", "departement": "57", "latitude": "49.1210",
+        "longitude": "6.1800", "est_siege": true, "etat_administratif": "A", "liste_enseignes": null,
+        "nom_commercial": null
+      },
+      "matching_etablissements": [
+        {
+          "siret": "90030000200010", "adresse": "9 AVENUE DE L'EXEMPLE 57000 METZ", "code_postal": "57000",
+          "commune": "57463", "libelle_commune": "METZ", "latitude": "49.1210", "longitude": "6.1800",
+          "est_siege": true, "etat_administratif": "A", "liste_enseignes": null, "nom_commercial": null
+        }
+      ],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false}
+    }
+  ],
+  "total_results": 2,
+  "page": 1,
+  "per_page": 20,
+  "total_pages": 1
+}

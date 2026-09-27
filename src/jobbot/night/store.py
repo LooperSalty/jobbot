@@ -2,7 +2,9 @@
 merged with what is stored, through the relevance gate (irrelevant ones are never stored; stored ones still
 waiting are set aside), never touching status / contacts / domain found by enrichment.
 
-Hiring signals (``raw["hiring_signal"] = [{title, source, date}]``) are merged, not replaced.
+Hiring signals (``raw["hiring_signal"] = [{title, source, date}]``) are merged, not replaced. A company located
+at the establishment near its offers (``raw["local_establishment"]``, :mod:`jobbot.night.hiring`) keeps that place
+(address, city, postal code, coordinates, SIRET) over a head office or another establishment.
 """
 
 from __future__ import annotations
@@ -20,7 +22,10 @@ from jobbot.textutil import normalize, normalize_company
 log = logging.getLogger(__name__)
 
 SIGNAL_KEY = "hiring_signal"
+LOCAL_KEY = "local_establishment"  # True: the place is the establishment near the employer's offers
 MAX_SIGNALS = 10
+PLACE_FIELDS = ("address", "city", "postal_code", "latitude", "longitude")
+PLACE_RAW = ("siret", "distance_km")
 
 
 def _valid_signals(*lists: object) -> list[dict]:
@@ -38,9 +43,26 @@ def merge_signals(*lists: object) -> list[dict]:
     return sorted(merged.values(), key=lambda s: str(s.get("date") or ""), reverse=True)[:MAX_SIGNALS]
 
 
+def _local_source(existing: Company, fresh: Company) -> Company | None:
+    """The version located at the establishment near the offers (the fresh one first), None when neither is."""
+    if fresh.raw.get(LOCAL_KEY):
+        return fresh
+    return existing if existing.raw.get(LOCAL_KEY) else None
+
+
+def _with_local_place(merged: Company, source: Company | None) -> Company:
+    if source is None:
+        return merged
+    raw = {k: v for k, v in merged.raw.items() if k not in PLACE_RAW}
+    raw.update({k: source.raw[k] for k in PLACE_RAW if k in source.raw})
+    update = {f: getattr(source, f) for f in PLACE_FIELDS}
+    return merged.model_copy(update={**update, "raw": {**raw, LOCAL_KEY: True}})
+
+
 def merge_company(existing: Company, fresh: Company) -> Company:
-    """Registry refresh (:func:`jobbot.outreach.companies.merge_company`) + hiring signals + known website."""
-    merged = _merge_registry(existing, fresh)
+    """Registry refresh (:func:`jobbot.outreach.companies.merge_company`) + hiring signals + known website + the
+    establishment near the offers."""
+    merged = _with_local_place(_merge_registry(existing, fresh), _local_source(existing, fresh))
     raw = dict(merged.raw)
     signals = merge_signals(existing.raw.get(SIGNAL_KEY), fresh.raw.get(SIGNAL_KEY))
     if signals:

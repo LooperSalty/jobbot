@@ -58,6 +58,7 @@ class NightSettings(Frozen):
     search_min_interval_s: float = Field(6.0, ge=0)  # between two SearXNG queries (jittered), day and night
     max_search_queries: int = Field(300, ge=0)  # SearXNG queries per day
     search_backoff_hours: float = Field(6.0, ge=0)  # SearXNG left alone after a CAPTCHA / block
+    max_siren_lookups: int = Field(200, ge=0)  # registry queries per night to identify the offers' employers
 
     @field_validator("until")
     @classmethod

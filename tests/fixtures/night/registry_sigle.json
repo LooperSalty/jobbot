@@ -1,0 +1,73 @@
+{
+  "results": [
+    {
+      "siren": "900100002",
+      "nom_complet": "SIMX",
+      "nom_raison_sociale": "SIMX",
+      "sigle": null,
+      "nombre_etablissements": 1,
+      "nombre_etablissements_ouverts": 1,
+      "activite_principale": "43.22A",
+      "activite_principale_naf25": "43.22Y",
+      "section_activite_principale": "F",
+      "categorie_entreprise": "PME",
+      "tranche_effectif_salarie": "02",
+      "nature_juridique": "5499",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90010000200018", "activite_principale": "43.22A",
+        "adresse": "3 RUE DE L'EXEMPLE 57100 THIONVILLE", "code_postal": "57100", "commune": "57672",
+        "libelle_commune": "THIONVILLE", "departement": "57", "region": "44",
+        "latitude": "49.3580", "longitude": "6.1680", "liste_enseignes": null, "nom_commercial": null,
+        "liste_idcc": [], "tranche_effectif_salarie": "02", "est_siege": true, "etat_administratif": "A"
+      },
+      "matching_etablissements": [
+        {
+          "siret": "90010000200018", "adresse": "3 RUE DE L'EXEMPLE 57100 THIONVILLE", "code_postal": "57100",
+          "commune": "57672", "libelle_commune": "THIONVILLE", "latitude": "49.3580", "longitude": "6.1680",
+          "activite_principale": "43.22A", "est_siege": true, "etat_administratif": "A", "liste_enseignes": null,
+          "nom_commercial": null
+        }
+      ],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false, "liste_idcc": []}
+    },
+    {
+      "siren": "900100001",
+      "nom_complet": "SOCIETE D'INGENIERIE ET DE MAINTENANCE XYLO (SIMX)",
+      "nom_raison_sociale": "SOCIETE D'INGENIERIE ET DE MAINTENANCE XYLO",
+      "sigle": "SIMX",
+      "nombre_etablissements": 42,
+      "nombre_etablissements_ouverts": 27,
+      "activite_principale": "62.02A",
+      "activite_principale_naf25": "62.20G",
+      "section_activite_principale": "J",
+      "categorie_entreprise": "ETI",
+      "tranche_effectif_salarie": "32",
+      "nature_juridique": "5710",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90010000100010", "activite_principale": "62.02A",
+        "adresse": "10 BOULEVARD DE L'EXEMPLE 75009 PARIS", "code_postal": "75009", "commune": "75109",
+        "libelle_commune": "PARIS", "departement": "75", "region": "11",
+        "latitude": "48.8740", "longitude": "2.3300", "liste_enseignes": null, "nom_commercial": null,
+        "liste_idcc": ["1486"], "tranche_effectif_salarie": "31", "est_siege": true, "etat_administratif": "A"
+      },
+      "matching_etablissements": [
+        {
+          "siret": "90010000100051", "adresse": "2 RUE DE L'EXEMPLE TECHNOPOLE 57070 METZ", "code_postal": "57070",
+          "commune": "57463", "libelle_commune": "METZ", "latitude": "49.1030", "longitude": "6.2210",
+          "activite_principale": "62.02A", "est_siege": false, "etat_administratif": "A",
+          "liste_enseignes": null, "nom_commercial": null, "liste_idcc": ["1486"], "tranche_effectif_salarie": "12"
+        }
+      ],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false, "convention_collective_renseignee": true,
+                      "liste_idcc": ["1486"]}
+    }
+  ],
+  "total_results": 2,
+  "page": 1,
+  "per_page": 20,
+  "total_pages": 1
+}

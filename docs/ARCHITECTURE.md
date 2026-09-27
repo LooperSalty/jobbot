@@ -562,7 +562,8 @@ ever sent at night**. The day campaign works through the queue by priority, unde
 
 - **Settings** (`config_sections.py`, re-exported by `config`): `NightSettings` (`settings.night`: `enabled`, `until`
   "06:30", `extra_radius_km` 20 (≤ 50), `workers` 4, `max_llm_summaries` 80, `prepare_margin` 5, `retention_days`
-  365, `search_min_interval_s` 6, `max_search_queries` 300, `search_backoff_hours` 6), `SpontaneousRamp`
+  365, `search_min_interval_s` 6, `max_search_queries` 300, `search_backoff_hours` 6, `max_siren_lookups` 200),
+  `SpontaneousRamp`
   (`settings.limits.spontaneous_ramp`: `enabled`, `start` 20, `step_per_week` 5, `max` 40, `max_bounce_rate` 0.05;
   `start ≤ max`), `parse_clock`; `Settings.search_engine_engines` (["bing"], comma string accepted).
 - **SearXNG** (`outreach/_searxng.py`): `SearxEngine` (frozen: base URL, engines, interval, daily budget, backoff,
@@ -623,12 +624,28 @@ ever sent at night**. The day campaign works through the queue by priority, unde
   8 h at most for a manual run), `Deadline(end)` (`expired`, `remaining_s`, `share`), clock indirection `_now`.
 - `night/hiring.py`: stored offers (any status) with a developer title, a named employer (not anonymous / school /
   sales), inside an area (distance ≤ radius + extra, else department) → `OfferGroup` per (normalised name,
-  country); French ones resolved with `/search?q=<name>&departement=` + rapidfuzz (`best_match`: ≥ 90, or ≥ 85 with
-  the offer's postal code / city, and ≥ 5 points ahead of any other SIREN), cached in kv
-  **`night:siren:<country>:<name>`** (`{siren, at}`; unresolved → retried after 30 days); Luxembourg → company
+  country), most offers first; `zone_of(ctx) -> Zone` (target departments + French areas' radius + extra). French
+  ones resolved by `night/siren.py` (`Lookups(settings.night.max_siren_lookups)` per night, every query through
+  `companies.fetch_registry_page` = shared 4 req/s throttle, 3 failures in a row stop it; `plan` → `resolve`, first
+  confident answer wins: `departement` `q=<name>&departement=<offer's dept or target depts>`, `code_postal` only when
+  ≥ 2 plausible companies answered, `variante:<q>` for ≤ 2 `query_variants`, `sans_lieu` `q=<cleaned name>`; 20
+  results, 20 matching establishments), scored by `night/siren_match.py` (pure: `words`/`cleaned_name`/
+  `query_variants` — « H/F », legal forms, groupe, France, trailing region / city, acronym dots, ampersands;
+  `registry_names` = raison sociale, sigle, nom complet, enseignes, noms commerciaux; `pair_score` = 100 without
+  punctuation, ratio / token_sort_ratio, contained name (token_set_ratio) 88 - 4 per extra word, initials 90;
+  `best_place` = best active establishment in the zone: same postal code / commune +8, ≤ 15 km +6, ≤ 40 km +3,
+  same dept +2; IT NAF / Syntec +4, ETI/GE +3, ≥ 10 employees +1; a ≤ 4-character name of a non-IT company counts
+  84 at most; `decide`: ≥ 96 and ≥ 6 ahead of any other SIREN, name ≥ 85 to be a candidate). `local_company`: the
+  group SIREN at the chosen establishment (address, city, postal code, coordinates — else its city's
+  `KNOWN_PLACES` — `raw.siret`, `raw.local_establishment`). Cache kv **`night:siren:<country>:<name>`**: found →
+  `{siren, siret, place, strategy, at}` (`with_cached_place` re-applies the establishment to the stored company, no
+  query); unresolved after every query → `{siren: null, tried, at, retry_after}` (7 days); an entry without `tried`
+  (older resolver) is retried at once, a lookup cut by the cap is not cached. Luxembourg → company
   `stable_id("company", "lu", name)`, `source="offre_emploi"`, `raw.country`, website from the offer's
   `company_domain`. Signals `raw.hiring_signal = [{title, source, date}]` (≤ 10, merged by `store.merge_signals`).
-- `night/store.py`: `combine` (one candidate per id), `merge_company` (registry merge + signals + website),
+- `night/store.py`: `combine` (one candidate per id), `merge_company` (registry merge + signals + website; a
+  version marked `raw.local_establishment` — fresh first — keeps its address / city / postal code / coordinates /
+  SIRET / distance over a head office),
   `store_candidates(ctx, candidates, deadline) -> HarvestResult` — relevance gate on the merged company (stored
   waiting ones set aside), blacklist / excluded skipped, an `irrelevant` company made relevant (developer offer) is
   reopened (`new`), unchanged ones not rewritten.
@@ -648,5 +665,6 @@ ever sent at night**. The day campaign works through the queue by priority, unde
   installs it through `jobbot schedule install`. Dashboard « Entreprises » page: « Nuit » section (last report,
   status lines, queue by priority).
 - Tests: `tests/test_searxng_hardening.py`, `tests/test_ramp.py`, `tests/test_outreach_priority.py`,
-  `tests/test_night_harvest.py`, `tests/test_night_enrich.py`, `tests/test_night_run.py` (`tests/night_fakes.py`:
-  fictitious registry items / offers).
+  `tests/test_night_harvest.py`, `tests/test_night_siren.py`, `tests/test_night_enrich.py`,
+  `tests/test_night_run.py` (`tests/night_fakes.py`: fictitious registry items / offers; `tests/fixtures/night/`:
+  recherche-entreprises JSON of fictitious companies).

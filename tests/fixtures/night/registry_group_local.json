@@ -1,0 +1,53 @@
+{
+  "results": [
+    {
+      "siren": "900200001",
+      "nom_complet": "EXEMPLE NUMERIQUE CONSEIL",
+      "nom_raison_sociale": "EXEMPLE NUMERIQUE CONSEIL",
+      "sigle": null,
+      "nombre_etablissements": 118,
+      "nombre_etablissements_ouverts": 61,
+      "activite_principale": "62.02A",
+      "activite_principale_naf25": "62.20G",
+      "section_activite_principale": "J",
+      "categorie_entreprise": "GE",
+      "tranche_effectif_salarie": "52",
+      "nature_juridique": "5710",
+      "etat_administratif": "A",
+      "siege": {
+        "siret": "90020000100019", "activite_principale": "70.10Z",
+        "adresse": "1 AVENUE DE L'EXEMPLE 75008 PARIS", "code_postal": "75008", "commune": "75108",
+        "libelle_commune": "PARIS", "departement": "75", "region": "11",
+        "latitude": "48.8720", "longitude": "2.3080", "liste_enseignes": null, "nom_commercial": null,
+        "liste_idcc": ["1486"], "tranche_effectif_salarie": "41", "est_siege": true, "etat_administratif": "A"
+      },
+      "matching_etablissements": [
+        {
+          "siret": "90020000100027", "adresse": "5 PLACE DE L'EXEMPLE 57000 METZ", "code_postal": "57000",
+          "commune": "57463", "libelle_commune": "METZ", "latitude": "49.1190", "longitude": "6.1760",
+          "activite_principale": "62.02A", "est_siege": false, "etat_administratif": "F",
+          "date_fermeture": "2019-06-30", "liste_enseignes": null, "nom_commercial": null
+        },
+        {
+          "siret": "90020000100035", "adresse": "8 ALLEE DE L'EXEMPLE 57100 THIONVILLE", "code_postal": "57100",
+          "commune": "57672", "libelle_commune": "THIONVILLE", "latitude": "49.3560", "longitude": "6.1660",
+          "activite_principale": "62.02A", "est_siege": false, "etat_administratif": "A",
+          "liste_enseignes": null, "nom_commercial": null, "tranche_effectif_salarie": "03"
+        },
+        {
+          "siret": "90020000100043", "adresse": "12 RUE DE L'EXEMPLE 57070 METZ", "code_postal": "57070",
+          "commune": "57463", "libelle_commune": "METZ", "latitude": "49.1040", "longitude": "6.2190",
+          "activite_principale": "62.02A", "est_siege": false, "etat_administratif": "A",
+          "liste_enseignes": null, "nom_commercial": null, "tranche_effectif_salarie": "21"
+        }
+      ],
+      "dirigeants": [],
+      "complements": {"est_entrepreneur_individuel": false, "convention_collective_renseignee": true,
+                      "liste_idcc": ["1486"]}
+    }
+  ],
+  "total_results": 1,
+  "page": 1,
+  "per_page": 20,
+  "total_pages": 1
+}
