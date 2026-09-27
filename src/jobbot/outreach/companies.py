@@ -50,6 +50,7 @@ MAX_RESULTS = 10_000  # page * per_page cap of the API
 MAX_GEOCODE_PER_RUN = 25
 ROMES_DEV = ("M1855", "M1805", "M1827", "M1818", "M1836", "M1852", "M1853")  # ROME 4.0, dev jobs
 LBA_BONUS = 4  # LBA flags these companies as likely to hire apprentices
+PURGED_KEY = "nominative_purged_at"  # set by the night's retention purge (jobbot.night.purge)
 
 _THROTTLE = HostThrottle(0.25)
 
@@ -111,10 +112,10 @@ def _collect_pages(client: httpx.Client, params: dict, departments: set[str], ma
     return companies
 
 
-def _fetch_page(client: httpx.Client, params: dict) -> dict:
+def _fetch_page(client: httpx.Client, params: dict, path: str = "/search") -> dict:
     try:
         resp = request_with_retry(
-            client, "GET", f"{API_BASE}/search", params=params, headers={"User-Agent": API_UA},
+            client, "GET", f"{API_BASE}{path}", params=params, headers={"User-Agent": API_UA},
             throttle=_THROTTLE, retries=4, backoff_s=1.0,
         )
     except httpx.HTTPError as exc:
@@ -202,13 +203,16 @@ def _rejection(ctx: AppContext, company: Company) -> str | None:
 
 
 def _merge(existing: Company, fresh: Company) -> Company:
-    """Refresh descriptive fields, never status/contacts/domain found by enrichment."""
+    """Refresh descriptive fields, never status/contacts/domain found by enrichment. Leaders are never brought
+    back for a company whose named contacts were deleted (retention, ``raw["nominative_purged_at"]``)."""
+    purged = bool(existing.raw.get(PURGED_KEY))
+    raw = {**existing.raw, **fresh.raw, SCORE_KEY: max(_score_of(existing), _score_of(fresh))}
     update: dict = {
         "naf_code": fresh.naf_code or existing.naf_code,
         "naf_label": fresh.naf_label or existing.naf_label,
         "headcount_range": fresh.headcount_range or existing.headcount_range,
-        "leaders": fresh.leaders or existing.leaders,
-        "raw": {**existing.raw, **fresh.raw, SCORE_KEY: max(_score_of(existing), _score_of(fresh))},
+        "leaders": [] if purged else fresh.leaders or existing.leaders,
+        "raw": {k: v for k, v in raw.items() if k != "leaders_detail"} if purged else raw,
     }
     if existing.latitude is None and fresh.latitude is not None:
         update.update(latitude=fresh.latitude, longitude=fresh.longitude)
@@ -311,6 +315,14 @@ def _lba_companies(ctx: AppContext, errors: list[str]) -> list[Company]:
             log.warning("Recruteurs LBA (%s) indisponibles : %s", loc.city, exc)
             errors.append(f"LBA recruteurs ({loc.city}) : {exc}")
     return out
+
+
+# Public names of the helpers reused by the night scraper (« jobbot night », :mod:`jobbot.night`).
+fetch_registry_page = _fetch_page  # (client, params, path="/search" | "/near_point") → JSON page
+merge_company = _merge  # refresh descriptive fields, never status / contacts / domain
+lba_company = _from_lba  # LBA recruiter keyed by SIREN, with its bonus
+lba_location_ok = _lba_location  # French location searched for alternance
+with_distance_score = _with_distance_score  # nearest target location → raw distance_km (+ score bonus)
 
 
 def _geocoded(company: Company) -> Company:

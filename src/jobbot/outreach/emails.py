@@ -13,6 +13,7 @@ the e-mail can say where it was found; guesses are sent only under the campaign'
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 from urllib.parse import urljoin, urlparse
 from urllib.robotparser import RobotFileParser
@@ -41,13 +42,15 @@ from jobbot.outreach._extract import (
     scrape_emails,
 )
 from jobbot.outreach._mailcheck import guess_patterns, has_mx, hunter_domain_search
+from jobbot.outreach._searxng import engine_for
+from jobbot.outreach.companies import PURGED_KEY
 from jobbot.outreach.relevance import split_relevant
-from jobbot.outreach.selection import usable
+from jobbot.outreach.selection import is_nominative, usable
 
 __all__ = [
     "EnrichReport", "SiteCrawl", "crawl_site", "crawl_site_emails", "decode_cfemail", "deobfuscate",
-    "enrich_companies", "enrich_company", "guess_patterns", "has_mx", "hunter_domain_search", "is_sendable",
-    "rank_contacts", "scrape_emails",
+    "drop_nominative", "enrich_companies", "enrich_company", "enrich_or_note_failure", "guess_patterns", "has_mx",
+    "hunter_domain_search", "is_sendable", "rank_contacts", "scrape_emails",
 ]
 
 log = logging.getLogger(__name__)
@@ -59,6 +62,9 @@ FALLBACK_PATHS = (
 )
 KIND_ORDER = {"recruitment": 0, "hr": 1, "tech": 2, "leader": 3, "generic": 4, "named": 5}
 MAX_ENRICH_ATTEMPTS = 3
+MAX_SITE_SKILLS = 30
+PERSONAL_RAW = ("people", "leaders_detail")  # personal data kept in raw (GDPR retention)
+SOURCE_RAW = ("email_sources", "source_urls")
 _KEEP_STATUS = frozenset({"contacted", "pending_review", "approved", "blacklisted"})
 
 
@@ -243,7 +249,16 @@ def _finish(company: Company, contacts: list[ContactEmail], raw_update: dict, cf
     if status not in _KEEP_STATUS:
         status = "enriched" if any(usable(c, cfg) for c in contacts) else "no_email"
     raw = {**company.raw, **raw_update, "enriched_at": clock.iso(clock.now())}
+    sources = raw.get("email_sources") or {}
+    raw["source_urls"] = {c.email: str(sources.get(c.email) or "") for c in contacts}  # GDPR transparency
     return company.model_copy(update={"contacts": contacts, "status": status, "raw": raw})
+
+
+def _site_skills(crawl: SiteCrawl) -> list[str]:
+    """Canonical skills named on the website (priority: profile skills the company uses)."""
+    from jobbot.matching.lexicon import find_skills
+
+    return sorted(find_skills(crawl.site_text))[:MAX_SITE_SKILLS] if crawl.site_text else []
 
 
 def _with_description(ctx: AppContext, company: Company, crawl: SiteCrawl) -> Company:
@@ -265,7 +280,7 @@ def enrich_company(ctx: AppContext, company: Company) -> Company:
     with make_client() as client:
         match = _known_domain(company) or _domains.find_domain_verified(
             company, client=client, secrets=ctx.secrets, contact=_domains.profile_contact(ctx.profile),
-            search_url=ctx.settings.search_engine_url)
+            search_url=engine_for(ctx))
         if match is None:
             return _finish(company, rank_contacts(list(company.contacts)), {"enrich_note": "site web introuvable"}, cfg)
         crawl = crawl_site(match.domain, client=client)
@@ -283,7 +298,8 @@ def enrich_company(ctx: AppContext, company: Company) -> Company:
     enriched = _finish(updated, rank_contacts([*company.contacts, *contacts]), {
         "domain_confidence": match.confidence, "domain_method": match.method,
         "domain_verified_by": match.verified_by, "contact_form_url": crawl.contact_form_url,
-        "email_sources": sources, "crawl_pages": crawl.pages, **found.raw_update(),
+        "email_sources": sources, "crawl_pages": crawl.pages, "site_skills": _site_skills(crawl),
+        **found.raw_update(),
     }, cfg)
     return _with_description(ctx, enriched, crawl)
 
@@ -295,6 +311,38 @@ def _failed_attempt(company: Company, exc: Exception) -> Company:
     return company.model_copy(update={"status": status, "raw": raw})
 
 
+def drop_nominative(company: Company, cfg: OutreachSettings) -> Company:
+    """``company`` without personal data: named addresses (and where they were found), people, leaders; the
+    status of a waiting company follows the addresses left."""
+    kept = [c for c in company.contacts if not is_nominative(c)]
+    emails = {c.email for c in kept}
+    raw = {k: v for k, v in company.raw.items() if k not in PERSONAL_RAW}
+    for key in SOURCE_RAW:
+        if isinstance(raw.get(key), dict):
+            raw[key] = {email: where for email, where in raw[key].items() if email in emails}
+    status = company.status
+    if status in ("enriched", "no_email"):
+        status = "enriched" if any(usable(c, cfg) for c in kept) else "no_email"
+    return company.model_copy(update={"contacts": kept, "leaders": [], "raw": raw, "status": status})
+
+
+def _roles_only(ctx: AppContext) -> AppContext:
+    outreach = ctx.settings.outreach.model_copy(update={"allow_nominative": False})
+    return dataclasses.replace(ctx, settings=ctx.settings.model_copy(update={"outreach": outreach}))
+
+
+def enrich_or_note_failure(ctx: AppContext, company: Company) -> Company:
+    """:func:`enrich_company`, or ``company`` with one more failed attempt recorded (never raises). A company whose
+    named contacts were deleted (retention, ``raw["nominative_purged_at"]``) only gets role addresses again."""
+    purged = bool(company.raw.get(PURGED_KEY))
+    try:
+        enriched = enrich_company(_roles_only(ctx) if purged else ctx, company)
+    except Exception as exc:
+        log.exception("Enrichissement de %s impossible", company.name)
+        return _failed_attempt(company, exc)
+    return drop_nominative(enriched, ctx.settings.outreach) if purged else enriched
+
+
 def enrich_companies(ctx: AppContext, *, limit: int = 50) -> EnrichReport:
     """Enrich up to ``limit`` companies in status ``new`` (best-scored first; those outside the target are set
     aside instead). One failure never stops the batch."""
@@ -303,11 +351,7 @@ def enrich_companies(ctx: AppContext, *, limit: int = 50) -> EnrichReport:
     batch = pending[: max(0, limit)]
     with_email = 0
     for company in batch:
-        try:
-            updated = enrich_company(ctx, company)
-        except Exception as exc:
-            log.exception("Enrichissement de %s impossible", company.name)
-            updated = _failed_attempt(company, exc)
+        updated = enrich_or_note_failure(ctx, company)
         try:
             ctx.repo.upsert_company(updated)
         except Exception:

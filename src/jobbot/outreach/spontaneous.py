@@ -9,6 +9,10 @@ blacklist (company, SIREN, domain, address), daily quota on the ``spontaneous`` 
 personalised greeting ("Bonjour Prénom Nom," for a person, else "Madame, Monsieur,"), an opt-out + address-source
 line in every body (CNIL / GDPR art. 14), review mode (documents prepared, company → ``pending_review``, nothing
 sent) and dry-run.
+
+Targets are taken by priority (:mod:`jobbot.outreach.priority`), documents prepared the night before (« jobbot
+night ») are reused for a week, and the daily quota follows the sending ramp (:mod:`jobbot.ramp`, checked for a
+reset after too many bounces at the start of every campaign).
 """
 
 from __future__ import annotations
@@ -17,28 +21,31 @@ import logging
 import re
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from jobbot import clock
+from jobbot import clock, ramp
 from jobbot.context import AppContext
 from jobbot.models import Application, ApplicationEvent, ApplyMethod, Company, ContactEmail, TailoredDocuments
 from jobbot.outreach import relevance
 from jobbot.outreach import selection as sel
 from jobbot.outreach._compose import OPT_OUT_SENTENCE, build_email, ensure_opt_out, is_alternance
+from jobbot.outreach.priority import company_priority
 from jobbot.pacing import Pacer, QuotaExceeded
 from jobbot.textutil import normalize_company
 
 if TYPE_CHECKING:  # written concurrently by the mail module owner: imported lazily at runtime
     from jobbot.mail.mailer import Mailer
 
-__all__ = ["OPT_OUT_SENTENCE", "CampaignReport", "ensure_opt_out", "run_spontaneous_campaign"]
+__all__ = ["OPT_OUT_SENTENCE", "CampaignReport", "ensure_opt_out", "fresh_documents", "run_spontaneous_campaign"]
 
 log = logging.getLogger(__name__)
 
 CHANNEL = sel.CHANNEL
 RECENT_DAYS = sel.RECENT_DAYS
+DOCS_FRESH_DAYS = 7  # documents prepared ahead (night) are reused for a week
 # Fallback when the mailer does not raise MailFatalError: SMTP answers that must stop the whole channel
 # (bad App Password, policy/spam block, sending limit, server unreachable)…
 _STOP_ERRORS = re.compile(
@@ -92,10 +99,16 @@ def _score(company: Company) -> int:
         return 0
 
 
+def _priority(ctx: AppContext, company: Company) -> float:
+    """Priority of the target now (:mod:`jobbot.outreach.priority`; the night stores it for the dashboard)."""
+    return company_priority(company, ctx.profile, ctx.repo, cfg=ctx.settings.outreach)[0]
+
+
 def _candidates(ctx: AppContext, apps: list[Application]) -> list[Company]:
-    """Retries after a bounce first (already chosen, never reached), then approved, then best-scored enriched."""
+    """Retries after a bounce first (already chosen, never reached), then approved, then enriched by priority
+    (then discovery score)."""
     fresh = sorted(ctx.repo.list_companies(status=["approved", "enriched"]),
-                   key=lambda c: (c.status != "approved", -_score(c)))
+                   key=lambda c: (c.status != "approved", -_priority(ctx, c), -_score(c)))
     seen = {c.id for c in fresh}
     retries = [c for c in sel.bounced_companies(ctx, apps) if c.id not in seen]
     return [*retries, *fresh]
@@ -130,13 +143,23 @@ def _prepare(ctx: AppContext, company: Company) -> TailoredDocuments:
     return prepare_documents(ctx, company=company)
 
 
+def fresh_documents(repo: Any, company_id: str, *, days: int = DOCS_FRESH_DAYS) -> TailoredDocuments | None:
+    """Documents prepared for this company less than ``days`` ago whose CV file still exists (night preparation)."""
+    docs = repo.latest_documents(company_id=company_id)
+    if docs is None or not docs.cv_pdf or not Path(docs.cv_pdf).is_file():
+        return None
+    created = clock.parse_dt(docs.created_at)
+    return docs if created is not None and clock.now() - created < timedelta(days=days) else None
+
+
 def _docs_for(ctx: AppContext, company: Company, history: sel.History) -> TailoredDocuments:
-    """Documents already prepared for an approved company or a retry are reused (greeting set at send time)."""
+    """Documents already prepared are reused (greeting set at send time): any age for an approved company or a
+    retry, less than ``DOCS_FRESH_DAYS`` old otherwise (prepared the night before by « jobbot night »)."""
     if company.status == "approved" or history.state == "retry":
         docs = ctx.repo.latest_documents(company_id=company.id)
         if docs is not None:
             return docs
-    return _prepare(ctx, company)
+    return fresh_documents(ctx.repo, company.id) or _prepare(ctx, company)
 
 
 def _next_followup(ctx: AppContext, app: Application) -> datetime:
@@ -300,6 +323,10 @@ def _process(ctx: AppContext, company: Company, run: _Run, pause: bool, simulate
 
 
 def _start(ctx: AppContext, mailer: Any, review: bool) -> _Run:
+    try:
+        ramp.check_reset(ctx)  # too many bounces this week: back to the ramp's start (recorded + notified)
+    except Exception:  # the cap is still computed by the Pacer
+        log.exception("Vérification de la montée progressive impossible")
     apps = ctx.repo.list_applications()
     paused = sel.guesses_paused(apps, ctx.settings.outreach)
     if paused:

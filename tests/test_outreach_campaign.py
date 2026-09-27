@@ -57,10 +57,10 @@ def test_named_contact_is_greeted_by_name_and_role_address_formally(live_ctx, ma
     _store(live_ctx, named, role)
     mailer = FakeMailer()
     run_spontaneous_campaign(live_ctx, mailer)
-    first, second = mailer.sent
-    assert first.to == JULIE.email and first.body.startswith("Bonjour Julie Martin,\n")
-    assert "Bonjour,\n" not in first.body and first.body.endswith(OPT_OUT_SENTENCE)
-    assert second.body.startswith(f"{GENERIC_GREETING}\n\nVotre activité chez Beta")
+    role_mail, named_mail = mailer.sent  # priority: recruitment address (+20) before a named HR contact (+15)
+    assert named_mail.to == JULIE.email and named_mail.body.startswith("Bonjour Julie Martin,\n")
+    assert "Bonjour,\n" not in named_mail.body and named_mail.body.endswith(OPT_OUT_SENTENCE)
+    assert role_mail.body.startswith(f"{GENERIC_GREETING}\n\nVotre activité chez Beta")
 
 
 # --------------------------------------------------------------------------- unverified guesses

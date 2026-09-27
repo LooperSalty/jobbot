@@ -45,11 +45,22 @@ TIMEOUT_S = 120
 MAX_RESULTS = 100
 KM_PER_MILE = 1.609344  # JobSpy sends Indeed a radius in MILES
 _THROTTLE_KEY = "https://fr.indeed.com/"
-_INSTALL_HINT = (
-    "python-jobspy n'est pas installé (optionnel, il impose numpy 1.26 / pandas 2 incompatibles avec le venv "
-    "principal). Pour activer Indeed : uv venv .venv-jobspy --python 3.12 puis "
-    "uv pip install --python .venv-jobspy\\Scripts\\python.exe python-jobspy (ou définis JOBSPY_PYTHON)."
-)
+_VENV_COMMANDS = {
+    "nt": "uv venv .venv-jobspy --python 3.12 puis uv pip install --python .venv-jobspy\\Scripts\\python.exe "
+          "python-jobspy",
+    "posix": "uv venv .venv-jobspy --python 3.12 && uv pip install --python .venv-jobspy/bin/python python-jobspy",
+}
+
+
+def install_hint(os_name: str = os.name) -> str:
+    """How to create the dedicated interpreter, with this OS's paths (Windows / Linux server)."""
+    command = _VENV_COMMANDS.get(os_name, _VENV_COMMANDS["posix"])
+    return ("python-jobspy n'est pas installé (optionnel, il impose numpy 1.26 / pandas 2 incompatibles avec le venv "
+            f"principal). Pour activer Indeed, à la racine du projet : {command} — jobbot trouve .venv-jobspy tout "
+            "seul (ou définis JOBSPY_PYTHON).")
+
+
+_INSTALL_HINT = install_hint()
 # Runs in the JobSpy interpreter: kwargs as JSON on stdin, rows as JSON into the file given as argv[1].
 _WORKER = r"""
 import json, sys
@@ -176,9 +187,10 @@ def _resolve_python() -> str:
     return _default_python()
 
 
-def _default_python() -> str:
-    venv = find_root() / LOCAL_VENV
-    for candidate in (venv / "Scripts" / "python.exe", venv / "bin" / "python"):
+def _default_python(root: Path | None = None) -> str:
+    """``<project>/.venv-jobspy`` interpreter: Windows ``Scripts\\python.exe`` or Linux ``bin/python(3)``."""
+    venv = (root or find_root()) / LOCAL_VENV
+    for candidate in (venv / "Scripts" / "python.exe", venv / "bin" / "python", venv / "bin" / "python3"):
         if candidate.exists():
             return str(candidate)
     return sys.executable

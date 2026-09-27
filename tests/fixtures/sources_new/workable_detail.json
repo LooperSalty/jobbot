@@ -1,0 +1,13 @@
+{
+  "id": 6100001,
+  "shortcode": "A1B2C3D4E5",
+  "title": "Développeur mobile Flutter",
+  "remote": true,
+  "location": {"country": "France", "countryCode": "FR", "city": "Metz", "region": "Grand Est"},
+  "published": "2026-09-21T00:00:00.000Z",
+  "type": "full",
+  "workplace": "remote",
+  "description": "<p>Tu développes notre application mobile Flutter (Dart), en télétravail complet depuis la France.</p>",
+  "requirements": "<ul><li>Premier projet Flutter publié</li><li>Git, tests</li></ul>",
+  "benefits": "<p>Matériel fourni.</p>"
+}

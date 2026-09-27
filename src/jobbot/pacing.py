@@ -1,4 +1,7 @@
-"""Daily quotas and human-like pauses, shared by every channel that acts on the user's behalf."""
+"""Daily quotas and human-like pauses, shared by every channel that acts on the user's behalf.
+
+The ``spontaneous`` quota follows the sending ramp (:mod:`jobbot.ramp`, ``limits.spontaneous_ramp``), computed once
+per Pacer (one run)."""
 
 from __future__ import annotations
 
@@ -22,6 +25,7 @@ CHANNEL_QUOTA = {
     "followup": "followups_per_day",
 }
 APPLY_ACTION = "apply"
+SPONTANEOUS = "spontaneous"
 
 
 class QuotaExceeded(RuntimeError):
@@ -42,11 +46,18 @@ class Pacer:
         self.limits = limits
         self._sleep = sleep
         self._rng = rng or random.Random()
+        self._ramp_cap: int | None = None
 
     def quota(self, channel: str) -> int:
         attr = CHANNEL_QUOTA.get(channel)
         if attr is None:
             raise KeyError(f"canal inconnu: {channel}")
+        if channel == SPONTANEOUS:
+            if self._ramp_cap is None:
+                from jobbot.ramp import spontaneous_cap
+
+                self._ramp_cap = spontaneous_cap(self.repo, self.limits)
+            return self._ramp_cap
         return int(getattr(self.limits, attr))
 
     def used_today(self, channel: str) -> int:

@@ -42,7 +42,7 @@ from jobbot.outreach._people_parse import (
     role_category,
     split_name,
 )
-from jobbot.outreach._searxng import searxng_search
+from jobbot.outreach._searxng import SearxEngine, searxng_search
 from jobbot.textutil import normalize
 
 __all__ = [
@@ -308,7 +308,7 @@ def _ddg_titles(client: httpx.Client, query: str) -> list[str]:
 
 
 def _search_titles(client: httpx.Client, company: Company, secrets: Secrets | None,
-                   search_url: str | None = None) -> list[str]:
+                   search_url: SearxEngine | str | None = None) -> list[str]:
     """Result titles: SearXNG first (self-hosted, ``settings.search_engine_url``), else Brave (key) / DuckDuckGo."""
     names = _domains.company_names(company)
     if not names:
@@ -344,7 +344,7 @@ def find_people_detailed(
     preferred_roles: Sequence[str] | None = None,
     use_hunter: bool = True,
     use_search: bool = True,
-    search_url: str | None = None,
+    search_url: SearxEngine | str | None = None,
 ) -> PeopleSearch:
     """Every source at once; ``pages`` (already crawled company pages) avoids fetching the site again;
     ``search_url``: SearXNG base URL tried before Brave / DuckDuckGo."""

@@ -23,7 +23,8 @@ RETRY_STATUSES = {419, 429, 500, 502, 503, 504}  # 419 = API Apprentissage rate 
 
 
 class HostThrottle:
-    """Minimum interval between two requests to the same host (thread-safe)."""
+    """Minimum interval between two requests to the same host (thread-safe). Each caller reserves its slot under
+    the lock and sleeps outside it: parallel workers on other hosts are never held up."""
 
     def __init__(self, min_interval_s: float = 1.0):
         self.min_interval_s = min_interval_s
@@ -33,11 +34,12 @@ class HostThrottle:
     def wait(self, url: str) -> None:
         host = urlparse(url).netloc
         with self._lock:
-            last = self._last.get(host, 0.0)
-            delay = self.min_interval_s - (time.monotonic() - last)
-            if delay > 0:
-                time.sleep(delay)
-            self._last[host] = time.monotonic()
+            now = time.monotonic()
+            last = self._last.get(host)
+            slot = now if last is None else max(now, last + self.min_interval_s)
+            self._last[host] = slot
+        if slot > now:
+            time.sleep(slot - now)
 
 
 def make_client(timeout: float = 20.0, headers: dict[str, str] | None = None) -> httpx.Client:

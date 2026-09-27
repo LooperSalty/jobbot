@@ -1,0 +1,22 @@
+{
+  "id": "744000100000001",
+  "name": "Développeur Java (F/H/X)",
+  "company": {"identifier": "MetzServicesGroupe", "name": "Metz Services Groupe"},
+  "releasedDate": "2026-09-21T14:49:00.552Z",
+  "location": {"city": "Metz", "country": "fr", "remote": false},
+  "postingUrl": "https://jobs.smartrecruiters.com/MetzServicesGroupe/744000100000001-developpeur-java-f-h-x-",
+  "applyUrl": "https://jobs.smartrecruiters.com/MetzServicesGroupe/744000100000001-developpeur-java-f-h-x-?oga=true",
+  "jobAd": {
+    "sections": {
+      "companyDescription": {"title": "L'entreprise", "text": "<p>Metz Services Groupe accompagne les collectivités.</p>"},
+      "jobDescription": {"title": "Le poste", "text": "<p>Au sein de l'équipe Java, vous développez nos services Spring Boot en alternance.</p>"},
+      "qualifications": {"title": "Profil", "text": "<ul><li>Java, SQL, Git</li></ul>"},
+      "additionalInformation": {"title": "Informations", "text": "<p>Rythme 3 semaines / 1 semaine.</p>"}
+    }
+  },
+  "active": true,
+  "visibility": "PUBLIC",
+  "experienceLevel": {"id": "entry_level", "label": "Entry Level"},
+  "typeOfEmployment": {"id": "permanent", "label": "Full-time"},
+  "language": {"code": "fr", "label": "French", "labelNative": "français"}
+}

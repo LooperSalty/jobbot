@@ -1,4 +1,5 @@
-"""Settings sections split from ``config`` (file size): outreach, reports, Classroom watcher (+ active hours).
+"""Settings sections split from ``config`` (file size): outreach, reports, Classroom watcher (+ active hours),
+night scraper (``night``) and the spontaneous sending ramp (``limits.spontaneous_ramp``).
 
 Everything here is re-exported by ``jobbot.config``: import from there.
 """
@@ -9,11 +10,60 @@ import re
 from datetime import time
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+_CLOCK_RE = re.compile(r"^([01]?\d|2[0-3]):([0-5]\d)$")
 
 
 class Frozen(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
+
+
+def parse_clock(value: str) -> time:
+    """'06:30' → time(6, 30). ValueError (French) when malformed."""
+    match = _CLOCK_RE.match((value or "").strip())
+    if not match:
+        raise ValueError(f"Heure invalide « {value} » (format HH:MM, ex. 06:30)")
+    return time(int(match[1]), int(match[2]))
+
+
+class SpontaneousRamp(Frozen):
+    """Sending ramp of spontaneous e-mails (deliverability): ``start`` per day, ``+step_per_week`` per full week
+    since the first real spontaneous e-mail, at most ``max``; back to ``start`` when the bounce rate of the last
+    7 days exceeds ``max_bounce_rate``. Disabled → ``limits.spontaneous_per_day``."""
+
+    enabled: bool = True
+    start: int = Field(20, ge=1)
+    step_per_week: int = Field(5, ge=0)
+    max: int = Field(40, ge=1)
+    max_bounce_rate: float = Field(0.05, ge=0, le=1)
+
+    @model_validator(mode="after")
+    def _start_below_max(self) -> SpontaneousRamp:
+        if self.start > self.max:
+            raise ValueError(f"Montée progressive : start ({self.start}) supérieur à max ({self.max})")
+        return self
+
+
+class NightSettings(Frozen):
+    """« jobbot night »: harvest companies + contacts while the server is idle (nothing is ever sent)."""
+
+    enabled: bool = True  # scheduled at 00:30 by « jobbot schedule install »
+    until: str = "06:30"  # local (Paris) time when the run stops cleanly
+    extra_radius_km: int = Field(20, ge=0, le=50)  # added to each location's radius (API maximum: 50 km)
+    workers: int = Field(4, ge=1, le=16)  # parallel enrichment (one worker per domain at a time)
+    max_llm_summaries: int = Field(80, ge=0)  # website summaries (fast model) per night
+    prepare_margin: int = Field(5, ge=0)  # documents prepared for the next day: daily cap + this margin
+    retention_days: int = Field(365, ge=30)  # named contacts of companies never contacted are purged after this
+    search_min_interval_s: float = Field(6.0, ge=0)  # between two SearXNG queries (jittered), day and night
+    max_search_queries: int = Field(300, ge=0)  # SearXNG queries per day
+    search_backoff_hours: float = Field(6.0, ge=0)  # SearXNG left alone after a CAPTCHA / block
+
+    @field_validator("until")
+    @classmethod
+    def _valid_until(cls, value: str) -> str:
+        parse_clock(value)
+        return value.strip()
 
 
 class OutreachSettings(Frozen):

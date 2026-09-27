@@ -320,10 +320,21 @@ def run_doctor(state: Any, *, smtp: bool = False, smtp_factory: Callable[..., An
         checks.extend(check_sources(ctx))
         checks.append(check_database(ctx))
         checks.extend(check_classroom(ctx))
+        checks.extend(_night_checks(ctx))
         checks.extend(_server_checks(state.root, settings, ctx))
         if smtp:
             checks.append(check_smtp(ctx.secrets, smtp_factory))
     return checks
+
+
+def _night_checks(ctx: Any) -> list[Check]:
+    """Last night run (kv) and SearXNG health (last backoff); never blocks the diagnosis."""
+    try:
+        from jobbot.night.status import doctor_checks
+
+        return doctor_checks(ctx)
+    except Exception as exc:
+        return [Check("Nuit (collecte d'entreprises)", "warn", f"état illisible : {str(exc)[:200]}")]
 
 
 def _server_checks(root: Path, settings: Settings, ctx: Any) -> list[Check]:

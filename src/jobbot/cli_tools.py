@@ -27,6 +27,7 @@ log = logging.getLogger(__name__)
 
 TASKS = {"jobbot-matin": ("09:30", "run"), "jobbot-soir": ("18:00", "evening")}
 CLASSROOM_TASK = "jobbot-classroom"  # « jobbot classroom watch --once » every classroom.poll_minutes minutes
+NIGHT_TASK = "jobbot-nuit"  # « jobbot night » daily at 00:30 (night.enabled)
 SCHTASKS_TIMEOUT_S = 30
 DASHBOARD_APP = Path(__file__).resolve().parent / "dashboard" / "app.py"
 QUOTA_CHANNELS = ("linkedin", "hellowork", "lba", "email", "spontaneous", "followup")
@@ -261,16 +262,31 @@ def run_command(cmd: list[str]) -> subprocess.CompletedProcess[str]:
                           timeout=SCHTASKS_TIMEOUT_S, check=False)
 
 
-def _classroom_schedule(root: Path) -> tuple[bool, int]:
-    """(watcher enabled, minutes between two checks) from settings.yaml (defaults when unreadable)."""
-    from jobbot.config import ClassroomSettings, load_settings
+def _task_settings(root: Path) -> Any:
+    from jobbot.config import Settings, load_settings
 
     try:
-        cfg = load_settings(root).classroom
+        return load_settings(root)
     except Exception as exc:  # invalid settings: « jobbot doctor » reports it
-        log.warning("Réglages illisibles (%s) : tâche Classroom avec les valeurs par défaut.", exc)
-        cfg = ClassroomSettings()
+        log.warning("Réglages illisibles (%s) : tâches planifiées avec les valeurs par défaut.", exc)
+        return Settings()
+
+
+def _classroom_schedule(root: Path) -> tuple[bool, int]:
+    """(watcher enabled, minutes between two checks) from settings.yaml (defaults when unreadable)."""
+    cfg = _task_settings(root).classroom
     return cfg.enabled, cfg.poll_minutes
+
+
+def night_commands(root: Path, action: str, at: str = "00:30") -> list[list[str]]:
+    """schtasks commands of the « jobbot-nuit » task (daily « jobbot night », nothing sent)."""
+    if action in ("show", "remove"):
+        return [["schtasks", "/Query", "/FO", "LIST", "/TN", NIGHT_TASK] if action == "show"
+                else ["schtasks", "/Delete", "/F", "/TN", NIGHT_TASK]]
+    if not _task_settings(root).night.enabled:
+        return []
+    command = f'"{classroom_python(root)}" -m jobbot.cli --root "{root}" night'
+    return [["schtasks", "/Create", "/F", "/TN", NIGHT_TASK, "/SC", "DAILY", "/ST", at, "/TR", command]]
 
 
 def classroom_python(root: Path) -> Path:
@@ -302,13 +318,14 @@ def schedule_commands(root: Path, action: str, times: dict[str, str] | None = No
     Classroom watcher task (schtasks /SC MINUTE); show → schtasks /Query."""
     if action == "show":
         return [*(["schtasks", "/Query", "/FO", "LIST", "/TN", name] for name in TASKS),
-                *classroom_commands(root, "show")]
+                *night_commands(root, "show"), *classroom_commands(root, "show")]
     script = ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
               str(root / "scripts" / "install_task.ps1")]
     if action == "remove":
-        return [*classroom_commands(root, "remove"), [*script, "-Supprimer"]]
+        return [*night_commands(root, "remove"), *classroom_commands(root, "remove"), [*script, "-Supprimer"]]
     at = {name: (times or {}).get(name, default) for name, (default, _) in TASKS.items()}
-    return [[*script, "-Matin", at["jobbot-matin"], "-Soir", at["jobbot-soir"]], *classroom_commands(root, action)]
+    return [[*script, "-Matin", at["jobbot-matin"], "-Soir", at["jobbot-soir"]],
+            *night_commands(root, action, (times or {}).get(NIGHT_TASK) or "00:30"), *classroom_commands(root, action)]
 
 
 def _result_line(action: str, name: str, cmd: list[str], proc: subprocess.CompletedProcess[str]) -> str:

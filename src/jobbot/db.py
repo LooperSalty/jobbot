@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import sqlite3
 import threading
-from collections.abc import Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -262,15 +262,28 @@ class Repository:
 
     def upsert_company(self, company: Company) -> bool:
         """Insert or fully replace a company. Returns True when new."""
-        row = _to_row(company, _COMPANY_COLS, _COMPANY_JSON)
-        row["name_key"] = normalize_company(company.name)
-        row["updated_at"] = clock.iso(clock.now())
         is_new = not self._query("SELECT 1 FROM companies WHERE id = ?", [company.id])
-        cols = ", ".join(row)
-        marks = ", ".join(f":{c}" for c in row)
         with self._tx() as conn:
-            conn.execute(f"INSERT OR REPLACE INTO companies ({cols}) VALUES ({marks})", row)
+            _write_company(conn, company)
         return is_new
+
+    def update_company(self, company_id: str, change: Callable[[Company], Company | None]) -> Company | None:
+        """Atomic read-modify-write (``BEGIN IMMEDIATE``: no other thread or process writes in between):
+        ``change(current)`` returns the new version, or None to leave it. Returns the stored version (None when
+        the company does not exist). ``change`` must not write to the repository itself."""
+        with self._lock:
+            self._conn.execute("BEGIN IMMEDIATE")
+            try:
+                rows = list(self._conn.execute("SELECT * FROM companies WHERE id = ?", [company_id]))
+                current = _company(rows[0]) if rows else None
+                updated = change(current) if current is not None else None
+                if updated is not None and updated != current:
+                    _write_company(self._conn, updated)
+                self._conn.commit()
+            except Exception:
+                self._conn.rollback()
+                raise
+        return updated if updated is not None else current
 
     def get_company(self, company_id: str) -> Company | None:
         rows = self._query("SELECT * FROM companies WHERE id = ?", [company_id])
@@ -529,6 +542,14 @@ def _merge_raw(stored: str | None, fresh: dict[str, Any]) -> str:
 def _ats(raw: str | None) -> ATSReport | None:
     data = json.loads(raw) if raw else None
     return ATSReport.model_validate(data) if data else None
+
+
+def _write_company(conn: sqlite3.Connection, company: Company) -> None:
+    row = _to_row(company, _COMPANY_COLS, _COMPANY_JSON)
+    row["name_key"] = normalize_company(company.name)
+    row["updated_at"] = clock.iso(clock.now())
+    cols, marks = ", ".join(row), ", ".join(f":{c}" for c in row)
+    conn.execute(f"INSERT OR REPLACE INTO companies ({cols}) VALUES ({marks})", row)
 
 
 def _company(row: sqlite3.Row) -> Company:

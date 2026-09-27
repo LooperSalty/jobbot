@@ -1,0 +1,18 @@
+{
+  "total": 2,
+  "results": [
+    {
+      "id": 6100002,
+      "shortcode": "F6G7H8I9J0",
+      "title": "Développeur back-end Go (CDD 12 mois)",
+      "remote": false,
+      "location": {"country": "France", "countryCode": "FR", "city": "Thionville", "region": "Grand Est"},
+      "state": "published",
+      "published": "2026-09-19T00:00:00.000Z",
+      "type": "contract",
+      "language": "fr",
+      "department": ["Tech"],
+      "workplace": "on_site"
+    }
+  ]
+}

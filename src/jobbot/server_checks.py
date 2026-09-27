@@ -39,7 +39,8 @@ def check_crontab(settings: Any, runner: Any = None, which: Callable[[str], str 
     except (OSError, RuntimeError) as exc:
         return Check("Tâches cron", "warn", f"crontab illisible : {str(exc)[:160]}")
     installed = {cron.managed_name(line) for line in current.splitlines()} - {None}
-    wanted = [n for n in cron.JOB_NAMES if n != "classroom" or settings.classroom.enabled]
+    optional = {"classroom": settings.classroom.enabled, "night": settings.night.enabled}
+    wanted = [n for n in cron.JOB_NAMES if optional.get(n, True)]
     missing = [n for n in wanted if n not in installed]
     if not missing:
         return Check("Tâches cron", "ok", f"{len(wanted)} tâche(s) jobbot : {', '.join(wanted)}")

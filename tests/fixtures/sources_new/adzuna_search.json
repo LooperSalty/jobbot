@@ -1,0 +1,70 @@
+{
+  "__CLASS__": "Adzuna::API::Response::JobSearchResults",
+  "count": 4,
+  "mean": 33512.4,
+  "results": [
+    {
+      "__CLASS__": "Adzuna::API::Response::Job",
+      "id": "4891234567",
+      "adref": "eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNDg5MTIzNDU2NyJ9.fake",
+      "title": "D&eacute;veloppeur <strong>Full-Stack</strong> en alternance H/F",
+      "description": "Acme Logiciels recherche un <strong>développeur</strong> full-stack en alternance (React, Node.js, PostgreSQL) pour 24 mois. Poste basé à Metz, télétravail partiel possible&hellip;",
+      "redirect_url": "https://www.adzuna.fr/land/ad/4891234567?se=AbCdEf&utm_medium=api&utm_source=00000000&v=0123456789ABCDEF",
+      "created": "2026-09-22T08:15:42Z",
+      "company": {"__CLASS__": "Adzuna::API::Response::Company", "display_name": "Acme Logiciels"},
+      "location": {"__CLASS__": "Adzuna::API::Response::Location", "display_name": "Metz, Moselle",
+                   "area": ["France", "Grand Est", "Moselle", "Metz"]},
+      "latitude": 49.1193,
+      "longitude": 6.1757,
+      "contract_time": "full_time",
+      "salary_min": 14000,
+      "salary_max": 14000,
+      "salary_is_predicted": "1",
+      "category": {"__CLASS__": "Adzuna::API::Response::Category", "label": "Emplois Informatique", "tag": "it-jobs"}
+    },
+    {
+      "__CLASS__": "Adzuna::API::Response::Job",
+      "id": "4891234568",
+      "title": "Développeur Java / Spring H/F",
+      "description": "Moselle Numérique renforce son équipe produit : Java 21, Spring Boot, Kubernetes. Profil junior accepté&hellip;",
+      "redirect_url": "https://www.adzuna.fr/land/ad/4891234568?se=GhIjKl&utm_medium=api&utm_source=00000000&v=FEDCBA9876543210",
+      "created": "2026-09-20T10:00:00Z",
+      "company": {"display_name": "Moselle Numérique"},
+      "location": {"display_name": "Thionville, Moselle", "area": ["France", "Grand Est", "Moselle", "Thionville"]},
+      "latitude": 49.3579,
+      "longitude": 6.1683,
+      "contract_type": "permanent",
+      "contract_time": "full_time",
+      "salary_min": 34000,
+      "salary_max": 40000,
+      "salary_is_predicted": "0",
+      "category": {"label": "Emplois Informatique", "tag": "it-jobs"}
+    },
+    {
+      "__CLASS__": "Adzuna::API::Response::Job",
+      "id": "4891234569",
+      "title": "Business developer / <strong>Développeur</strong> commercial",
+      "description": "Prospection et fidélisation d'un portefeuille clients B2B&hellip;",
+      "redirect_url": "https://www.adzuna.fr/land/ad/4891234569?se=MnOpQr",
+      "created": "2026-09-21T09:00:00Z",
+      "company": {"display_name": "Vendtout"},
+      "location": {"display_name": "Metz, Moselle", "area": ["France", "Grand Est", "Moselle", "Metz"]},
+      "contract_type": "permanent",
+      "salary_is_predicted": "0",
+      "category": {"label": "Emplois Commercial", "tag": "sales-jobs"}
+    },
+    {
+      "__CLASS__": "Adzuna::API::Response::Job",
+      "id": "4891234570",
+      "title": "Développeur Python",
+      "description": "Poste 100 % télétravail, équipe répartie en France. Django, FastAPI&hellip;",
+      "redirect_url": "https://www.adzuna.fr/land/ad/4891234570?se=StUvWx",
+      "created": "2026-09-23T07:30:00Z",
+      "company": {"display_name": "Lorraine Digital"},
+      "location": {"display_name": "France", "area": ["France"]},
+      "contract_type": "contract",
+      "salary_is_predicted": "0",
+      "category": {"label": "Emplois Informatique", "tag": "it-jobs"}
+    }
+  ]
+}

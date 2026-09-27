@@ -18,7 +18,7 @@ avant envoi.
 | Étape | Ce qui se passe |
 |---|---|
 | **Offres de l'école** (`classroom watch`) | Le flux Google Classroom de ton école est relu toutes les 15 minutes : chaque nouvelle offre adaptée reçoit tout de suite un CV et une lettre ciblés, et la candidature part aussitôt (voir § 3.6). |
-| **Collecte** (`search`) | Offres de La Bonne Alternance, France Travail, LinkedIn (sans connexion), HelloWork, Indeed, Welcome to the Jungle, Free-Work et APEC, à Metz, Nancy, **au Luxembourg** et en télétravail. Les doublons entre sites sont détectés. |
+| **Collecte** (`search`) | Offres de La Bonne Alternance, France Travail, LinkedIn (sans connexion), HelloWork, Indeed, Welcome to the Jungle, Free-Work, APEC, Adzuna, Jooble et des **pages carrières des entreprises** (Lever, Greenhouse, Teamtailor…, voir § 3.7), à Metz, Nancy, **au Luxembourg** et en télétravail. Les doublons entre sites sont détectés. |
 | **Tri** (`score`) | Chaque offre reçoit une note de 0 à 100 avec ses raisons (intitulé, compétences, distance, contrat, pays, expérience demandée, salaire). Les fausses alternances d'écoles et les postes commerciaux sont écartés. |
 | **CV + lettre** (`prepare`) | CV d'une page et lettre adaptés aux mots-clés de l'offre, avec un **score ATS expliqué** (mots-clés présents ou manquants). Tout est tiré de `config/profile.yaml` : **rien n'est inventé**. |
 | **Candidature** (`apply`) | Envoi par LinkedIn (candidature simplifiée), HelloWork, La Bonne Alternance ou e-mail. Sur le site d'une entreprise, jobbot pré-remplit le formulaire et c'est **toi** qui cliques « Envoyer » (`assist`). |
@@ -49,6 +49,7 @@ py -3.12 -m venv .venv-jobspy
 ```
 
 jobbot détecte `.venv-jobspy` tout seul (ou le Python indiqué par la variable d'environnement `JOBSPY_PYTHON`).
+Sur un serveur Linux, voir § 3.7 (`.venv-jobspy/bin/python`).
 
 La commande `jobbot` est ensuite disponible dans `.venv\Scripts\` : active l'environnement avec
 `.venv\Scripts\Activate.ps1`, ou lance `.venv\Scripts\jobbot.exe ...` directement.
@@ -78,7 +79,7 @@ L'assistant pose une quarantaine de questions, en sept sections :
 | **Candidatures spontanées** | Quota par jour, écrire ou non à des personnes nommées, chercher les RH et responsables techniques, adresses devinées autorisées ou non et leur maximum par jour. |
 | **Relances** | Délais des deux relances et leur nombre. |
 | **Notifications** | Annonces vocales Jarvis, rapport de la semaine (et son envoi par e-mail), fiche d'entretien automatique, notifications importantes par e-mail, sur le téléphone (ntfy) ou par Telegram (voir § 12.6). |
-| **Comptes** | Mot de passe d'application Gmail, identifiants France Travail, clés La Bonne Alternance / Hunter / Brave. |
+| **Comptes** | Mot de passe d'application Gmail, identifiants France Travail, clés La Bonne Alternance / Hunter / Brave / Adzuna / Jooble. |
 | **Offres de l'école (Classroom)** | Surveillance du Classroom de l'école oui/non, candidature immédiate oui/non, fréquence de vérification, lien du cours. |
 
 **Entrée** garde la valeur affichée entre parenthèses. Les mots de passe sont saisis masqués ; laisse vide pour garder
@@ -121,6 +122,8 @@ alors modifiée (sinon le changement n'aurait aucun effet, le fichier local éta
 | `FRANCE_TRAVAIL_CLIENT_ID`, `FRANCE_TRAVAIL_CLIENT_SECRET` | Offres France Travail | https://francetravail.io → Espace développeur → créer une application → s'abonner à l'API « Offres d'emploi v2 ». |
 | `LBA_API_TOKEN` | Optionnel : API officielle de La Bonne Alternance, en plus du site | Compte gratuit sur https://api.apprentissage.beta.gouv.fr. Il n'est **pas** nécessaire pour postuler via La Bonne Alternance. |
 | `HUNTER_API_KEY`, `BRAVE_API_KEY` | Optionnel : vérifier des adresses e-mail, trouver le site d'une entreprise | hunter.io, brave.com/search/api |
+| `ADZUNA_APP_ID`, `ADZUNA_APP_KEY` | Optionnel : offres de l'agrégateur Adzuna (§ 3.7) | Gratuit : https://developer.adzuna.com → Register, puis le tableau de bord (« Application ID », « Application Key »). |
+| `JOOBLE_API_KEY` | Optionnel : offres de l'agrégateur Jooble (§ 3.7) | Gratuit sur demande : https://fr.jooble.org/api/about (clé française). |
 | `CLASSROOM_COURSE_URLS` | Optionnel : le(s) cours Google Classroom où ton école publie des offres (liens séparés par des virgules) | Ouvre le cours dans ton navigateur et copie l'adresse `https://classroom.google.com/c/…` (voir § 3.6). |
 | `CLAUDE_CODE_OAUTH_TOKEN` | Optionnel : l'IA de ton abonnement Claude sur un serveur sans écran | Sur le PC : `claude setup-token` (voir § 12.2). |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Optionnel : notifications Telegram | Jeton donné par @BotFather et identifiant de ta conversation avec le bot. |
@@ -244,6 +247,38 @@ commence aussi par une vérification du Classroom.
 puis `jobbot config set classroom.backend api` et `jobbot login classroom` (autorisation dans le navigateur ; le
 jeton va dans `data/classroom_token.json`). Ces deux fichiers sont ignorés par git.
 
+### 3.7 Sources d'offres en plus : Adzuna, Jooble, pages carrières, Indeed
+
+Ces sources sont dans `search.sources` par défaut. Sans leur clé, une source est simplement ignorée ;
+`jobbot doctor` affiche pour chacune « disponible » ou la raison (clé absente, module non installé…).
+
+**Adzuna** (`adzuna`) — agrégateur d'offres, API officielle gratuite. Il faut `ADZUNA_APP_ID` et `ADZUNA_APP_KEY` :
+crée un compte sur https://developer.adzuna.com (« Register »), puis copie l'« Application ID » et
+l'« Application Key » du tableau de bord (`jobbot setup --section Comptes` ou directement dans `.env`). jobbot
+cherche autour de chacune de tes villes (rayon du profil), 24 recherches au plus par exécution (l'offre gratuite
+permet environ 250 requêtes par jour). Adzuna ne couvre **pas** le Luxembourg : ces recherches-là sont sautées.
+Adzuna ne publie qu'un extrait de l'annonce ; le lien mène à l'offre d'origine, où tu postules toi-même.
+
+**Jooble** (`jooble`) — autre agrégateur, API officielle gratuite sur demande. Il faut `JOOBLE_API_KEY` : remplis
+le formulaire « Get API key » sur https://fr.jooble.org/api/about (voir aussi https://jooble.org/api/about). Chaque
+pays a sa propre clé : demande la clé **française** (seules les recherches en France sont faites). 10 recherches au
+plus par exécution ; comme pour Adzuna, l'annonce est un extrait et la candidature se fait sur le site d'origine.
+
+**Pages carrières des entreprises** (`company_ats`) — aucune clé. jobbot lit les offres publiées par les
+employeurs qu'il connaît déjà : les entreprises de la base (page carrières trouvée pendant `enrich`) et celles des
+offres collectées dont le lien de candidature mène à un logiciel de recrutement connu (Lever, Greenhouse, Recruitee,
+SmartRecruiters, Workable, Teamtailor, page entreprise Welcome to the Jungle). Une page carrières sans logiciel
+connu est lue pour ses offres au format schema.org (JSON-LD). Seuls les postes de développeur (ni commerciaux ni
+seniors) près de tes villes, au Luxembourg si tu l'as choisi, ou en télétravail complet sont gardés. Politesse :
+80 pages au plus par exécution (`search.max_ats_boards_per_run`), chaque page au plus une fois toutes les 20 h (et
+de plus en plus rarement si elle reste en erreur), une requête par seconde au plus par logiciel ; seules les
+adresses publiques sont lues (jamais une adresse interne, même après une redirection). La candidature se fait sur la page de l'offre (« à finir à la main »,
+`jobbot assist` pré-remplit le formulaire).
+
+**Indeed** (`indeed`) — lu avec `python-jobspy`, installé dans un environnement séparé `.venv-jobspy` à la racine du
+projet (jobbot le trouve seul, sous Windows comme sous Linux, ou via la variable `JOBSPY_PYTHON`). Sur un serveur
+Linux : `uv venv .venv-jobspy --python 3.12 && uv pip install --python .venv-jobspy/bin/python python-jobspy`.
+
 ---
 
 ## 4. Premier lancement : la checklist
@@ -267,7 +302,8 @@ jeton va dans `data/classroom_token.json`). Ces deux fichiers sont ignorés par 
 
 ```powershell
 jobbot run                 # journée complète : collecte → tri → CV/lettres → candidatures → spontanées → mails → relances
-jobbot status              # résumé : offres, candidatures, quotas du jour, files d'attente
+jobbot night               # nuit : entreprises + adresses, priorités, dossiers du lendemain (rien n'est envoyé)
+jobbot status              # résumé : offres, candidatures, quotas du jour, files d'attente, dernière nuit
 jobbot assist              # offres « à finir à la main » : ouvertes et pré-remplies, tu cliques « Envoyer »
 jobbot prep 12             # fiche de préparation de l'entretien de la candidature n° 12
 jobbot report              # rapport de la semaine en cours (--precedente : semaine dernière complète)
@@ -278,7 +314,7 @@ jobbot export              # Excel (ou --format csv) de tout le suivi
 Pour que jobbot tourne tout seul chaque jour :
 
 ```powershell
-jobbot schedule install    # 09:30 : jobbot run · 18:00 : réponses + relances · Classroom toutes les 15 min
+jobbot schedule install    # 09:30 : jobbot run · 18:00 : réponses + relances · Classroom toutes les 15 min · 00:30 : nuit
 jobbot schedule show
 jobbot schedule remove
 ```
@@ -286,9 +322,44 @@ jobbot schedule remove
 La tâche `jobbot-classroom` (si `classroom.enabled`) lance `jobbot classroom watch --once` toutes les
 `classroom.poll_minutes` minutes, sans fenêtre ; son journal est dans `data\logs\jobbot.log`.
 
-Sous Linux (serveur), les mêmes commandes gèrent ta **crontab** : trois lignes marquées `# jobbot:run`,
-`# jobbot:soir` et `# jobbot:classroom` (les autres lignes ne sont jamais touchées), chacune protégée par
-`flock` contre les doubles lancements, sortie dans `data/logs/cron.log` (voir § 12.7).
+Sous Linux (serveur), les mêmes commandes gèrent ta **crontab** : quatre lignes marquées `# jobbot:run`,
+`# jobbot:soir`, `# jobbot:classroom` et `# jobbot:night` (les autres lignes ne sont jamais touchées), chacune
+protégée par `flock` contre les doubles lancements, sortie dans `data/logs/cron.log` (voir § 12.7). La nuit tourne
+avec une priorité basse (`nice -n 10 ionice -c3`) ; `--nuit 01:00` change son heure, `night.enabled: false` la
+retire. Sous Windows, la tâche s'appelle `jobbot-nuit`.
+
+### La nuit : `jobbot night`
+
+Le serveur ne fait rien la nuit : `jobbot night` (planifiée à 0 h 30) s'en sert pour remplir la file des candidatures
+spontanées. **Rien n'est jamais envoyé la nuit.** Dans l'ordre, chaque étape isolée (une erreur n'arrête pas les
+suivantes) et l'ensemble arrêté proprement à `night.until` (06:30) ou après `--budget MINUTES` :
+
+1. **Rétention RGPD** : les contacts nominatifs des entreprises jamais contactées sont supprimés au bout de
+   `night.retention_days` (365) jours ; la source de chaque adresse reste notée (`raw.source_urls`).
+2. **Collecte** : toutes les entreprises du numérique autour de chacune de tes zones (rayon + `night.extra_radius_km`,
+   50 km au plus), les « recruteurs » La Bonne Alternance, et **les employeurs des offres déjà en base** (même
+   écartées pour l'expérience : une entreprise qui recrute des développeurs est une excellente cible pour une
+   alternance), identifiés dans le registre avec une correspondance de nom sûre ; au Luxembourg (pas de SIREN), par
+   leur nom. Tout passe par le filtre « hors cible ».
+3. **Contacts** : sites, pages carrières, personnes, format d'adresse, sur `night.workers` (4) fils, jamais deux à la
+   fois sur le même site ; résumés du site par le modèle rapide, `night.max_llm_summaries` (80) au plus.
+4. **Priorités** (0-100, raisons en français) : numérique cœur +30 / proche +15 / grande structure +10, offre de
+   développeur publiée depuis moins de 60 jours +25, adresse recrutement/RH +20, RH ou responsable technique nommé
+   +15, adresse devinée d'après le format appris +5, devinée non vérifiée -10 (sans adresse : hors file), à 20 km
+   +10 / 40 km +5, 10 à 249 salariés (tuteur possible) +10, tes compétences sur son site jusqu'à +10. La campagne
+   du jour prend les entreprises **par priorité décroissante**.
+5. **Dossiers du lendemain** : CV + lettre pour les premières de la file (plafond du jour + `night.prepare_margin`) ;
+   la campagne du matin les réutilise pendant 7 jours au lieu de les régénérer.
+
+Au réveil, une notification (Telegram / e-mail si activés) : « Nuit : +X entreprises (Y pertinentes, N nouvelles),
++Z adresses (dont N nominatives), D dossiers prêts, file d'attente : Q entreprises ≈ J jours d'envoi ». `jobbot
+status`, `jobbot doctor` et la page « Entreprises » du tableau de bord montrent la file et la dernière nuit.
+`jobbot night --dry-run --budget 30` : essai sans génération de dossiers.
+
+**Montée progressive des envois spontanés** (`limits.spontaneous_ramp`, la vraie limite est la délivrabilité) :
+20 par jour au départ, +5 par semaine complète depuis le premier envoi réel, 40 au plus ; si plus de 5 % des envois
+spontanés des 7 derniers jours rebondissent, retour à 20 (tu es prévenu) et la montée reprend une semaine plus tard.
+`limits.spontaneous_ramp.enabled: false` revient au quota fixe `limits.spontaneous_per_day`.
 
 Le script `scripts\install_task.ps1` fait la même chose ; il accepte `-Matin 08:45 -Soir 18:30` et `-Supprimer`. Les
 tâches tournent quand ta session Windows est ouverte, parce que LinkedIn et HelloWork ont besoin du navigateur. Si le PC
@@ -315,6 +386,7 @@ d'entretien est écrite dès qu'une invitation est lue.
 | `prep <id candidature>` | Fiche de préparation d'entretien (régénérée si elle existe) |
 | `report [--precedente] [--date AAAA-MM-JJ] [--email]` | Rapport de la semaine ; `--email` te l'envoie aussi par e-mail |
 | `run [-s étape]` | Journée complète, ou seulement certaines étapes : `classroom`, `collect`, `score`, `prepare`, `apply`, `discover`, `enrich`, `spontaneous`, `inbox`, `followup` |
+| `night [--budget MINUTES] [--dry-run]` | Nuit : collecte d'entreprises et d'adresses, priorités, dossiers du lendemain ; rien n'est envoyé |
 | `status` · `export` · `dashboard [--host IP] [--port N]` · `schedule install\|remove\|show` | Suivi |
 
 Options communes : `--dry-run` (simulation), `-v` (journal détaillé), `--root <dossier>`.
@@ -665,7 +737,12 @@ En `--dry-run`, rien n'est envoyé (les e-mails sont écrits dans `output/outbox
 - Sur le serveur, change tes réglages dans `config/settings.local.yaml` (`jobbot config set` y écrit quand la clé y
   est déjà) : `config/settings.yaml` est remplacé par la version du PC à chaque déploiement.
 - Moteur de recherche : avec `search_engine_url` (SearXNG), la recherche des sites d'entreprises et des personnes
-  l'utilise avant Brave et DuckDuckGo, sans l'attente de 25 s.
+  l'utilise avant Brave et DuckDuckGo, sans l'attente de 25 s. Chaque requête ne demande que
+  `search_engine_engines` (`[bing]` : le seul moteur qui répond encore depuis l'IP du serveur), une à la fois, au
+  moins `night.search_min_interval_s` (6 s) d'écart, `night.max_search_queries` (300) par jour. Si l'instance
+  signale ses moteurs bloqués (CAPTCHA, trop de requêtes, accès refusé), SearXNG est laissé tranquille
+  `night.search_backoff_hours` (6 h) : Clearbit, noms de domaine devinés + DNS + SIREN, Wikidata et Brave (si
+  `BRAVE_API_KEY`) prennent le relais. `jobbot doctor` montre l'état (« SearXNG ») et la dernière nuit.
 
 ### 12.8 Dépannage du serveur
 

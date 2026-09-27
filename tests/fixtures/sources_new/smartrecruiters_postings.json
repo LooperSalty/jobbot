@@ -1,0 +1,38 @@
+{
+  "offset": 0,
+  "limit": 100,
+  "totalFound": 2,
+  "content": [
+    {
+      "id": "744000100000001",
+      "name": "Développeur Java (F/H/X)",
+      "uuid": "0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0",
+      "jobAdId": "1a2b3c4d-0000-1111-2222-333344445555",
+      "defaultJobAd": true,
+      "refNumber": "REF1001",
+      "company": {"identifier": "MetzServicesGroupe", "name": "Metz Services Groupe"},
+      "releasedDate": "2026-09-21T14:49:00.552Z",
+      "location": {"city": "Metz", "region": "Grand Est", "country": "fr", "remote": false, "hybrid": false,
+                   "latitude": "49.1193", "longitude": "6.1757", "fullLocation": "Metz, Grand Est, France"},
+      "industry": {"id": "it", "label": "IT"},
+      "department": {"id": "1", "label": "Tech"},
+      "function": {"id": "engineering", "label": "Engineering"},
+      "typeOfEmployment": {"id": "permanent", "label": "Full-time"},
+      "experienceLevel": {"id": "entry_level", "label": "Entry Level"},
+      "customField": [{"fieldId": "f1", "fieldLabel": "Contract", "valueId": "v1", "valueLabel": "Apprenticeship"}],
+      "ref": "https://api.smartrecruiters.com/v1/companies/MetzServicesGroupe/postings/744000100000001",
+      "creator": {"name": "Recruteur"},
+      "language": {"code": "fr", "label": "French", "labelNative": "français"}
+    },
+    {
+      "id": "744000100000002",
+      "name": "Directeur des systèmes d'information",
+      "company": {"identifier": "MetzServicesGroupe", "name": "Metz Services Groupe"},
+      "releasedDate": "2026-09-21T14:49:00.552Z",
+      "location": {"city": "Metz", "country": "fr", "remote": false},
+      "typeOfEmployment": {"id": "permanent", "label": "Full-time"},
+      "experienceLevel": {"id": "director", "label": "Director"},
+      "customField": []
+    }
+  ]
+}

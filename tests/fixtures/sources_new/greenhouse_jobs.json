@@ -1,0 +1,53 @@
+{
+  "jobs": [
+    {
+      "absolute_url": "https://www.lorraine-digital.example/carrieres/detail/4400001/?gh_jid=4400001",
+      "data_compliance": [{"type": "gdpr", "requires_consent": false, "requires_processing_consent": false,
+                           "requires_retention_consent": false, "retention_period": null}],
+      "internal_job_id": 3300001,
+      "location": {"name": "Luxembourg, Luxembourg"},
+      "metadata": [
+        {"id": 33310, "name": "Time Type", "value": "Full time", "value_type": "single_select"},
+        {"id": 33311, "name": "Contract Type", "value": "Permanent", "value_type": "single_select"}
+      ],
+      "id": 4400001,
+      "updated_at": "2026-09-18T14:57:30-04:00",
+      "requisition_id": "R1001",
+      "title": "Software Engineer (Java)",
+      "company_name": "Lorraine Digital",
+      "first_published": "2026-09-10T10:34:20-04:00",
+      "language": "en",
+      "application_deadline": null,
+      "content": "&lt;p&gt;Join our Luxembourg team: Java 21, Spring Boot, Kafka.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;2 years of experience&lt;/li&gt;&lt;/ul&gt;",
+      "departments": [{"id": 1, "name": "Engineering", "child_ids": [], "parent_id": null}],
+      "offices": [{"id": 2, "name": "Luxembourg", "location": "Luxembourg, Luxembourg", "child_ids": [], "parent_id": null}]
+    },
+    {
+      "absolute_url": "https://www.lorraine-digital.example/carrieres/detail/4400002/?gh_jid=4400002",
+      "internal_job_id": 3300002,
+      "location": {"name": "Nancy, France"},
+      "metadata": [{"id": 33312, "name": "Contrat", "value": "Apprentissage", "value_type": "single_select"}],
+      "id": 4400002,
+      "updated_at": "2026-09-19T09:00:00-04:00",
+      "title": "Développeur web",
+      "company_name": "Lorraine Digital",
+      "first_published": "2026-09-19T09:00:00-04:00",
+      "language": "fr",
+      "content": "&lt;p&gt;Développement de nos applications Vue.js et Laravel, contrat de 24 mois.&lt;/p&gt;",
+      "departments": [],
+      "offices": []
+    },
+    {
+      "absolute_url": "https://www.lorraine-digital.example/carrieres/detail/4400003/?gh_jid=4400003",
+      "location": {"name": "New York, NY"},
+      "metadata": null,
+      "id": 4400003,
+      "updated_at": "2026-09-19T09:00:00-04:00",
+      "title": "Frontend Developer",
+      "company_name": "Lorraine Digital",
+      "first_published": "2026-09-19T09:00:00-04:00",
+      "content": "&lt;p&gt;React in New York.&lt;/p&gt;"
+    }
+  ],
+  "meta": {"total": 3}
+}

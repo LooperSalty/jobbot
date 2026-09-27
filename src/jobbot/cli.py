@@ -44,7 +44,7 @@ config_app = typer.Typer(help="Lire ou modifier les réglages (settings.yaml, pr
                          no_args_is_help=True)
 schedule_app = typer.Typer(help="Tâches planifiées (Windows : Planificateur de tâches ; Linux : crontab) : « run » "
                                 "à 9 h 30, boîte mail + relances à 18 h, flux Classroom de l'école toutes les "
-                                "classroom.poll_minutes minutes.", no_args_is_help=True)
+                                "classroom.poll_minutes minutes, « night » à 0 h 30.", no_args_is_help=True)
 
 
 # --------------------------------------------------------------------------- global options & first run
@@ -171,7 +171,7 @@ for _name, _func in (
     ("apply", run_cmds.apply), ("assist", run_cmds.assist), ("approve", run_cmds.approve),
     ("reject", run_cmds.reject), ("discover", run_cmds.discover), ("enrich", run_cmds.enrich),
     ("spontaneous", run_cmds.spontaneous), ("inbox", run_cmds.inbox), ("followup", run_cmds.followup),
-    ("run", run_cmds.run), ("prep", prep), ("report", report), ("status", setup_cmds.status),
+    ("run", run_cmds.run), ("night", run_cmds.night), ("prep", prep), ("report", report), ("status", setup_cmds.status),
     ("export", setup_cmds.export), ("dashboard", setup_cmds.dashboard),
 ):
     app.command(_name)(_func)

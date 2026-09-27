@@ -24,6 +24,7 @@ from jobbot.models import Company, ContactEmail
 from jobbot.outreach._extract import ROLE_APPLY, ROLE_GENERIC, WEBMAIL_DOMAINS, classify_email
 from jobbot.outreach._mailcheck import guess_patterns, has_mx, hunter_domain_search, hunter_verify, take_hunter_credit
 from jobbot.outreach._patterns import infer_domain_pattern, learned_pattern, person_for_local, remember_pattern
+from jobbot.outreach._searxng import engine_for
 from jobbot.outreach.people import PeopleSearch, Person, find_people_detailed, is_small_company
 
 log = logging.getLogger(__name__)
@@ -194,7 +195,7 @@ def _search_people(ctx: AppContext, company: Company, domain: str, contacts: lis
     return find_people_detailed(
         company, client=client, secrets=ctx.secrets, domain=domain, pages=pages if employee else [],
         preferred_roles=cfg.preferred_roles, use_hunter=use_hunter, use_search=employee and not has_recruitment,
-        search_url=ctx.settings.search_engine_url,
+        search_url=engine_for(ctx),
     )
 
 

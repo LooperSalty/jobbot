@@ -340,10 +340,10 @@ def validate_steps(steps: list[str] | None) -> list[str]:
 
 
 @contextmanager
-def run_lock(ctx: AppContext) -> Iterator[None]:
-    """Exclusive lock file in the data folder (a stale lock older than 6 h is taken over)."""
-    path = ctx.path(f"{ctx.settings.paths.data_dir}/{LOCK_FILE}")
-    if path.exists() and time.time() - path.stat().st_mtime < LOCK_STALE_S:
+def run_lock(ctx: AppContext, lock_file: str = LOCK_FILE, stale_s: float = LOCK_STALE_S) -> Iterator[None]:
+    """Exclusive lock file in the data folder (a stale lock older than ``stale_s``, 6 h, is taken over)."""
+    path = ctx.path(f"{ctx.settings.paths.data_dir}/{lock_file}")
+    if path.exists() and time.time() - path.stat().st_mtime < stale_s:
         raise PipelineBusy(f"Une exécution de jobbot est déjà en cours (verrou {path}). Réessaie plus tard.")
     path.write_text(str(os.getpid()), encoding="utf-8")
     try:

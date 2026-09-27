@@ -1,7 +1,7 @@
 """jobbot dashboard (Streamlit, French). Run with « jobbot dashboard » (or streamlit run this file).
 
 Pages: vue d'ensemble, offres, à valider, actions manuelles, candidatures, entretiens (fiches de préparation),
-entreprises, sources, réglages.
+entreprises (+ section « Nuit » : dernier rapport, file d'attente par priorité), sources, réglages.
 All queries/actions live in ``jobbot.dashboard.data`` (tested without Streamlit).
 """
 
@@ -224,7 +224,27 @@ def page_interviews() -> None:
                 _act(generate_prep(ctx(), row["id"]))
 
 
+def _night_section() -> None:
+    """Last night report + ready queue by priority (« jobbot night »)."""
+    from jobbot.night.status import last_report, queue_rows, status_lines
+
+    st.subheader("Nuit")
+    last = last_report(ctx())
+    st.caption(f"{last['at'][:16].replace('T', ' ')} UTC — {last['summary']}" if last
+               else "Aucune nuit encore : « jobbot night » (planifiée à 0 h 30 par « jobbot schedule install »).")
+    for line in status_lines(ctx())[:3]:
+        st.write(line)
+    rows = queue_rows(ctx())
+    if rows:
+        st.dataframe(_frame(rows), hide_index=True,
+                     column_config={"priorite": SCORE("Priorité", format="%.0f")})
+
+
 def page_companies() -> None:
+    try:
+        _night_section()
+    except Exception as exc:  # the companies table stays available
+        st.warning(f"Section « Nuit » indisponible : {exc}")
     rows = data.company_rows(ctx())
     if not rows:
         st.info("Aucune entreprise : lance « jobbot discover ».")

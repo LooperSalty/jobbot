@@ -473,3 +473,180 @@ The school posts apprenticeship offers in a Google Classroom course (private URL
   `jobbot score`) runs it before `score_new_jobs` (a failure never blocks the scoring). `prepare` scores every
   SHORTLISTED offer again after `ensure_details` and drops it (FILTERED_OUT) below `thresholds.min_match_score`.
   Tests: `tests/test_matching_regions.py`, `tests/test_matching_details.py`.
+
+## v6 — More job sources: Adzuna, Jooble, company career boards (ATS), Indeed on Linux
+
+- **Config**: `Secrets.adzuna_app_id`, `adzuna_app_key`, `jooble_api_key` (`.env.example`, wizard « Comptes »; blank /
+  `# comment` values treated as unset by `offer_utils.secret_value`); `SearchSettings.max_ats_boards_per_run` (80);
+  `adzuna`, `jooble`, `company_ats` appended to the default `search.sources` and to `config/settings.yaml`.
+- **Registry**: `SOURCE_SPECS` + `SECRET_SOURCES` (adzuna, jooble) + `CONTEXT_SOURCES` (company_ats, built with
+  `cls.from_context(ctx)`: repository, profile, settings); aliases `ats`, `company_careers`, `pages_carrieres`;
+  `SOURCE_QUERY_BUDGET` adzuna 24 / jooble 10; `FOREIGN_LOCATION_SOURCES` += adzuna, company_ats (each skips or
+  filters what it cannot serve); `DETAIL_SOURCES` += company_ats; `matching.location.FULL_REMOTE_FLAG_SOURCES` += the
+  three (their `remote=True` always means full remote). `jobbot doctor` lists them through `check_sources`.
+- `sources/offer_utils.py` (shared): `detect_contract(title, description, hint)` (title → API label → description,
+  LinkedIn rules), `contract_from_hint`, `detect_remote`, `is_dev_title` / `is_not_dev_title` / `is_senior_title`,
+  `country_code` (ISO from « fr », « France », « Nederland »…), `parse_date` (ISO, « … UTC », RFC 822, epoch ms),
+  `format_salary`, `strip_tags`, `with_contract_word` (alternance / stage added to keyword searches), `secret_value`.
+- `sources/adzuna.py`: `AdzunaSource(secrets, client=None)`, `name="adzuna"`. `GET api.adzuna.com/v1/api/jobs/<cc>/
+  search/<page>` (`what`, `where`, `distance` km, `max_days_old`, `results_per_page` ≤ 50, `sort_by=date`,
+  `permanent=1` / `contract=1`, remote query → `what_or`), ≤ 2 pages, 2.5 s apart. Countries gb us at au be br ca ch
+  de es fr in it mx nl nz pl sg za — **no Luxembourg** (query skipped). `<strong>` highlights stripped, predicted
+  salaries hidden (currency per country), `raw.description_truncated`; `fetch_details` returns the job (the tracked
+  `redirect_url` is never followed by a robot). 401/403 → source refused for the run, 429 → `SourceUnavailable`;
+  network / 5xx / unreadable answer → `offer_utils.QueryFailed` (that query only, the next ones still run).
+- `sources/jooble.py`: `JoobleSource(secrets, client=None)`, `name="jooble"`. `POST https://fr.jooble.org/api/<key>`
+  (`keywords`, `location`, `radius` ∈ 0/4/8/16/26/40/80 km, `page`, `ResultOnPage`, `companysearch=false`); one key
+  per country → French queries only (key URL-encoded in the path); one page; `updated` older than `max_age_days`
+  dropped; Cloudflare challenge (`cf-mitigated`) → temporary `SourceUnavailable`, 401/403/404 → key refused for the
+  run, other failures → `QueryFailed`.
+- `sources/key_redaction.py`: logging filter on `httpx` / `httpcore` / `jobbot.http` masking `app_id=` / `app_key=`
+  and `jooble.org/api/<key>` (installed when adzuna / jooble are imported).
+- `sources/ats_detect.py` (reusable): `detect_ats(url) -> (provider, slug) | None`, `ats_board(url) -> AtsBoard`
+  (`provider`, `slug`, `region` "eu" for `jobs.eu.lever.co`; `key` = `provider:[region/]slug`), `board_url(board)`,
+  `page_key(url)`. Providers: lever, greenhouse, recruitee, smartrecruiters, workable, teamtailor, wttj.
+- `sources/ats_fetch.py`: `AtsFetcher(client, *, wttj_source=None, countries={"FR"})` — `fetch_board(board,
+  company_hint, *, max_age_days)` (Lever `api[.eu].lever.co/v0/postings/<slug>?mode=json`, Greenhouse
+  `boards-api…/v1/boards/<slug>/jobs?content=true`, Recruitee `<slug>.recruitee.com/api/offers/`, SmartRecruiters
+  `api.smartrecruiters.com/v1/companies/<id>/postings?country=<cc>` per searched country, Workable `POST
+  apply.workable.com/api/v3/accounts/<slug>/jobs` + `nextPage` token, Teamtailor `<slug>.teamtailor.com/jobs.rss`
+  (DTD refused before parsing), WTTJ company = the wttj source's Algolia index filtered on `organization.slug`, offers
+  keep `source="wttj"`); `fetch_page(url)` → `BoardResult(offers, linked_boards)` (JSON-LD `JobPosting` via
+  `sources/jsonld.py` + ATS links of the page); details `smartrecruiters_detail`, `workable_detail`, `page_html`.
+  404/410 → `BoardNotFound`; `FETCH_ERRORS` = network / HTTP / invalid URL / unreadable payload / WTTJ down. ≤ 1
+  request/s per provider (`HostThrottle` keyed by provider), one retry.
+- `sources/public_page.py`: third-party pages (careers pages, JSON-LD offer URLs) only on public addresses —
+  `is_safe_url` (http(s), dotted name, no IP literal incl. `127.1` / hex forms, no `.local`…), `resolves_public`
+  (every resolved address `is_global`), `fetch_public_page(client, url)` (redirects followed by hand and re-checked, 3
+  max; body streamed and cut at `MAX_PAGE_BYTES`; `UnsafeUrl`, `PageGone`).
+- `sources/ats_mapping.py`: provider JSON → `Posting` → `to_offer(board, posting, …)` → `JobOffer(source=
+  "company_ats", external_id=f"{board.key}:{posting_id}", apply_method=EXTERNAL, apply_url=<posting apply page>)`,
+  `raw` = `ats`, `ats_slug`, `ats_region`, `posting_id`, `country_code`, `board_url`, `contract_label`
+  (+ `needs_details` for SmartRecruiters / Workable, whose listings have no text, and for short JSON-LD listings with
+  their own offer page; director/executive SR postings dropped). Full remote only when the ATS says so without a
+  hybrid / on-site flag (Recruitee) or a place (JSON-LD `TELECOMMUTE`). JSON-LD `url` resolved against the page,
+  http(s) only. Location « Metz (57) » in France, « City, CC » abroad.
+- `sources/ats_targets.py`: `discover_targets(repo)` — companies (not blacklisted / irrelevant / rejected):
+  `careers_url` / `website` / URL values under career-like keys of `raw` that are an ATS, else `careers_url` as a
+  careers page (`is_public_page`: safe URL, job-board hosts excluded); stored offers (≤ 5000 most recent, not
+  company_ats) whose `apply_url` / `url` is an ATS (WTTJ excluded). Slugs are never guessed from a domain
+  (homonyms). kv **`company_ats:last:<board key>`** (ISO time of the last attempt) and **`company_ats:fail:<board
+  key>`** (consecutive failures): due again `refresh_delay` = `refresh_hours` × 2^failures (≤ 16×) after the last
+  attempt. `select_targets(repo, targets, limit, refresh_hours)` → never-read first, then oldest, but half of the cap
+  kept for re-reads; `mark_fetched` (offers or 404, resets failures) / `mark_failed`.
+- `sources/ats_reader.py`: `BoardReader(repo, fetcher_factory, refresh_hours, time_budget_s=900)` —
+  `read_all(targets, max_age_days)` (stops at the time budget), one board's errors never stop the others, kv writes
+  never raise (a locked database keeps what was read), ≤ 2 ATS followed from a careers page (under their own key).
+- `sources/zones.py`: `in_query_zone(job, query, locate=None)` — `raw.country_code` (WTTJ `office_country`) must be
+  the query's country; remote query → `remote is True`; foreign place → same country; else distance ≤ radius (offer
+  / known-city coordinates, then `locate` for unknown French places), else same department.
+- `sources/company_ats.py`: `CompanyATSSource(repo=None, *, profile=None, max_boards=80, client=None,
+  geocoder=None, wttj_source=None, refresh_hours=20)`, `from_context(ctx)`, `name="company_ats"`, always available.
+  First `search()` of a run reads the due boards (cap `max_ats_boards_per_run`), keeps developer titles (not senior
+  / sales) of the searched countries (FR + profile areas' countries); every query then yields the kept offers of its
+  zone and compatible contract (unknown contract kept) not given to an earlier query of the run. A French search
+  area without coordinates, and unknown French offer places, are geocoded (Géoplateforme, ≤ 40 per run).
+  `fetch_details`: SmartRecruiters / Workable detail, JSON-LD offer page (public address only); 404 → EXPIRED.
+  `registry.needs_details` completes a company_ats offer only while `raw.needs_details` and not `detail_fetched`.
+- `sources/jobspy_source.py`: `.venv-jobspy` found as `Scripts\python.exe` (Windows) or `bin/python(3)` (Linux);
+  `install_hint(os_name)` gives the matching `uv venv .venv-jobspy --python 3.12 && uv pip install --python
+  .venv-jobspy/bin/python python-jobspy` command in `available()`'s reason.
+- Tests: `tests/test_sources_adzuna_jooble.py`, `tests/test_sources_company_ats.py`,
+  `tests/test_sources_company_pages.py`, `tests/test_sources_new_integration.py`; fixtures
+  `tests/fixtures/sources_new/` (fictitious employers).
+
+## v6 — Night scraper (`night/`), priorities, sending ramp, hardened SearXNG
+
+Goal: use the idle server at night to fill the spontaneous queue with relevant companies + addresses; **nothing is
+ever sent at night**. The day campaign works through the queue by priority, under a sending ramp.
+
+- **Settings** (`config_sections.py`, re-exported by `config`): `NightSettings` (`settings.night`: `enabled`, `until`
+  "06:30", `extra_radius_km` 20 (≤ 50), `workers` 4, `max_llm_summaries` 80, `prepare_margin` 5, `retention_days`
+  365, `search_min_interval_s` 6, `max_search_queries` 300, `search_backoff_hours` 6), `SpontaneousRamp`
+  (`settings.limits.spontaneous_ramp`: `enabled`, `start` 20, `step_per_week` 5, `max` 40, `max_bounce_rate` 0.05;
+  `start ≤ max`), `parse_clock`; `Settings.search_engine_engines` (["bing"], comma string accepted).
+- **SearXNG** (`outreach/_searxng.py`): `SearxEngine` (frozen: base URL, engines, interval, daily budget, backoff,
+  repo) built by `engine_for(ctx)`; `searxng_search(client, engine | base_url | None, query)` sends `engines=`, one
+  query at a time per process ≥ interval + jitter (`_Polite`), counts kv **`searxng:queries:<date>`**, and when the
+  JSON's `unresponsive_engines` reports every wanted engine blocked (CAPTCHA / too many requests / access denied /
+  suspended, FR or EN) or the instance answers 429, sets kv **`searxng:backoff_until`** + **`searxng:last_backoff`**
+  (`{at, until, reason}`) and returns [] until then (callers fall back on Clearbit, slug + DNS + SIREN, Wikidata,
+  Brave). `emails.enrich_company` / `_nominative` pass `engine_for(ctx)`; a bare URL keeps the v4 behaviour.
+  `domains._DdgBreaker` and `_mailcheck.take_hunter_credit` are thread-safe; `http.HostThrottle` reserves the
+  slot under its lock and sleeps outside it (parallel workers on other hosts are not held up).
+- **Ramp** (`ramp.py`): `ramp_state(repo, limits, now=, apps=) -> RampState(cap, enabled, weeks, since, sent,
+  bounced, reset_due)` — weeks since max(first real spontaneous e-mail = `is_spontaneous` application, kv
+  **`ramp:spontaneous:reset_at`**); 7-day bounce rate > max → cap = start. `spontaneous_cap`, `describe` (French),
+  `check_reset(ctx)` (the only writer: kv + `notify(level="important")`, nothing in dry-run; called at the start of
+  the campaign). `Pacer.quota("spontaneous")` = the ramp (computed once per Pacer); disabled → `spontaneous_per_day`.
+  `selection.is_spontaneous` is re-exported from `ramp`.
+- **Priority** (`outreach/priority.py`): `company_priority(company, profile, repo, *, cfg=None, now=None) ->
+  (score 0-100, French reasons)` — sector bucket (core IT NAF `_registry.CORE_NAF` +30 / `relevance.sector_fit`
+  digital or consulting +15 / large +10), hiring signal < 60 days +25, best usable contact (`best_contact`:
+  recruitment/HR role +20, named HR/tech +15, learned-pattern guess +5, unverified guess -10), distance ≤ 20 km +10
+  / ≤ 40 km +5, 10-249 employees +10, profile skills in `raw.site_skills` (else description) +2 each ≤ 10; excluded
+  (contacted, blacklisted, irrelevant, rejected, excluded name, applied < 60 days) or no usable address → 0 (a
+  queued company scores ≥ 1). `potential()` (without contact: enrichment order), `ready_queue(ctx) ->
+  list[Ranked(company, score, reasons)]` (enriched/approved, relevant, score > 0; approved first, then priority,
+  then outreach score), `with_priority` (`raw.priority`, `raw.priority_reasons`, `raw.priority_at`).
+- **Relevance** (`outreach/relevance.py`): new rule 5b — a developer offer in `raw["hiring_signal"]`
+  (`dev_offer_title`, `is_dev_title`); `sector_fit(company, profile)`.
+- **Campaign** (`outreach/spontaneous.py`): candidates = bounce retries, then approved, then enriched **by priority
+  DESC** (then outreach score); `fresh_documents(repo, company_id, days=7)` (latest documents < 7 days with an
+  existing CV file) are reused instead of `prepare_documents` (approved / retry keep reusing documents of any age).
+- **Repository**: `update_company(company_id, change) -> Company | None` — atomic read-modify-write (`BEGIN
+  IMMEDIATE`, no other thread or process writes in between; `change(current)` returns the new version or None and
+  must not write itself). Every night write onto a company the day may touch (store merge, enrichment save,
+  priority, purge) goes through it and never undoes a status set meanwhile (contacted, approved…).
+- **Enrichment** (`outreach/emails.py`): `raw["source_urls"]` (address → page / `hunter` / `pattern:<source>`, GDPR
+  transparency), `raw["site_skills"]` (lexicon skills of the site text), `enrich_or_note_failure(ctx, company)`
+  (a company marked `raw["nominative_purged_at"]` is enriched with `allow_nominative` off and `drop_nominative`
+  applied: named contacts never come back; `companies.merge_company` never restores its leaders either).
+  `companies.py` exposes `fetch_registry_page(client, params, path="/search"|"/near_point")`, `merge_company`,
+  `lba_company`, `lba_location_ok`, `with_distance_score`. `llm.CappedLLM(inner, max_calls)`: fast model only, one
+  call at a time, `LLMError` beyond the cap.
+- **`night/`**: `run.run_night(ctx, *, budget_minutes=None) -> NightReport` (lock `data/night.lock` via
+  `pipeline.run_lock(ctx, lock_file, stale_s)`, stale only after the longest possible night + 2 h; `PipelineBusy`
+  when held). Steps (`run.STEPS`, each isolated, never started
+  after the deadline): `purge` (`purge.purge_personal_data`: named contacts / people / leaders of companies never
+  contacted, in the database for more than `retention_days`; dry-run counts only) → `harvest` (`harvest.harvest`:
+  `/near_point` around every French area with coordinates, radius + extra (≤ 50), NAF = profile full codes + IT list
+  + telecoms/72.19Z, every page (≤ 10 000 results, else one query per NAF), profile `min_headcount_code` applied
+  client-side; LBA recruiters for `ROMES_DEV`; `hiring.hiring_companies`; 35 % of the time, storing until the
+  final deadline) → `enrich` (`enrich.run_enrichment`: `new`, stale > 60 days `enriched`/`no_email`, `enriched`
+  without usable address; relevant only, most promising first; `run_parallel` on `workers` threads, one worker per
+  `domain_key`; `save_enriched` keeps a status the day set meanwhile; 75 % of what is left) → `prioritize`
+  (`prioritize.prioritize`: stores the priority of enriched/approved/pending_review companies when it changed) →
+  `prepare` (`prepare.prepare_ahead`: top `cap + prepare_margin` of `ready_queue`, `enriched` companies only — an
+  `approved` one keeps its reviewed documents — without fresh documents; none in dry-run) → report (`report.publish`: kv **`night:last_report`** `{at, summary, report}` except in dry-run +
+  `notify(level="important")`). `budget.py`: `night_end(until, start=, budget_minutes=)` (next `until` Paris time,
+  8 h at most for a manual run), `Deadline(end)` (`expired`, `remaining_s`, `share`), clock indirection `_now`.
+- `night/hiring.py`: stored offers (any status) with a developer title, a named employer (not anonymous / school /
+  sales), inside an area (distance ≤ radius + extra, else department) → `OfferGroup` per (normalised name,
+  country); French ones resolved with `/search?q=<name>&departement=` + rapidfuzz (`best_match`: ≥ 90, or ≥ 85 with
+  the offer's postal code / city, and ≥ 5 points ahead of any other SIREN), cached in kv
+  **`night:siren:<country>:<name>`** (`{siren, at}`; unresolved → retried after 30 days); Luxembourg → company
+  `stable_id("company", "lu", name)`, `source="offre_emploi"`, `raw.country`, website from the offer's
+  `company_domain`. Signals `raw.hiring_signal = [{title, source, date}]` (≤ 10, merged by `store.merge_signals`).
+- `night/store.py`: `combine` (one candidate per id), `merge_company` (registry merge + signals + website),
+  `store_candidates(ctx, candidates, deadline) -> HarvestResult` — relevance gate on the merged company (stored
+  waiting ones set aside), blacklist / excluded skipped, an `irrelevant` company made relevant (developer offer) is
+  reopened (`new`), unchanged ones not rewritten.
+- `night/models.py`: `HarvestResult`, `EnrichResult`, `PrepareResult`, `NightReport` (frozen: `companies_found`,
+  `companies_new`, `relevant`, `irrelevant`, `enriched`, `with_email`, `generic_emails`, `nominative_emails`,
+  `docs_prepared`, `queue_ready`, `daily_cap`, `purged`, `duration_min`, `stopped_early`, `dry_run`, `errors`,
+  `details`; `queue_days`, `summary()` = « Nuit : +X entreprises (Y pertinentes, N nouvelles), +Z adresses (dont N
+  nominatives), D dossiers prêts, file d'attente : Q entreprises ≈ J jours d'envoi »).
+- `night/status.py`: `status_lines(ctx)` (ramp, queue ≈ days, next night: companies to enrich (read only) and
+  documents to prepare, last night), `queue_rows(ctx, limit)` (dashboard), `last_report`, `searxng_health`,
+  `doctor_checks(ctx)` (« Nuit (collecte d'entreprises) », « SearXNG »).
+- **CLI / scheduling**: `jobbot night [--budget MINUTES] [--dry-run]` (exit 2 when busy); `jobbot status` prints
+  `status_lines`; `jobbot doctor` adds the night checks; `cli_support.FIELD_FR` labels the report. `cron.py`: job
+  `night` (`DEFAULT_TIMES["night"]` 00:30, `schedule install --nuit HH:MM`, only when `night.enabled`, never
+  `xvfb-run`, prefix `low_priority_prefix()` = `nice -n 10 ionice -c3 ` when available); Windows task
+  `jobbot-nuit` (`cli_tools.night_commands`, `schtasks /SC DAILY /ST`); `server_checks` expects it; deploy step 9
+  installs it through `jobbot schedule install`. Dashboard « Entreprises » page: « Nuit » section (last report,
+  status lines, queue by priority).
+- Tests: `tests/test_searxng_hardening.py`, `tests/test_ramp.py`, `tests/test_outreach_priority.py`,
+  `tests/test_night_harvest.py`, `tests/test_night_enrich.py`, `tests/test_night_run.py` (`tests/night_fakes.py`:
+  fictitious registry items / offers).

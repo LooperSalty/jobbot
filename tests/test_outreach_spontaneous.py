@@ -213,8 +213,10 @@ def test_company_level_dedup_blacklist_and_exclusion(live_ctx, make_company, doc
 
 
 def test_daily_quota_stops_the_campaign(live_ctx, make_company, docs_calls, sleeps):
+    limits = live_ctx.settings.limits
+    ramp_off = limits.spontaneous_ramp.model_copy(update={"enabled": False})  # fixed quota (ramp: test_ramp.py)
     ctx = dataclasses.replace(live_ctx, settings=live_ctx.settings.model_copy(update={
-        "limits": live_ctx.settings.limits.model_copy(update={"spontaneous_per_day": 1})}))
+        "limits": limits.model_copy(update={"spontaneous_per_day": 1, "spontaneous_ramp": ramp_off})}))
     _store(ctx, _company(make_company, "111111111", "Alpha", score=9), _company(make_company, "222222222", "Beta"))
     mailer = FakeMailer()
     report = run_spontaneous_campaign(ctx, mailer)

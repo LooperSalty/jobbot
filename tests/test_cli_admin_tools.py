@@ -58,5 +58,5 @@ def test_schedule_show_reports_missing_tasks(tmp_path, monkeypatch):
 
     monkeypatch.setattr(cli_tools, "run_command", missing)
     lines = cli_tools.run_schedule(tmp_path, "show", dry_run=False)
-    names = [*cli_tools.TASKS, cli_tools.CLASSROOM_TASK]
+    names = [*cli_tools.TASKS, cli_tools.NIGHT_TASK, cli_tools.CLASSROOM_TASK]
     assert lines == [f"{name} : non installée (lance « jobbot schedule install »)" for name in names]

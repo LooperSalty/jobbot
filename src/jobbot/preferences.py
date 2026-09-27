@@ -260,7 +260,8 @@ SETUP_QUESTIONS: tuple[Question, ...] = (
     Question("limits.email_applications_per_day", "Candidatures par e-mail (offres) max par jour", "int", SEC_AUTO),
     # --- Candidatures spontanées
     Question("limits.spontaneous_per_day", "Candidatures spontanées max par jour", "int", SEC_OUTREACH,
-             help="Commence à ~20/jour les 2 premières semaines (réputation Gmail)."),
+             help="Seulement si la montée progressive (limits.spontaneous_ramp : 20/jour, +5 par semaine, 40 max) "
+                  "est désactivée."),
     Question("outreach.allow_nominative", "Écrire aux personnes nommées (dirigeants, salariés) ?", "bool",
              SEC_OUTREACH),
     Question("outreach.allow_employee_search", "Chercher les RH / responsables techniques de l'entreprise ?", "bool",
@@ -296,6 +297,11 @@ SETUP_QUESTIONS: tuple[Question, ...] = (
     Question("LBA_API_TOKEN", "La Bonne Alternance — jeton API (optionnel)", "secret", SEC_ACCOUNTS),
     Question("HUNTER_API_KEY", "Hunter.io — clé API (optionnel)", "secret", SEC_ACCOUNTS),
     Question("BRAVE_API_KEY", "Brave Search — clé API (optionnel)", "secret", SEC_ACCOUNTS),
+    Question("ADZUNA_APP_ID", "Adzuna — Application ID (optionnel, offres d'emploi)", "secret", SEC_ACCOUNTS,
+             help="Gratuit : developer.adzuna.com → Register, puis Dashboard (Application ID et Application Key)."),
+    Question("ADZUNA_APP_KEY", "Adzuna — Application Key (optionnel)", "secret", SEC_ACCOUNTS),
+    Question("JOOBLE_API_KEY", "Jooble — clé API (optionnel, offres d'emploi)", "secret", SEC_ACCOUNTS,
+             help="Gratuite sur demande : fr.jooble.org/api/about (clé française ; chaque pays a sa propre clé)."),
     # --- Offres de l'école (Google Classroom)
     Question("classroom.enabled", "Surveiller les offres publiées par l'école sur Google Classroom ?", "bool",
              SEC_CLASSROOM),

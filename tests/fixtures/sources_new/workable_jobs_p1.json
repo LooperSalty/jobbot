@@ -1,0 +1,24 @@
+{
+  "total": 2,
+  "results": [
+    {
+      "id": 6100001,
+      "shortcode": "A1B2C3D4E5",
+      "title": "Développeur mobile Flutter",
+      "remote": true,
+      "location": {"country": "France", "countryCode": "FR", "city": "Metz", "region": "Grand Est"},
+      "locations": [{"country": "France", "countryCode": "FR", "city": "Metz", "region": "Grand Est", "hidden": false}],
+      "state": "published",
+      "isInternal": false,
+      "code": "",
+      "published": "2026-09-21T00:00:00.000Z",
+      "type": "full",
+      "language": "fr",
+      "department": ["Produit"],
+      "accountUid": "00000000-0000-0000-0000-000000000001",
+      "approvalStatus": "approved",
+      "workplace": "remote"
+    }
+  ],
+  "nextPage": "eyJvZmZzZXQiOjF9"
+}

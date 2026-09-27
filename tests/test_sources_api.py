@@ -291,7 +291,8 @@ def test_collect_jobs_builds_sources_and_queries(ctx, make_job, monkeypatch):
     monkeypatch.setattr(registry, "_instantiate", lambda _ctx, name: fakes.get(name) or FakeSource(name, ok=False))
     report = registry.collect_jobs(ctx)
     assert report.new == 1 and report.per_source == {"lba": 1}
-    assert report.errors["france_travail"] == "pas de clé" and len(report.errors) == 7
+    assert report.errors["france_travail"] == "pas de clé"
+    assert len(report.errors) == len(ctx.settings.search.sources) - 1  # every configured source but lba
 
 
 def test_ensure_details(ctx, make_job, monkeypatch):

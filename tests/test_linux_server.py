@@ -45,7 +45,7 @@ class FakeCrontab:
 def test_job_lines_follow_the_contract(tmp_path):
     root = Path("/home/jobuser/jobbot")
     jobs = cron.build_jobs(root, Settings(), exe="/home/jobuser/jobbot/.venv/bin/jobbot", path_env="/usr/bin:/bin")
-    assert [j.name for j in jobs] == ["run", "soir", "classroom"]
+    assert [j.name for j in jobs] == ["run", "soir", "classroom", "night"]
     run = jobs[0].line()
     assert run == ("30 9 * * * cd /home/jobuser/jobbot && PATH=/usr/bin:/bin flock -n /tmp/jobbot-run.lock "
                    "/home/jobuser/jobbot/.venv/bin/jobbot run >> /home/jobuser/jobbot/data/logs/cron.log 2>&1 "
@@ -55,7 +55,7 @@ def test_job_lines_follow_the_contract(tmp_path):
     with_screen = cron.build_jobs(root, Settings(), {"run": "08:05"}, xvfb=True, exe="jobbot", path_env="/bin")
     assert with_screen[0].schedule == "5 8 * * *" and "jobbot-run.lock xvfb-run -a jobbot run" in with_screen[0].command
     off = Settings(classroom={"enabled": False})
-    assert [j.name for j in cron.build_jobs(root, off, exe="jobbot", path_env="/bin")] == ["run", "soir"]
+    assert [j.name for j in cron.build_jobs(root, off, exe="jobbot", path_env="/bin")] == ["run", "soir", "night"]
     assert cron.job_command(Path("/srv/j%b"), "run", xvfb=False, exe="jobbot", path_env="/bin",
                             logs=Path("/srv/logs")).count(r"\%") == 1  # % is a newline for cron
     with pytest.raises(ValueError):
@@ -78,19 +78,19 @@ def test_cron_path_puts_local_bin_first():
 def test_install_keeps_other_lines_and_is_idempotent(project_root):
     crontab = FakeCrontab()
     lines = cron.run_cron(project_root, "install", dry_run=False, runner=crontab)
-    assert lines[0].startswith("Crontab : 3 tâche(s) jobbot installée(s) (2 autre(s) ligne(s) conservée(s))")
+    assert lines[0].startswith("Crontab : 4 tâche(s) jobbot installée(s) (2 autre(s) ligne(s) conservée(s))")
     text = crontab.text
-    assert text.startswith(OTHER_LINES) and text.count("# jobbot:") == 3 and text.endswith("\n")
+    assert text.startswith(OTHER_LINES) and text.count("# jobbot:") == 4 and text.endswith("\n")
     assert (project_root / "data" / "logs").is_dir()
     cron.run_cron(project_root, "install", dry_run=False, runner=crontab)
     assert crontab.writes == 1 and crontab.text == text  # same content: not rewritten
     changed = cron.run_cron(project_root, "install", dry_run=False, runner=crontab, times={"run": "08:00"})
-    assert crontab.writes == 2 and "0 8 * * *" in crontab.text and crontab.text.count("# jobbot:") == 3
+    assert crontab.writes == 2 and "0 8 * * *" in crontab.text and crontab.text.count("# jobbot:") == 4
     assert any(line.startswith("run : 0 8 * * *") for line in changed)
     shown = cron.run_cron(project_root, "show", dry_run=False, runner=crontab)
-    assert shown[0].startswith("run : installée — 0 8 * * *") and len(shown) == 3
+    assert shown[0].startswith("run : installée — 0 8 * * *") and len(shown) == 4
     removed = cron.run_cron(project_root, "remove", dry_run=False, runner=crontab)
-    assert "3 tâche(s) jobbot supprimée(s)" in removed[0] and crontab.text == OTHER_LINES
+    assert "4 tâche(s) jobbot supprimée(s)" in removed[0] and crontab.text == OTHER_LINES
     assert cron.run_cron(project_root, "remove", dry_run=False, runner=crontab) == [
         "Crontab : aucune tâche jobbot à supprimer"]
     assert cron.run_cron(project_root, "show", dry_run=False, runner=crontab)[0].startswith("run : non installée")
@@ -100,7 +100,7 @@ def test_install_on_empty_crontab_and_dry_run(project_root):
     crontab = FakeCrontab(text=None)
     preview = cron.run_cron(project_root, "install", dry_run=True, runner=crontab)
     assert preview[0] == "[simulation] crontab après installation :" and crontab.writes == 0
-    assert sum("# jobbot:" in line for line in preview) == 3
+    assert sum("# jobbot:" in line for line in preview) == 4
     cron.run_cron(project_root, "install", dry_run=False, runner=crontab)
     assert crontab.text.splitlines()[0].endswith("# jobbot:run")
 
@@ -113,7 +113,7 @@ def test_install_on_empty_crontab_and_dry_run(project_root):
 def test_schedule_cli_uses_cron_on_linux(run_cli_linux, project_root):
     invoke, crontab = run_cli_linux
     out = invoke("schedule", "install", "--matin", "08:15")
-    assert out.exit_code == 0 and "Crontab : 3 tâche(s)" in out.output and "15 8 * * *" in crontab.text
+    assert out.exit_code == 0 and "Crontab : 4 tâche(s)" in out.output and "15 8 * * *" in crontab.text
     assert "run : installée" in invoke("schedule", "show").output
     assert "supprimée" in invoke("schedule", "remove").output and "# jobbot:" not in crontab.text
 

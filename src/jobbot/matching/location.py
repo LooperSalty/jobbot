@@ -33,7 +33,8 @@ UNKNOWN_SCORE = 0.5
 VAGUE_REGION_PENALTY = 10.0  # points off the total score: « Grand Est » for a Metz search
 COUNTRY_ONLY_PENALTY = 15.0  # « France » / no place at all, remote unknown
 # Sources whose ``remote=True`` means full remote (France Travail / LBA / Indeed also flag hybrid work).
-FULL_REMOTE_FLAG_SOURCES = frozenset({"linkedin", "hellowork", "wttj", "apec", "free_work"})
+FULL_REMOTE_FLAG_SOURCES = frozenset({"linkedin", "hellowork", "wttj", "apec", "free_work", "adzuna", "jooble",
+                                      "company_ats"})
 
 
 @dataclass(frozen=True)

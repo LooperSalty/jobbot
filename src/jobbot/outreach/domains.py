@@ -14,6 +14,7 @@ import logging
 import random
 import re
 import socket
+import threading
 import time
 import unicodedata
 from collections.abc import Callable
@@ -28,7 +29,7 @@ from jobbot.config import Profile, Secrets
 from jobbot.http import HostThrottle, make_client, request_with_retry
 from jobbot.models import Company
 from jobbot.outreach._geocode import GEOCODE_URL, geocode_address  # noqa: F401
-from jobbot.outreach._searxng import searxng_search
+from jobbot.outreach._searxng import SearxEngine, searxng_search
 
 log = logging.getLogger(__name__)
 
@@ -280,16 +281,18 @@ class _DdgBreaker:
         self.last = 0.0
         self.blocked_until = 0.0
         self.count = 0
+        self._lock = threading.Lock()  # parallel enrichment workers (« jobbot night ») queue here
 
     def allowed(self) -> bool:
         return time.monotonic() >= self.blocked_until and self.count < DDG_MAX_PER_RUN
 
     def wait_turn(self) -> None:
-        delay = self.last + DDG_MIN_INTERVAL_S + random.uniform(0, 5) - time.monotonic()
-        if self.last and delay > 0:
-            _sleep(delay)
-        self.last = time.monotonic()
-        self.count += 1
+        with self._lock:
+            delay = self.last + DDG_MIN_INTERVAL_S + random.uniform(0, 5) - time.monotonic()
+            if self.last and delay > 0:
+                _sleep(delay)
+            self.last = time.monotonic()
+            self.count += 1
 
     def trip(self) -> None:
         self.blocked_until = time.monotonic() + DDG_BLOCK_S
@@ -315,7 +318,8 @@ def _ddg(client: httpx.Client, query: str) -> list[str]:
 
 
 def _providers(
-    company: Company, names: list[str], secrets: Secrets | None, contact: str | None, search_url: str | None = None,
+    company: Company, names: list[str], secrets: Secrets | None, contact: str | None,
+    search_url: SearxEngine | str | None = None,
 ) -> list[tuple[str, bool, Callable]]:
     """(method, costly, fetch(client) -> domains). Costly ones are skipped once a name match exists."""
     query = f"{names[0]} {company.city}".strip()
@@ -342,10 +346,10 @@ def _providers(
 
 def find_domain_verified(
     company: Company, *, client: httpx.Client | None = None, secrets: Secrets | None = None,
-    contact: str | None = None, search_url: str | None = None,
+    contact: str | None = None, search_url: SearxEngine | str | None = None,
 ) -> DomainMatch | None:
     """Best verified domain with its confidence, or None. ``contact``: see :func:`profile_contact`;
-    ``search_url``: SearXNG base URL (``settings.search_engine_url``), tried before Brave / DuckDuckGo."""
+    ``search_url``: SearXNG (``_searxng.engine_for(ctx)``, or a bare base URL), tried before Brave / DuckDuckGo."""
     names = company_names(company)
     own = client is None
     http = client or make_client()
@@ -377,7 +381,7 @@ def find_domain_verified(
 
 def find_domain(
     company: Company, *, client: httpx.Client | None = None, secrets: Secrets | None = None,
-    contact: str | None = None, search_url: str | None = None,
+    contact: str | None = None, search_url: SearxEngine | str | None = None,
 ) -> str | None:
     """Verified website domain of ``company`` (SIREN on the site, else strong name match), or None."""
     match = find_domain_verified(company, client=client, secrets=secrets, contact=contact, search_url=search_url)

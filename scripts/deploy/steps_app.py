@@ -169,7 +169,8 @@ def step_init(dep: Deployment) -> None:
 
 
 def step_schedule(dep: Deployment) -> None:
-    dep.title(9, "Tâches planifiées (cron) : run 09:30, réponses + relances 18:00, Classroom")
+    dep.title(9, "Tâches planifiées (cron) : run 09:30, réponses + relances 18:00, Classroom, nuit 00:30 "
+                 "(collecte, priorité basse)")
     result = dep.user_ssh(tpl.jobbot_script("schedule install"), "jobbot schedule install", check=False)
     codes = _print_jobbot(dep, result.out)
     if codes.get("EXIT_0", "0") != "0" and not dep.dry_run:
@@ -210,7 +211,8 @@ def step_dashboard(dep: Deployment) -> None:
 
 def step_summary(dep: Deployment) -> None:
     dep.title(11, "Résumé")
-    dep.say("jobbot est installé sur le serveur : ~/jobbot (code), cron (run 09:30, réponses 18:00, Classroom), "
+    dep.say("jobbot est installé sur le serveur : ~/jobbot (code), cron (run 09:30, réponses 18:00, Classroom, "
+            "nuit 00:30), "
             "tableau de bord en service.")
     for note in dep.notes:
         dep.say(f"• {note}")

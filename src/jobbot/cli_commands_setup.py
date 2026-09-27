@@ -192,11 +192,26 @@ def status(ctx: typer.Context) -> None:
     state = state_of(ctx)
     for table in status_tables(state.app):
         state.console.print(table)
+    _night_status(state)
     for job_status, title in ((JobStatus.PENDING_REVIEW, "À valider (jobbot approve / reject)"),
                               (JobStatus.NEEDS_MANUAL, "À finir à la main (jobbot assist)")):
         jobs = state.app.repo.list_jobs(job_status, limit=10)
         if jobs:
             state.console.print(jobs_table(jobs, title))
+
+
+def _night_status(state: State) -> None:
+    """Sending ramp, ready queue and night work (never blocks the status)."""
+    from jobbot.night.status import status_lines
+
+    try:
+        lines = status_lines(state.app)
+    except Exception as exc:  # the tables above are what matters
+        log.warning("État de la nuit indisponible : %s", exc)
+        return
+    state.console.print("[bold]Candidatures spontanées et nuit[/]")
+    for line in lines:
+        state.console.print(f"  • {escape(line)}")
 
 
 def export(
@@ -237,13 +252,15 @@ def schedule_install(
     ctx: typer.Context,
     morning: Annotated[str, typer.Option("--matin", help="Heure du lancement complet (HH:MM).")] = "09:30",
     evening: Annotated[str, typer.Option("--soir", help="Heure boîte mail + relances (HH:MM).")] = "18:00",
+    night: Annotated[str, typer.Option("--nuit", help="Heure de la collecte de nuit (HH:MM).")] = "00:30",
 ) -> None:
-    """Crée les tâches planifiées (Windows : jobbot-matin, jobbot-soir, jobbot-classroom ; Linux : crontab)."""
+    """Crée les tâches planifiées (Windows : jobbot-matin, jobbot-soir, jobbot-classroom, jobbot-nuit ; Linux :
+    crontab)."""
     state = state_of(ctx)
-    bad = [t for t in (morning, evening) if not _TIME_RE.match(t)]
+    bad = [t for t in (morning, evening, night) if not _TIME_RE.match(t)]
     if bad:
         fail(state.console, f"Heure invalide : {', '.join(bad)} (format HH:MM)")
-    _schedule(state, "install", {"jobbot-matin": morning, "jobbot-soir": evening})
+    _schedule(state, "install", {"jobbot-matin": morning, "jobbot-soir": evening, "jobbot-nuit": night})
 
 
 def schedule_remove(ctx: typer.Context) -> None:
@@ -263,7 +280,8 @@ def _schedule(state: State, action: str, times: dict[str, str] | None = None) ->
 
     kind = scheduler_kind()
     if kind == "cron":
-        cron_times = {"run": (times or {}).get("jobbot-matin", ""), "soir": (times or {}).get("jobbot-soir", "")}
+        cron_times = {"run": (times or {}).get("jobbot-matin", ""), "soir": (times or {}).get("jobbot-soir", ""),
+                      "night": (times or {}).get("jobbot-nuit", "")}
         lines = run_cron(state.root, action, dry_run=state.dry_run, times=cron_times)
     elif kind == "windows" or state.dry_run:
         lines = run_schedule(state.root, action, dry_run=state.dry_run, times=times)

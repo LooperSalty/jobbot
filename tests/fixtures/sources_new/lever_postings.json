@@ -1,0 +1,74 @@
+[
+  {
+    "additionalPlain": "Avantages : tickets restaurant, mutuelle, 2 jours de télétravail par semaine.",
+    "additional": "<div>Avantages : tickets restaurant, mutuelle, 2 jours de télétravail par semaine.</div>",
+    "categories": {"commitment": "Alternance", "department": "Tech", "location": "Metz", "team": "Produit",
+                   "allLocations": ["Metz"]},
+    "createdAt": 1758520800000,
+    "descriptionPlain": "Acme Logiciels édite des logiciels de gestion pour les PME du Grand Est. Tu rejoins l'équipe produit pour développer notre application web.",
+    "description": "<div>Acme Logiciels édite des logiciels de gestion pour les PME du Grand Est.</div>",
+    "id": "3f2a9c10-0b1e-4c7d-9a55-5d1f2e3a4b01",
+    "lists": [
+      {"text": "Tes missions", "content": "<li>Développer des fonctionnalités React / Node.js</li><li>Écrire des tests</li>"},
+      {"text": "Ton profil", "content": "<li>Bac+3 en informatique, alternance de 24 mois</li>"}
+    ],
+    "text": "Développeur Full-Stack (alternance)",
+    "country": "FR",
+    "workplaceType": "hybrid",
+    "opening": "",
+    "openingPlain": "",
+    "descriptionBody": "",
+    "descriptionBodyPlain": "",
+    "hostedUrl": "https://jobs.lever.co/acme-logiciels/3f2a9c10-0b1e-4c7d-9a55-5d1f2e3a4b01",
+    "applyUrl": "https://jobs.lever.co/acme-logiciels/3f2a9c10-0b1e-4c7d-9a55-5d1f2e3a4b01/apply"
+  },
+  {
+    "categories": {"commitment": "CDI", "department": "Tech", "location": "Lyon", "team": "Plateforme",
+                   "allLocations": ["Lyon"]},
+    "createdAt": 1758434400000,
+    "descriptionPlain": "Poste en télétravail complet depuis la France. Python, Django, PostgreSQL.",
+    "id": "8c1d2e3f-4a5b-6c7d-8e9f-0a1b2c3d4e02",
+    "lists": [],
+    "text": "Développeur Python",
+    "country": "FR",
+    "workplaceType": "remote",
+    "hostedUrl": "https://jobs.lever.co/acme-logiciels/8c1d2e3f-4a5b-6c7d-8e9f-0a1b2c3d4e02",
+    "applyUrl": "https://jobs.lever.co/acme-logiciels/8c1d2e3f-4a5b-6c7d-8e9f-0a1b2c3d4e02/apply"
+  },
+  {
+    "categories": {"commitment": "CDI", "department": "Tech", "location": "Metz", "team": "Plateforme"},
+    "createdAt": 1758434400000,
+    "descriptionPlain": "10 ans d'expérience minimum.",
+    "id": "a0a0a0a0-1111-2222-3333-444444444403",
+    "lists": [],
+    "text": "Senior Backend Engineer",
+    "country": "FR",
+    "workplaceType": "onsite",
+    "hostedUrl": "https://jobs.lever.co/acme-logiciels/a0a0a0a0-1111-2222-3333-444444444403",
+    "applyUrl": "https://jobs.lever.co/acme-logiciels/a0a0a0a0-1111-2222-3333-444444444403/apply"
+  },
+  {
+    "categories": {"commitment": "CDI", "department": "Sales", "location": "Metz"},
+    "createdAt": 1758434400000,
+    "descriptionPlain": "Développer le portefeuille clients.",
+    "id": "b0b0b0b0-1111-2222-3333-444444444404",
+    "lists": [],
+    "text": "Account Executive",
+    "country": "FR",
+    "workplaceType": "onsite",
+    "hostedUrl": "https://jobs.lever.co/acme-logiciels/b0b0b0b0-1111-2222-3333-444444444404",
+    "applyUrl": "https://jobs.lever.co/acme-logiciels/b0b0b0b0-1111-2222-3333-444444444404/apply"
+  },
+  {
+    "categories": {"commitment": "Full-time", "department": "Tech", "location": "Berlin"},
+    "createdAt": 1758434400000,
+    "descriptionPlain": "Frontend in Berlin.",
+    "id": "c0c0c0c0-1111-2222-3333-444444444405",
+    "lists": [],
+    "text": "Frontend Developer",
+    "country": "DE",
+    "workplaceType": "onsite",
+    "hostedUrl": "https://jobs.lever.co/acme-logiciels/c0c0c0c0-1111-2222-3333-444444444405",
+    "applyUrl": "https://jobs.lever.co/acme-logiciels/c0c0c0c0-1111-2222-3333-444444444405/apply"
+  }
+]

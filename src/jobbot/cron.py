@@ -7,11 +7,13 @@ Every managed line ends with the marker ``# jobbot:<name>``; every other line of
 | ``run``       | daily at --matin (09:30)                                    | ``jobbot run``                           |
 | ``soir``      | daily at --soir (18:00)                                     | ``jobbot run --step inbox --step followup`` |
 | ``classroom`` | every ``classroom.poll_minutes`` within ``classroom.active_hours`` | ``jobbot classroom watch --once``   |
+| ``night``     | daily at --nuit (00:30), when ``night.enabled``             | ``jobbot night``                         |
 
 Line: ``cd <root> && PATH=… flock -n /tmp/jobbot-<name>.lock [xvfb-run -a] <root>/.venv/bin/jobbot <cmd> >>
 <root>/data/logs/cron.log 2>&1 # jobbot:<name>`` — ``xvfb-run -a`` only when available and ``settings.headless``
-is false (virtual screen for a visible browser). Cron uses the server's local time: it should be Europe/Paris.
-The watcher checks ``classroom.active_hours`` itself, so the hour range of its line may be approximate.
+is false (virtual screen for a visible browser). The night job never opens a visible browser and runs with a low
+CPU / disk priority (``nice -n 10 ionice -c3`` when available). Cron uses the server's local time: it should be
+Europe/Paris. The watcher checks ``classroom.active_hours`` itself, so the hour range of its line may be approximate.
 """
 
 from __future__ import annotations
@@ -34,9 +36,11 @@ from jobbot import clock
 log = logging.getLogger(__name__)
 
 MARKER = "# jobbot:"
-JOB_NAMES: tuple[str, ...] = ("run", "soir", "classroom")
-COMMANDS = {"run": "run", "soir": "run --step inbox --step followup", "classroom": "classroom watch --once"}
-DEFAULT_TIMES = {"run": "09:30", "soir": "18:00"}
+JOB_NAMES: tuple[str, ...] = ("run", "soir", "classroom", "night")
+COMMANDS = {"run": "run", "soir": "run --step inbox --step followup", "classroom": "classroom watch --once",
+            "night": "night"}
+DEFAULT_TIMES = {"run": "09:30", "soir": "18:00", "night": "00:30"}
+LOW_PRIORITY = "nice -n 10 ionice -c3 "  # night job: idle CPU and disk only
 LOCK_DIR = "/tmp"
 CRON_LOG = "cron.log"
 CRON_TIMEOUT_S = 30
@@ -112,16 +116,24 @@ def cron_path(env_path: str | None = None, home: Path | None = None) -> str:
     return ":".join(dict.fromkeys(e for e in entries if e.startswith("/") and "%" not in e))
 
 
-def job_command(root: Path, name: str, *, xvfb: bool, exe: str, path_env: str, logs: Path) -> str:
-    wrapper = "xvfb-run -a " if xvfb else ""
+def job_command(root: Path, name: str, *, xvfb: bool, exe: str, path_env: str, logs: Path,
+                low_priority: str = "") -> str:
+    wrapper = f"{low_priority}{'xvfb-run -a ' if xvfb else ''}"
     log_file = shlex.quote((logs / CRON_LOG).as_posix())
     command = (f"cd {shlex.quote(root.as_posix())} && PATH={shlex.quote(path_env)} "
                f"flock -n {LOCK_DIR}/jobbot-{name}.lock {wrapper}{exe} {COMMANDS[name]} >> {log_file} 2>&1")
     return command.replace("%", r"\%")  # « % » means newline in a crontab line
 
 
+def low_priority_prefix(which: Callable[[str], str | None] = shutil.which) -> str:
+    """``nice -n 10 ionice -c3 `` when both tools exist (Debian: coreutils + util-linux), else ``nice`` alone."""
+    if which("nice") and which("ionice"):
+        return LOW_PRIORITY
+    return "nice -n 10 " if which("nice") else ""
+
+
 def build_jobs(root: Path, settings: Any, times: dict[str, str] | None = None, *, xvfb: bool = False,
-               exe: str | None = None, path_env: str | None = None) -> list[CronJob]:
+               exe: str | None = None, path_env: str | None = None, low_priority: str = "") -> list[CronJob]:
     at = {**DEFAULT_TIMES, **{k: v for k, v in (times or {}).items() if v}}
     logs = root / settings.paths.logs_dir
     options = dict(xvfb=xvfb, exe=exe or jobbot_executable(root), path_env=path_env or cron_path(), logs=logs)
@@ -130,6 +142,9 @@ def build_jobs(root: Path, settings: Any, times: dict[str, str] | None = None, *
     if cfg.enabled:
         jobs.append(CronJob("classroom", classroom_schedule(cfg.poll_minutes, cfg.active_hours),
                             job_command(root, "classroom", **options)))
+    if settings.night.enabled:
+        night = {**options, "xvfb": False, "low_priority": low_priority}
+        jobs.append(CronJob("night", daily_schedule(at["night"]), job_command(root, "night", **night)))
     return jobs
 
 
@@ -199,7 +214,7 @@ def _install(root: Path, runner: Runner, current: str, *, dry_run: bool,
              times: dict[str, str] | None) -> list[str]:
     settings = _settings(root)
     xvfb = not settings.headless and shutil.which("xvfb-run") is not None
-    jobs = build_jobs(root, settings, times, xvfb=xvfb)
+    jobs = build_jobs(root, settings, times, xvfb=xvfb, low_priority=low_priority_prefix())
     lines = [_describe(job) for job in jobs]
     if not settings.headless and not xvfb:
         lines.append("xvfb-run absent : navigateur sans écran conseillé (headless: true dans "
@@ -227,10 +242,10 @@ def _remove(runner: Runner, current: str, *, dry_run: bool) -> list[str]:
     return [f"Crontab : {len(found)} tâche(s) jobbot supprimée(s) ({', '.join(found)}), autres lignes conservées"]
 
 
-def _show(current: str) -> list[str]:
+def _show(current: str, names: tuple[str, ...] = JOB_NAMES) -> list[str]:
     installed = {managed_name(line): line for line in current.splitlines() if managed_name(line)}
     lines = []
-    for name in JOB_NAMES:
+    for name in names:
         line = installed.get(name)
         if line is None:
             lines.append(f"{name} : non installée (lance « jobbot schedule install »)")

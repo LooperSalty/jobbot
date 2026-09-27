@@ -1,0 +1,53 @@
+{
+  "totalCount": 4,
+  "jobs": [
+    {
+      "title": "Développeur <b>web</b> PHP / Symfony en alternance",
+      "location": "Metz (57)",
+      "snippet": "&nbsp;...Rejoignez notre équipe en <b>alternance</b> pour développer nos applications Symfony et React...&nbsp;",
+      "salary": "",
+      "source": "hellowork.com",
+      "type": "Alternance",
+      "link": "https://fr.jooble.org/desc/-1234567890123456789?ckey=developpeur&rgn=-1&pos=1&p=1&jobAge=48&relb=100&brelb=100&bscr=1&scr=1",
+      "company": "Acme Logiciels",
+      "updated": "2026-09-22T00:00:00.0000000",
+      "id": -1234567890123456789
+    },
+    {
+      "title": "Développeur .NET C# H/F",
+      "location": "Nancy",
+      "snippet": "...Lorraine Digital recrute en CDI un développeur .NET (C#, Azure). Télétravail 2 jours par semaine...",
+      "salary": "35k - 42k €",
+      "source": "indeed.fr",
+      "type": "CDI",
+      "link": "https://fr.jooble.org/desc/5550001?ckey=developpeur&pos=2",
+      "company": "Lorraine Digital",
+      "updated": "2026-09-20T13:45:10.1234567",
+      "id": 5550001
+    },
+    {
+      "title": "Chargé de développement commercial",
+      "location": "Metz",
+      "snippet": "...Développez le chiffre d'affaires de l'agence...",
+      "salary": "",
+      "source": "jobboard.example",
+      "type": "CDI",
+      "link": "https://fr.jooble.org/desc/7770001",
+      "company": "Vendtout",
+      "updated": "2026-09-21T00:00:00.0000000",
+      "id": 7770001
+    },
+    {
+      "title": "Développeur Python",
+      "location": "Metz",
+      "snippet": "...offre ancienne...",
+      "salary": "",
+      "source": "jobboard.example",
+      "type": "",
+      "link": "https://fr.jooble.org/desc/8880001",
+      "company": "Ancienne Entreprise",
+      "updated": "2025-01-01T00:00:00.0000000",
+      "id": 8880001
+    }
+  ]
+}

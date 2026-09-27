@@ -18,7 +18,13 @@ limits:                  # quotas journaliers prudents (LinkedIn bannit les comp
   hellowork_per_day: 10
   lba_per_day: 20
   email_applications_per_day: 30
-  spontaneous_per_day: 20
+  spontaneous_per_day: 20  # utilisé seulement si la montée progressive ci-dessous est désactivée
+  spontaneous_ramp:        # spontanées : 20/jour, +5 par semaine depuis le premier envoi réel, 40 au plus ;
+    enabled: true          # retour à 20 (et notification) si plus de 5 % de rebonds sur 7 jours
+    start: 20
+    step_per_week: 5
+    max: 40
+    max_bounce_rate: 0.05
   followups_per_day: 10
   min_delay_s: 40
   max_delay_s: 140
@@ -36,10 +42,24 @@ followup:
   give_up_after_days: 30
 
 search:
-  sources: [lba, france_travail, linkedin, hellowork, indeed, wttj, free_work, apec]
+  sources: [lba, france_travail, linkedin, hellowork, indeed, wttj, free_work, apec, adzuna, jooble, company_ats]
   max_results_per_query: 100
   max_age_days: 30
   max_detail_fetches_per_run: 60  # annonces courtes complétées (page de l'offre) avant la notation, par exécution
+  max_ats_boards_per_run: 80      # pages carrières d'entreprises (Lever, Greenhouse, Teamtailor…) lues par exécution
+
+night:                     # « jobbot night » (0 h 30) : entreprises + adresses + dossiers du lendemain, rien n'est envoyé
+  until: "06:30"           # arrêt propre à cette heure (ou jobbot night --budget MINUTES)
+  extra_radius_km: 20      # ajouté au rayon de chaque zone (50 km au plus)
+  workers: 4               # recherches de contacts en parallèle (jamais deux à la fois sur le même site)
+  max_llm_summaries: 80    # résumés de sites par le modèle rapide, par nuit
+  prepare_margin: 5        # dossiers préparés pour le lendemain : plafond du jour + cette marge
+  retention_days: 365      # contacts nominatifs des entreprises jamais contactées supprimés après ce délai
+  search_min_interval_s: 6 # SearXNG : écart minimum entre deux requêtes (jour et nuit)
+  max_search_queries: 300  # SearXNG : requêtes par jour
+  search_backoff_hours: 6  # SearXNG laissé tranquille après un CAPTCHA / blocage de ses moteurs
+
+search_engine_engines: [bing]  # moteurs demandés à SearXNG (search_engine_url : settings.local.yaml du serveur)
 
 notify_jarvis: false     # annonce vocale des réponses/entretiens via Jarvis
 jarvis_script:           # chemin de ton jarvis_notify.py, ex. "C:/chemin/vers/jarvis_notify.py" (vide = désactivé)

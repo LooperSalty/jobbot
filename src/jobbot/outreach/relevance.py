@@ -15,7 +15,8 @@ Relevant when (first match wins):
    local establishments never hire a developer;
 4. consulting / engineering (70.22Z, 71.12B) under the Syntec agreement (IDCC 1486), or 70.22Z with ≥ 50 employees
    (IT consulting is often registered there);
-5. La Bonne Alternance lists a developer job among those it expects the company to hire for;
+5. La Bonne Alternance lists a developer job among those it expects the company to hire for, or the company
+   published a developer offer stored in the database (``raw["hiring_signal"]``, « jobbot night »);
 6. its name says IT (« … Informatique », « … Software », « … IT »), or — sector unknown — its name or description does.
 
 Otherwise irrelevant, with a French reason such as « secteur hors numérique (NAF 42.11Z, 10 à 19 salariés) ».
@@ -34,7 +35,8 @@ from jobbot.outreach._registry import SYNTEC_IDCC, TRANCHE_LABELS
 from jobbot.textutil import strip_accents, truncate
 
 __all__ = [
-    "IRRELEVANT_STATUS", "OFF_TARGET", "OPEN_STATUSES", "REASON_KEY", "headcount_min", "is_relevant_employer",
+    "IRRELEVANT_STATUS", "OFF_TARGET", "OPEN_STATUSES", "REASON_KEY", "dev_offer_title", "headcount_min",
+    "is_dev_title", "is_relevant_employer", "naf_key", "sector_fit", "set_aside_copy",
     "report_lines", "set_aside", "split_relevant", "sweep_review_queue",
 ]
 
@@ -65,6 +67,11 @@ _DEV_JOB = re.compile(
     r"developpeu\w* (?:web|informatique|logiciel|full|front|back|mobile|d'applications?|java|python|php)"
     r"|devops|programmeu|informaticien|data engineer"
     r"|(?:ingenieur|concepteur|analyste|chef de projet)\w*[^,;]{0,50}(?:informatique|logiciel|systemes d'information)"
+)
+_DEV_TITLE = re.compile(
+    r"developpeu|devops|programmeu|informaticien|full ?stack|front ?end|back ?end|logiciel|software|"
+    r"\bweb\b|\bdata\b|\bcloud\b|cyber|\bdev\b|concepteur d'applications?|ingenieur (?:etudes|logiciel|informatique|"
+    r"developpement|systemes?|reseaux?)"
 )
 _IT_WORDS = re.compile(
     r"informati|logiciel|software|\bdigital|(?<!commande )numerique|\bweb\b|\bdata\b|\besn\b|\bssii\b|cyber"
@@ -143,6 +150,29 @@ def _hires_developers(company: Company) -> bool:
     return any(_DEV_JOB.search(_fold(label)) for label in labels)
 
 
+def is_dev_title(title: str) -> bool:
+    """A software / IT job title (« Développeur React », « Ingénieur DevOps », « Data engineer »…)."""
+    folded = _fold(title)
+    return bool(folded) and bool(_DEV_JOB.search(folded) or _DEV_TITLE.search(folded))
+
+
+def dev_offer_title(company: Company) -> str | None:
+    """Title of a developer offer the company published (``raw["hiring_signal"]``), else None."""
+    for signal in company.raw.get("hiring_signal") or []:
+        title = str(signal.get("title") or "") if isinstance(signal, dict) else ""
+        if is_dev_title(title):
+            return title
+    return None
+
+
+def _recruits_developers(company: Company) -> str | None:
+    """Reason when LBA expects developer hires or the company published a developer offer."""
+    if _hires_developers(company):
+        return "La Bonne Alternance y prévoit des recrutements en développement"
+    offer = dev_offer_title(company)
+    return f"a publié une offre de développeur (« {truncate(offer, 60)} »)" if offer else None
+
+
 def _says_it(company: Company, *, sector_known: bool) -> bool:
     """IT name (always); IT name or description with looser words when the sector is unknown."""
     name = company.name or ""
@@ -152,6 +182,19 @@ def _says_it(company: Company, *, sector_known: bool) -> bool:
         return False
     text = _fold(f"{name}\n{company.description or ''}")
     return bool(_IT_WORDS.search(text) or _IT_LOOSE.search(text))
+
+
+def sector_fit(company: Company, profile: Profile) -> str | None:
+    """Sector rules of the gate alone: 'digital' (targeted / digital NAF or label), 'consulting', 'large' or None."""
+    code, label = (company.naf_code or "").strip(), (company.naf_label or "").strip()
+    key, size = naf_key(code), headcount_min(company)
+    if (key and _targeted(key, profile)) or _digital(key, label):
+        return "digital"
+    if _consulting(company, key, size):
+        return "consulting"
+    if _large(company, size) and key[:2] not in FIELD_DIVISIONS:
+        return "large"
+    return None
 
 
 def is_relevant_employer(company: Company, profile: Profile) -> tuple[bool, str]:
@@ -169,8 +212,9 @@ def is_relevant_employer(company: Company, profile: Profile) -> tuple[bool, str]
         return True, f"grande structure ({_size_text(company, size)}) : service informatique probable"
     if _consulting(company, key, size):
         return True, f"conseil / ingénierie ({sector}, {_size_text(company, size)})"
-    if _hires_developers(company):
-        return True, "La Bonne Alternance y prévoit des recrutements en développement"
+    recruits = _recruits_developers(company)
+    if recruits:
+        return True, recruits
     if not field and _says_it(company, sector_known=bool(key or label)):
         return True, "nom ou activité tournés vers le numérique"
     if key or label:
@@ -181,13 +225,20 @@ def is_relevant_employer(company: Company, profile: Profile) -> tuple[bool, str]
 # --------------------------------------------------------------------------- bookkeeping
 
 
-def set_aside(repo: Repository, company: Company, reason: str) -> Company:
-    """Status ``irrelevant`` (kept for the record, never contacted) for a company still waiting; others unchanged."""
+def set_aside_copy(company: Company, reason: str) -> Company | None:
+    """The ``irrelevant`` version of a company still waiting (None when it is not waiting)."""
     if company.status not in OPEN_STATUSES:
-        return company
-    updated = company.model_copy(update={
+        return None
+    return company.model_copy(update={
         "status": IRRELEVANT_STATUS, "raw": {**company.raw, REASON_KEY: truncate(reason, 300)},
     })
+
+
+def set_aside(repo: Repository, company: Company, reason: str) -> Company:
+    """Status ``irrelevant`` (kept for the record, never contacted) for a company still waiting; others unchanged."""
+    updated = set_aside_copy(company, reason)
+    if updated is None:
+        return company
     try:
         repo.upsert_company(updated)
     except Exception:  # the company is skipped anyway; it will be set aside on a later run

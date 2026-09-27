@@ -230,6 +230,32 @@ def run(
     _print_weekly(state.console, report.weekly)
 
 
+def night(
+    ctx: typer.Context,
+    budget: Annotated[int | None, typer.Option("--budget", min=0, help="Durée maximale en minutes (défaut : "
+                                                                      "jusqu'à night.until, 06:30).")] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Simulation : aucun dossier généré (rien n'est "
+                                                            "jamais envoyé la nuit).")] = False,
+) -> None:
+    """Nuit : collecte d'entreprises et d'adresses, priorités, dossiers du lendemain (aucun envoi)."""
+    import dataclasses
+
+    from jobbot.night.run import run_night
+    from jobbot.pipeline import PipelineBusy
+
+    state = state_of(ctx)
+    app = dataclasses.replace(state.app, dry_run=True) if dry_run and not state.app.dry_run else state.app
+    if app.dry_run:
+        state.console.print("[yellow]Mode simulation : aucun dossier généré (rien n'est envoyé la nuit).[/]")
+    try:
+        report = run_night(app, budget_minutes=budget)
+    except PipelineBusy as exc:
+        fail(state.console, str(exc), code=2)
+        return
+    print_report(state.console, "Nuit", report)
+    state.console.print(f"\n[bold]Bilan[/] : {escape(report.summary())}")
+
+
 def _print_weekly(console: Any, weekly: Any) -> None:
     """The weekly report written after the run (when due): its summary and file, or its error."""
     if weekly is None:

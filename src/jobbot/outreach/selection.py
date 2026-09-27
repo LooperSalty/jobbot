@@ -25,9 +25,10 @@ from jobbot import clock
 from jobbot.config import OutreachSettings
 from jobbot.context import AppContext
 from jobbot.db import Repository
-from jobbot.models import Application, ApplicationStatus, ApplyMethod, Company, ContactEmail
+from jobbot.models import Application, ApplicationStatus, Company, ContactEmail
 from jobbot.outreach._extract import ROLE_APPLY, ROLE_GENERIC, classify_email
 from jobbot.outreach.people import is_small_company
+from jobbot.ramp import is_spontaneous
 from jobbot.textutil import normalize_company
 
 CHANNEL = "spontaneous"
@@ -94,10 +95,6 @@ def sort_contacts(contacts: list[ContactEmail], *, small_company: bool = True) -
 
 
 # --------------------------------------------------------------------------- guess guardrails
-
-
-def is_spontaneous(app: Application) -> bool:
-    return app.method == ApplyMethod.EMAIL and app.job_id is None and app.company_id is not None
 
 
 def bounce_stats(apps: list[Application], days: int = BOUNCE_WINDOW_DAYS) -> tuple[int, int]:

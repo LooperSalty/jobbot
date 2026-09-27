@@ -14,6 +14,7 @@ import os
 import re
 import shutil
 import subprocess
+import threading
 from collections.abc import Callable
 from pathlib import Path
 from typing import Protocol, TypeVar
@@ -181,6 +182,24 @@ class FakeLLM(_JsonMixin):
 class DisabledLLM(_JsonMixin):
     def complete(self, prompt: str, *, system: str | None = None, fast: bool = False) -> str:
         raise LLMError("LLM désactivé (llm.provider = none)")
+
+
+class CappedLLM(_JsonMixin):
+    """Wraps a client for background work (« jobbot night »): fast model only, one call at a time (a small server
+    never runs several ``claude -p`` at once), at most ``max_calls`` calls — then ``LLMError`` (callers fall back)."""
+
+    def __init__(self, inner: LLMClient, max_calls: int):
+        self.inner = inner
+        self.max_calls = max(0, max_calls)
+        self.calls = 0
+        self._lock = threading.Lock()
+
+    def complete(self, prompt: str, *, system: str | None = None, fast: bool = False) -> str:
+        with self._lock:
+            if self.calls >= self.max_calls:
+                raise LLMError(f"quota d'appels au modèle atteint ({self.max_calls})")
+            self.calls += 1
+            return self.inner.complete(prompt, system=system, fast=True)
 
 
 def build_llm(settings: LLMSettings, secrets: Secrets) -> LLMClient:

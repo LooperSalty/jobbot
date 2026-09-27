@@ -33,23 +33,34 @@ SOURCE_SPECS: dict[str, tuple[str, str]] = {
     "wttj": ("jobbot.sources.wttj", "WelcomeToTheJungleSource"),
     "free_work": ("jobbot.sources.free_work", "FreeWorkSource"),
     "apec": ("jobbot.sources.apec", "ApecSource"),
+    "adzuna": ("jobbot.sources.adzuna", "AdzunaSource"),
+    "jooble": ("jobbot.sources.jooble", "JoobleSource"),
+    "company_ats": ("jobbot.sources.company_ats", "CompanyATSSource"),
 }
-SECRET_SOURCES = frozenset({"lba", "france_travail"})  # constructors take ctx.secrets
+SECRET_SOURCES = frozenset({"lba", "france_travail", "adzuna", "jooble"})  # constructors take ctx.secrets
+CONTEXT_SOURCES = frozenset({"company_ats"})  # built with ``cls.from_context(ctx)`` (repository, profile, settings)
 ALIASES = {
     "jobspy": "indeed", "la_bonne_alternance": "lba", "labonnealternance": "lba", "francetravail": "france_travail",
     "pole_emploi": "france_travail", "welcome_to_the_jungle": "wttj", "freework": "free_work",
+    "ats": "company_ats", "company_careers": "company_ats", "pages_carrieres": "company_ats",
 }
 DETAILS_MIN_CHARS = 400
-# Sources whose ``fetch_details`` completes a search card (Indeed via JobSpy already returns the full text).
-DETAIL_SOURCES = frozenset({"linkedin", "hellowork", "lba", "wttj", "apec", "free_work", "france_travail"})
+# Sources whose ``fetch_details`` completes a search card (Indeed via JobSpy already returns the full text;
+# Adzuna / Jooble only publish a snippet).
+DETAIL_SOURCES = frozenset({"linkedin", "hellowork", "lba", "wttj", "apec", "free_work", "france_travail",
+                            "company_ats"})
 MAX_ERROR_CHARS = 300
 # Politeness caps (queries per run) for scraped boards — docs/research: LinkedIn guest ≈ 9 keywords × 3 geos
 # a day, HelloWork "a handful of queries, page 1 only", Indeed via JobSpy a few searches. APIs are uncapped.
 # build_queries() is title-major, so the first queries cover every contract × location of the top titles.
-SOURCE_QUERY_BUDGET = {"linkedin": 27, "hellowork": 6, "indeed": 10, "apec": 18, "wttj": 27}
+# Keyed APIs with a request quota: Adzuna free plan ≈ 250 requests a day, Jooble quota set per key.
+SOURCE_QUERY_BUDGET = {"linkedin": 27, "hellowork": 6, "indeed": 10, "apec": 18, "wttj": 27, "adzuna": 24,
+                       "jooble": 10}
 # Sources able to search around a foreign location (Luxembourg track): LinkedIn/HelloWork geo ids, WTTJ
-# coordinates, Free-Work country keys, France Travail ``paysContinent``, Indeed (JobSpy) ``country_indeed``.
-FOREIGN_LOCATION_SOURCES = frozenset({"linkedin", "hellowork", "wttj", "free_work", "france_travail", "indeed"})
+# coordinates, Free-Work country keys, France Travail ``paysContinent``, Indeed (JobSpy) ``country_indeed``,
+# Adzuna country sites (skips countries it does not cover), company career boards (offers filtered by country).
+FOREIGN_LOCATION_SOURCES = frozenset({"linkedin", "hellowork", "wttj", "free_work", "france_travail", "indeed",
+                                      "adzuna", "company_ats"})
 _CONTRACT_WORDS = frozenset({
     "alternance", "alternant", "alternante", "apprenti", "apprentie", "apprentissage", "cdi", "cdd",
     "stage", "h/f", "f/h",
@@ -77,6 +88,8 @@ def _instantiate(ctx: AppContext, name: str) -> JobSource:
     """Import the source module lazily and build the source (ImportError/KeyError propagate)."""
     module_name, class_name = SOURCE_SPECS[name]
     cls = getattr(importlib.import_module(module_name), class_name)
+    if name in CONTEXT_SOURCES:
+        return cls.from_context(ctx)
     return cls(ctx.secrets) if name in SECRET_SOURCES else cls()
 
 
@@ -329,8 +342,12 @@ def ensure_details(ctx: AppContext, job: JobOffer) -> JobOffer:
 
 
 def needs_details(job: JobOffer) -> bool:
-    """Short description (search card) that the owning source can complete."""
-    return len(job.description or "") < DETAILS_MIN_CHARS and canonical_name(job.source) in DETAIL_SOURCES
+    """Short description (search card) that the owning source can complete (company career boards: only the
+    postings listed without their text, and only until their detail was read)."""
+    source = canonical_name(job.source)
+    if len(job.description or "") >= DETAILS_MIN_CHARS or source not in DETAIL_SOURCES:
+        return False
+    return source != "company_ats" or bool(job.raw.get("needs_details") and not job.raw.get("detail_fetched"))
 
 
 def complete_new_offers(ctx: AppContext) -> int:

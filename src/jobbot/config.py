@@ -13,9 +13,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from jobbot.config_sections import (  # noqa: F401
     ClassroomSettings,
     Frozen,
+    NightSettings,
     OutreachSettings,
     ReportSettings,
+    SpontaneousRamp,
     parse_active_hours,
+    parse_clock,
 )
 from jobbot.models import ContractType
 
@@ -182,7 +185,8 @@ class Limits(Frozen):
     hellowork_per_day: int = 10
     lba_per_day: int = 20
     email_applications_per_day: int = 30
-    spontaneous_per_day: int = 20
+    spontaneous_per_day: int = 20  # used when the ramp below is disabled
+    spontaneous_ramp: SpontaneousRamp = Field(default_factory=SpontaneousRamp)
     followups_per_day: int = 10
     min_delay_s: float = 40.0  # between two applications / emails
     max_delay_s: float = 140.0
@@ -207,12 +211,14 @@ class FollowupSettings(Frozen):
 class SearchSettings(Frozen):
     sources: list[str] = Field(
         default_factory=lambda: ["lba", "france_travail", "linkedin", "hellowork", "indeed", "wttj", "free_work",
-                                 "apec"]
+                                 "apec", "adzuna", "jooble", "company_ats"]
     )
     max_results_per_query: int = 100
     max_age_days: int = 30
     # « score » step: short offers (search cards) completed through their source before scoring, per run
     max_detail_fetches_per_run: int = Field(default=60, ge=0)
+    # « company_ats » source: company career boards (ATS job APIs / careers pages) read per run
+    max_ats_boards_per_run: int = Field(default=80, ge=0)
 
 
 _NTFY_TOPIC_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
@@ -243,6 +249,7 @@ class Settings(Frozen):
     outreach: OutreachSettings = Field(default_factory=OutreachSettings)
     reports: ReportSettings = Field(default_factory=ReportSettings)
     classroom: ClassroomSettings = Field(default_factory=ClassroomSettings)
+    night: NightSettings = Field(default_factory=NightSettings)
     paths: Paths = Field(default_factory=Paths)
     notify_jarvis: bool = False  # speak notifications through the local Jarvis TTS
     jarvis_script: str | None = None  # path to jarvis_notify.py (called as: python <script> --type tell "<msg>")
@@ -252,6 +259,7 @@ class Settings(Frozen):
     notify_telegram: bool = False  # Telegram bot (TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID in .env)
     notify_telegram_all: bool = False  # also « info » notifications (summaries); default: important / urgent only
     search_engine_url: str | None = None  # self-hosted SearXNG (JSON enabled), used before Brave / DuckDuckGo
+    search_engine_engines: list[str] = Field(default_factory=lambda: ["bing"])  # SearXNG « engines= » of every query
 
     @field_validator("notify_ntfy_topic", mode="before")
     @classmethod
@@ -273,6 +281,15 @@ class Settings(Frozen):
         if not re.match(r"^https?://[^\s/]+", url):
             raise ValueError(f"Adresse SearXNG invalide « {url} » (ex. http://127.0.0.1:8888)")
         return url
+
+    @field_validator("search_engine_engines", mode="before")
+    @classmethod
+    def _engine_names(cls, value: object) -> object:
+        """'bing, Brave' or a list → ['bing', 'brave'] (empty = every engine enabled on the instance)."""
+        if value is None:
+            return []
+        items = value.split(",") if isinstance(value, str) else value
+        return [str(v).strip().lower() for v in items if str(v).strip()] if isinstance(items, list) else value
 
 
 class Secrets(BaseSettings):
@@ -296,6 +313,9 @@ class Secrets(BaseSettings):
     claude_code_oauth_token: str | None = None  # « claude setup-token » (server): passed to « claude -p »
     telegram_bot_token: str | None = None  # notifications through a Telegram bot (never logged)
     telegram_chat_id: str | None = None
+    adzuna_app_id: str | None = None  # Adzuna job API (developer.adzuna.com), with adzuna_app_key
+    adzuna_app_key: str | None = None
+    jooble_api_key: str | None = None  # Jooble REST API, French key (fr.jooble.org/api/about)
 
     @field_validator(
         "france_travail_client_id", "france_travail_client_secret", "lba_api_token", "hunter_api_key",

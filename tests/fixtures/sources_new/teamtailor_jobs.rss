@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:tt="https://teamtailor.com/locations">
+  <channel>
+    <title>MOSELLE NUMERIQUE </title>
+    <description>NOS JOBS</description>
+    <link>https://moselle-numerique.teamtailor.com/jobs</link>
+    <item>
+      <title>Développeur Full-Stack (F/H)</title>
+      <description>&lt;h3&gt;Description du poste&lt;/h3&gt;&lt;p&gt;Poste basé à Metz – &lt;strong&gt;alternance&lt;/strong&gt; de 24 mois. Stack : Vue.js, Symfony, MySQL.&lt;/p&gt;</description>
+      <pubDate>Thu, 17 Sep 2026 16:06:01 +0200</pubDate>
+      <link>https://moselle-numerique.teamtailor.com/jobs/8400001-developpeur-full-stack-f-h</link>
+      <remoteStatus>hybrid</remoteStatus>
+      <guid>11111111-2222-3333-4444-555555555555</guid>
+      <tt:locations>
+        <tt:location>
+          <tt:name>Metz</tt:name>
+          <tt:address>1 Rue de l'Exemple</tt:address>
+          <tt:zip>57000</tt:zip>
+          <tt:city>Metz</tt:city>
+          <tt:country>France</tt:country>
+        </tt:location>
+      </tt:locations>
+      <tt:department>MOSELLE NUMERIQUE</tt:department>
+      <tt:role/>
+    </item>
+    <item>
+      <title>Ingénieur Commercial (F/H)</title>
+      <description>&lt;p&gt;Développement commercial.&lt;/p&gt;</description>
+      <pubDate>Thu, 17 Sep 2026 15:42:57 +0200</pubDate>
+      <link>https://moselle-numerique.teamtailor.com/jobs/8400002-ingenieur-commercial-f-h</link>
+      <remoteStatus>none</remoteStatus>
+      <guid>66666666-7777-8888-9999-000000000000</guid>
+      <tt:locations>
+        <tt:location>
+          <tt:name>Metz</tt:name>
+          <tt:zip>57000</tt:zip>
+          <tt:city>Metz</tt:city>
+          <tt:country>France</tt:country>
+        </tt:location>
+      </tt:locations>
+      <tt:department>MOSELLE NUMERIQUE</tt:department>
+    </item>
+  </channel>
+</rss>

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import re
+import threading
 import time
 from collections.abc import Callable
 
@@ -28,6 +29,7 @@ HUNTER_BASE = "https://api.hunter.io/v2"
 HUNTER_MAX_CONFIDENCE = 0.85
 VERIFIER_POLLS = 3
 HUNTER_MONTHLY_CAPS = {"search": 20, "verify": 40}  # free plan = 50 credits/month (verify = 0.5), keep a margin
+_CREDIT_LOCK = threading.Lock()  # parallel enrichment workers never overspend the budget
 
 
 def guess_patterns(
@@ -47,12 +49,13 @@ def guess_patterns(
 def take_hunter_credit(repo: Repository, kind: str) -> bool:
     """Reserve one Hunter call of ``kind`` (search | verify) in this month's budget (kv ``hunter_<kind>:YYYY-MM``)."""
     key = hunter_month_key(kind)
-    used = int(repo.kv_get(key, "0") or 0)
     cap = HUNTER_MONTHLY_CAPS[kind]
-    if used >= cap:
-        log.info("Budget Hunter mensuel (%s) atteint : %d/%d", kind, used, cap)
-        return False
-    repo.kv_set(key, str(used + 1))
+    with _CREDIT_LOCK:
+        used = int(repo.kv_get(key, "0") or 0)
+        if used >= cap:
+            log.info("Budget Hunter mensuel (%s) atteint : %d/%d", kind, used, cap)
+            return False
+        repo.kv_set(key, str(used + 1))
     return True
 
 

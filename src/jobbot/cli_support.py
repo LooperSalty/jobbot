@@ -70,6 +70,12 @@ FIELD_FR = {
     "new_posts": "Publications analysées", "offers": "Offres extraites", "simulated": "Simulées (--dry-run)",
     "deferred": "Reportées (nouvel essai)", "completed": "Annonces complétées avant notation",
     "irrelevant": "Hors cible (écartées)",
+    "companies_found": "Entreprises trouvées", "companies_new": "Nouvelles entreprises", "relevant": "Pertinentes",
+    "enriched": "Entreprises enrichies", "generic_emails": "Nouvelles adresses génériques",
+    "nominative_emails": "Nouvelles adresses nominatives", "docs_prepared": "Dossiers préparés",
+    "queue_ready": "File d'attente (prêtes)", "daily_cap": "Plafond d'envois spontanés / jour",
+    "purged": "Contacts nominatifs supprimés (rétention)", "duration_min": "Durée (min)",
+    "stopped_early": "Arrêt à l'heure prévue", "dry_run": "Simulation",
 }
 LIST_FIELDS = ("details", "updates", "errors")
 
