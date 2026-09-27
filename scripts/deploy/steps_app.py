@@ -198,6 +198,9 @@ def step_dashboard(dep: Deployment) -> None:
     if state and state != "active":
         dep.notes.append(f"Le service jobbot-dashboard est « {state} » : journalctl --user -u jobbot-dashboard.")
     if host == "127.0.0.1":
+        tunnel = dep.root_ssh(tpl.ssh_tunnel_script(dep.config.project_user), "Tunnel SSH du tableau de bord").out
+        if "TUNNEL_INVALID" in tunnel:
+            dep.notes.append("Autorisation du tunnel SSH refusée par sshd -t (config restaurée) : voir /etc/ssh.")
         dep.say(f"Tableau de bord sur le serveur en 127.0.0.1:{tpl.DASHBOARD_PORT} (jamais exposé au réseau).")
         dep.say("Depuis le PC : powershell -ExecutionPolicy Bypass -File scripts\\dashboard_serveur.ps1 "
                 f"(tunnel SSH), puis http://localhost:{tpl.DASHBOARD_PORT}")

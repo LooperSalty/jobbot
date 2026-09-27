@@ -291,3 +291,19 @@ echo "STATE=$(systemctl --user is-active {DASHBOARD_UNIT} || true)"
 
 def linger_script(user: str) -> str:
     return f"set -eu\nloginctl enable-linger {shlex.quote(user)}\necho LINGER_OK\n"
+
+
+TUNNEL_MARKER = "# jobbot : tunnel SSH vers le tableau de bord"
+
+
+def ssh_tunnel_script(user: str) -> str:
+    """Root: let the project account (only) open a local SSH tunnel to the dashboard port (only), even when a
+    hardening file forbids TCP forwarding globally. Validated with ``sshd -t`` before reloading; idempotent."""
+    block = (f"\n{TUNNEL_MARKER}, et seulement vers lui (127.0.0.1:{DASHBOARD_PORT})\n"
+             f"Match User {user}\n    AllowTcpForwarding local\n"
+             f"    PermitOpen 127.0.0.1:{DASHBOARD_PORT} localhost:{DASHBOARD_PORT}\n")
+    return (f"set -eu\nCFG=/etc/ssh/sshd_config\n"
+            f"if grep -qF {shlex.quote(TUNNEL_MARKER)} \"$CFG\"; then echo TUNNEL_ALREADY; exit 0; fi\n"
+            f"cp -a \"$CFG\" \"$CFG.bak-jobbot\"\nprintf '%s' {shlex.quote(block)} >> \"$CFG\"\n"
+            "if sshd -t; then systemctl reload ssh 2>/dev/null || systemctl reload sshd; echo TUNNEL_OK; "
+            "else cp -a \"$CFG.bak-jobbot\" \"$CFG\"; echo TUNNEL_INVALID; fi\n")

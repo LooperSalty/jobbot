@@ -268,3 +268,13 @@ def test_runner_contract():
     assert pkgs == ["libnss3", "fonts-liberation"] and "reboot" not in templates.apt_install_script(pkgs)
     assert steps_app.parse_remote_state(f"{'a' * 64}  ./x.json\nENV_PRESENT\n---SETTINGS_LOCAL---\nk: v\n") == (
         {"x.json": "a" * 64}, True, "k: v\n")
+
+
+def test_ssh_tunnel_script_is_scoped_idempotent_and_validated():
+    from scripts.deploy import templates as tpl
+
+    script = tpl.ssh_tunnel_script("jobuser")
+    assert "Match User jobuser" in script and "AllowTcpForwarding local" in script
+    assert f"PermitOpen 127.0.0.1:{tpl.DASHBOARD_PORT} localhost:{tpl.DASHBOARD_PORT}" in script
+    assert "TUNNEL_ALREADY" in script and "sshd -t" in script and "TUNNEL_INVALID" in script
+    assert "AllowTcpForwarding yes" not in script
