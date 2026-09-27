@@ -292,6 +292,15 @@ above are kept; additions:
   (**action_log `spontaneous/unverified_guess`**, written only for real sends) and paused while the spontaneous
   bounce rate over 30 days exceeds `max_bounce_rate` (report line « Info : adresses devinées en pause… »). A guess
   blocked by the cap/pause falls back to the next verified address, else the company waits (status unchanged).
+- `outreach/relevance.py` (new): **one relevance gate for every spontaneous target** (registry + « recruteurs LBA »),
+  `is_relevant_employer(company, profile) -> (bool, French reason)`. Relevant: NAF in `target.naf_codes` or digital
+  (62, 63.1, 58.2, 61, 72.19Z; LBA site hits have only the NAF *label*), ≥ 250 employees or ETI/GE (never for
+  field sectors: farming, extraction, construction 41-43, catering, temp work, cleaning), 70.22Z/71.12B under Syntec
+  (or 70.22Z ≥ 50), a developer job in LBA `rome_labels`/`keywords`, an IT name (or name/description when the
+  sector is unknown). Applied at discovery (not stored, `DiscoverReport.irrelevant`), enrichment, the LBA relay (stored
+  data, then the recruiter detail's `nafs`/`company.size`) and the e-mail campaign; waiting companies (and the
+  `pending_review` queue) get **status `irrelevant`** + `raw.irrelevant_reason`; counted in `CampaignReport.irrelevant`
+  and the daily summary (« N entreprise(s) hors cible écartée(s) »).
 - Bounce retry (`spontaneous`): candidates also include **`contacted` companies whose latest application is
   BOUNCED** and whose spontaneous attempts < `max_attempts_per_company` (60-day dedup otherwise unchanged). The next
   best address is used (bounced/blacklisted/already-used ones never), documents are reused, the new Application gets

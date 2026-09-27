@@ -2,7 +2,8 @@
 
 Source: ``recherche-entreprises.api.gouv.fr`` (keyless, 7 req/s per IP — we stay ≤ 4 req/s), sharded by
 department × NAF code, plus — when the LBA source module is available — La Bonne Alternance "recruteurs"
-(companies likely to hire apprentices). Result mapping lives in :mod:`jobbot.outreach._registry`.
+(companies likely to hire apprentices). Result mapping lives in :mod:`jobbot.outreach._registry`. Candidates
+outside the target (public works, HVAC… for a developer: :mod:`jobbot.outreach.relevance`) are never stored.
 """
 
 from __future__ import annotations
@@ -31,6 +32,7 @@ from jobbot.outreach._registry import (
     person_leaders,
     tranche_codes_from,
 )
+from jobbot.outreach.relevance import is_relevant_employer, set_aside
 from jobbot.textutil import normalize_company, stable_id
 
 __all__ = [
@@ -61,6 +63,7 @@ class DiscoverReport(BaseModel):
 
     found: int
     new: int
+    irrelevant: int = 0  # found but outside the target (not stored; already stored ones set aside)
     errors: list[str] = Field(default_factory=list)
 
 
@@ -223,6 +226,29 @@ def _store(repo: Repository, company: Company) -> bool:
     return False
 
 
+def _combined(companies: list[Company]) -> list[Company]:
+    """One candidate per company (same SIREN from several departments or sources), best-scored first and used as the
+    base, the others' details merged in before judging it: an LBA recruiter gets the registry's NAF and headcount."""
+    merged: dict[str, Company] = {}
+    for company in companies:
+        merged[company.id] = _merge(merged[company.id], company) if company.id in merged else company
+    return list(merged.values())
+
+
+def _off_target(ctx: AppContext, company: Company) -> str | None:
+    """French reason when ``company`` is outside the target; an already stored one still waiting is set aside."""
+    relevant, reason = is_relevant_employer(company, ctx.profile)
+    if relevant:
+        return None
+    try:
+        stored = ctx.repo.get_company(company.id)
+        if stored is not None:
+            set_aside(ctx.repo, stored, reason)
+    except Exception:
+        log.exception("Entreprise hors cible %s non marquée", company.name)
+    return reason
+
+
 def _from_lba(company: Company) -> Company:
     """Key LBA recruiters by SIREN (dedupe with the registry) and give them their bonus."""
     update: dict = {"raw": {**company.raw, SCORE_KEY: _score_of(company) + LBA_BONUS}}
@@ -307,19 +333,22 @@ def discover_companies(
     limit: int = 300,
 ) -> DiscoverReport:
     """Find companies to contact spontaneously and upsert them, best-scored first (existing companies keep
-    their status, contacts and domain). Blacklisted, excluded and too-distant companies are skipped."""
+    their status, contacts and domain). Companies outside the target (:mod:`jobbot.outreach.relevance`),
+    blacklisted, excluded and too-distant ones are skipped."""
     errors: list[str] = []
     nafs = list(naf_codes or ctx.profile.target.naf_codes or DEFAULT_NAF_CODES)
     candidates = _api_companies(ctx, nafs, _departments(ctx, departments), errors) + _lba_companies(ctx, errors)
     locations = list(ctx.profile.target.locations)
     scored = sorted((_with_distance_score(c, locations) for c in candidates), key=lambda c: -_score_of(c))
     accepted: set[str] = set()
-    new = geocoded = 0
-    for company in scored:
+    new = geocoded = irrelevant = 0
+    for company in _combined(scored):
         if len(accepted) >= limit:
             break
-        if company.id in accepted:
-            _store(ctx.repo, company)  # same SIREN from another source/department: merge extra info
+        off = _off_target(ctx, company)
+        if off:
+            irrelevant += 1
+            log.debug("Entreprise %s hors cible : %s", company.name, off)
             continue
         if company.latitude is None and company.address and geocoded < MAX_GEOCODE_PER_RUN:
             geocoded += 1
@@ -334,5 +363,5 @@ def discover_companies(
         except Exception as exc:
             log.exception("Enregistrement de %s impossible", company.name)
             errors.append(f"{company.name} : {exc}")
-    log.info("Découverte : %d entreprises retenues dont %d nouvelles", len(accepted), new)
-    return DiscoverReport(found=len(accepted), new=new, errors=errors)
+    log.info("Découverte : %d entreprises retenues dont %d nouvelles, %d hors cible", len(accepted), new, irrelevant)
+    return DiscoverReport(found=len(accepted), new=new, irrelevant=irrelevant, errors=errors)

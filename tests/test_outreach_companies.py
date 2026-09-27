@@ -199,15 +199,21 @@ def _install_lba(monkeypatch, recruiters=None, error: Exception | None = None):
     return calls
 
 
-def _lba_company(siren: str, name: str, lat: float = 49.11, lon: float = 6.17) -> Company:
+def _lba_company(siren: str, name: str, lat: float = 49.11, lon: float = 6.17, *,
+                 naf_label: str | None = "EDITION DE LOGICIELS APPLICATIFS", **fields) -> Company:
+    """LBA site recruiter: the NAF label (``activity_sector``) is all LBA gives about the sector."""
     return Company(id=f"lba-{siren}", name=name, siren=siren, city="Metz", latitude=lat, longitude=lon,
-                   source="lba_recruteur", found_at=clock.now(), raw={"hasEmail": True, "siret": siren + "00038"})
+                   naf_label=naf_label, source="lba_recruteur", found_at=clock.now(),
+                   raw={"hasEmail": True, "siret": siren + "00038"}, **fields)
 
 
 @respx.mock
 def test_discover_filters_dedupes_and_merges_lba(ctx, monkeypatch):
     route = respx.get(SEARCH_URL).mock(side_effect=_shard_responder(error_naf="63.12Z"))
-    lba_calls = _install_lba(monkeypatch, [_lba_company("519037253", "TRUSTTEAM"), _lba_company("788876522", "EFLUID")])
+    public_works = _lba_company("111222333", "TRAVAUX EXEMPLE TP", naf_code="42.11Z", naf_label="Construction de routes",
+                                headcount_range="10-19")
+    lba_calls = _install_lba(monkeypatch, [_lba_company("519037253", "TRUSTTEAM", naf_label=None),
+                                           _lba_company("788876522", "EFLUID"), public_works])
     ctx.repo.blacklist_add("YAAKADEV", "test")
 
     report = discover_companies(ctx)
@@ -215,14 +221,31 @@ def test_discover_filters_dedupes_and_merges_lba(ctx, monkeypatch):
     assert isinstance(report, DiscoverReport)
     assert route.call_count == len(ctx.profile.target.naf_codes) * len(ctx.profile.target.departments)
     stored = {c.siren: c for c in ctx.repo.list_companies()}
-    # YAAKADEV blacklisted, CYBERG (Stiring-Wendel, ~56 km) too far
+    # YAAKADEV blacklisted, CYBERG (Stiring-Wendel, ~56 km) too far, TRAVAUX EXEMPLE TP outside the target (never stored);
+    # TRUSTTEAM (no sector on LBA's side) is judged on the registry's NAF code once merged
     assert set(stored) == {"519037253", "345051684", "800065146", "788876522"}
-    assert report.found == 4 and report.new == 4
+    assert report.found == 4 and report.new == 4 and report.irrelevant == 1  # TRAVAUX EXEMPLE TP (found for both locations)
     assert len(report.errors) == 2 and all("63.12Z" in e for e in report.errors)  # one per department
     assert stored["519037253"].source == "lba_recruteur" and stored["519037253"].raw["hasEmail"] is True
     assert stored["788876522"].id == stable_id("company", "788876522")
     assert all(call[3] == list(ROMES_DEV) for call in lba_calls) and {c[2] for c in lba_calls} == {40, 25}
     assert stored["519037253"].raw["outreach_score"] > stored["800065146"].raw["outreach_score"]
+
+
+@respx.mock
+def test_discover_sets_aside_a_stored_company_found_off_target(ctx, monkeypatch):
+    respx.get(SEARCH_URL).mock(side_effect=_shard_responder())
+    found = _lba_company("111222333", "TRAVAUX EXEMPLE TP", naf_code="42.11Z", naf_label=None, headcount_range="10-19")
+    stored = found.model_copy(update={"id": stable_id("company", "111222333"), "status": "enriched",
+                                      "contacts": [ContactEmail(email="contact@travaux-exemple.fr", kind="generic")]})
+    ctx.repo.upsert_company(stored)
+    _install_lba(monkeypatch, [found])
+
+    report = discover_companies(ctx, naf_codes=["62.01Z"], departments=["57"])
+
+    again = ctx.repo.get_company(stored.id)
+    assert report.irrelevant == 1 and again.status == "irrelevant" and again.contacts  # kept for the record
+    assert again.raw["irrelevant_reason"] == "secteur hors numérique (NAF 42.11Z, 10-19 salariés)"
 
 
 @respx.mock

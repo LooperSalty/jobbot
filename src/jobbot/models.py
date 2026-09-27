@@ -133,7 +133,8 @@ class Company(Frozen):
     contacts: list[ContactEmail] = Field(default_factory=list)
     source: str = "recherche_entreprises"  # recherche_entreprises | lba_recruteur | manual
     found_at: datetime
-    status: str = "new"  # new | enriched | no_email | pending_review | approved | rejected | contacted | blacklisted
+    # new | enriched | no_email | pending_review | approved | rejected | contacted | blacklisted | irrelevant
+    status: str = "new"
     raw: dict[str, Any] = Field(default_factory=dict)
 
 

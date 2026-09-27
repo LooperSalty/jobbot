@@ -44,6 +44,7 @@ APP_STATUS_FR: dict[ApplicationStatus, str] = {
 COMPANY_STATUS_FR = {
     "new": "Nouvelle", "enriched": "Contact trouvé", "no_email": "Sans e-mail", "pending_review": "À valider",
     "approved": "Validée", "contacted": "Contactée", "rejected": "Écartée", "blacklisted": "Liste noire",
+    "irrelevant": "Hors cible",
 }
 EVENT_FR = {
     "applied": "Candidature envoyée", "followup_sent": "Relance envoyée", "manual_followup": "Relance à faire",
@@ -68,6 +69,7 @@ FIELD_FR = {
     "manual": "À faire à la main", "closed": "Closes", "posts": "Publications lues",
     "new_posts": "Publications analysées", "offers": "Offres extraites", "simulated": "Simulées (--dry-run)",
     "deferred": "Reportées (nouvel essai)", "completed": "Annonces complétées avant notation",
+    "irrelevant": "Hors cible (écartées)",
 }
 LIST_FIELDS = ("details", "updates", "errors")
 

@@ -41,6 +41,7 @@ from jobbot.outreach._extract import (
     scrape_emails,
 )
 from jobbot.outreach._mailcheck import guess_patterns, has_mx, hunter_domain_search
+from jobbot.outreach.relevance import split_relevant
 from jobbot.outreach.selection import usable
 
 __all__ = [
@@ -81,6 +82,7 @@ class EnrichReport(BaseModel):
     processed: int
     with_email: int
     without_email: int
+    irrelevant: int = 0  # « new » companies outside the target, set aside instead of being enriched
 
 
 # --------------------------------------------------------------------------- ranking
@@ -294,8 +296,10 @@ def _failed_attempt(company: Company, exc: Exception) -> Company:
 
 
 def enrich_companies(ctx: AppContext, *, limit: int = 50) -> EnrichReport:
-    """Enrich up to ``limit`` companies in status ``new`` (best-scored first). One failure never stops the batch."""
-    pending = sorted(ctx.repo.list_companies(status="new"), key=lambda c: -int(c.raw.get("outreach_score", 0)))
+    """Enrich up to ``limit`` companies in status ``new`` (best-scored first; those outside the target are set
+    aside instead). One failure never stops the batch."""
+    waiting = sorted(ctx.repo.list_companies(status="new"), key=lambda c: -int(c.raw.get("outreach_score", 0)))
+    pending, off = split_relevant(ctx.repo, ctx.profile, waiting)
     batch = pending[: max(0, limit)]
     with_email = 0
     for company in batch:
@@ -310,5 +314,7 @@ def enrich_companies(ctx: AppContext, *, limit: int = 50) -> EnrichReport:
             log.exception("Enregistrement de %s impossible", company.name)
             continue
         with_email += int(updated.status == "enriched")
-    log.info("Enrichissement : %d entreprises traitées, %d avec e-mail", len(batch), with_email)
-    return EnrichReport(processed=len(batch), with_email=with_email, without_email=len(batch) - with_email)
+    log.info("Enrichissement : %d entreprises traitées, %d avec e-mail, %d hors cible", len(batch), with_email,
+             len(off))
+    return EnrichReport(processed=len(batch), with_email=with_email, without_email=len(batch) - with_email,
+                        irrelevant=len(off))

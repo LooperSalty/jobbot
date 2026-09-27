@@ -1,7 +1,11 @@
 """Reply classification: deterministic FR/EN rules first, fast LLM as fallback.
 
 Order (research §5.12, §6.6): bounce → out-of-office → opt-out → rejection → scheduling (interview)
-→ acknowledgement/auto → interview → positive → info request → LLM → other.
+→ acknowledgement/auto → interview → vague refusal → positive → info request → LLM → other.
+Refusals: firm wording always wins; regrets (« malheureusement … candidature ») and « no opening » answers to a
+spontaneous application (« nous ne recrutons pas », « pas de poste à pourvoir », « nous ne prenons pas
+d'alternant ») only when no interview is proposed and the sentence is not conditional (« si aucun poste… »); vague
+wording (« malheureusement », « nous vous invitons à consulter… ») only when nothing else is in the message.
 Rules run on accent-free lower-case text, on the NEW part of the reply only (quotes stripped).
 """
 
@@ -39,19 +43,47 @@ UNSUBSCRIBE = _rx(
     r"supprim(er|ez) (mon|notre|nos) (adresse|donnees|coordonnees)",
     r"(do not|don't) (contact|e-?mail) (me|us)", r"remove (me|us|my address|our address) from",
 )
-REJECTION = _rx(
+_FIRM_REJECTION = (
     r"ne (pas |pouvons pas |pourrons pas |sommes pas en mesure de )?(pouvoir )?donner (une )?suite",
     r"pas (de |une )?suite favorable", r"(ne|n') ?(correspond|correspondent) pas", r"n'y a pas de suite",
     r"(poste|offre) (a ete |est )?(deja )?pourvu",
     r"(avons|avez) (retenu|choisi|selectionne) (une autre|un autre|d'autres)",
     r"n'(a|avons|ont) pas ete retenue?", r"pas (ete )?retenue?s? pour", r"ne (sera|seront) pas retenue?",
-    r"malheureusement[^.]{0,200}(candidature|profil|suite|retenu|poste|opportunite)",
     r"pas en mesure de (donner suite|retenir|poursuivre)", r"decide de ne pas (donner suite|poursuivre|retenir)",
     r"regret to inform", r"not (be )?moving forward", r"decided (not )?to (move|proceed) forward with other",
     r"decided to pursue other candidates", r"(will|have decided to) not (be )?(proceed|progress)",
     r"position has (already )?been filled", r"not been selected",
+)
+_REGRET = (
+    r"malheureusement[^.]{0,200}(candidature|profil|suite|retenu|poste|opportunite)",
     r"unfortunately[^.]{0,200}(application|position|profile)",
 )
+REJECTION = _rx(*_FIRM_REJECTION, *_REGRET)  # any refusal wording (platform notifications)
+FIRM_REJECTION = _rx(*_FIRM_REJECTION)
+REGRET = _rx(*_REGRET)
+# No opening at all (spontaneous applications): a refusal unless an interview is proposed or it is conditional.
+NO_OPENING = _rx(
+    r"(ne|n') ?recrut(ons|e|erons) (pas|plus|personne)", r"pas (en|de) (phase de |periode de )?recrutement",
+    r"pas (de |d')?(poste|offre|place)s? (a pourvoir|disponibles?|ouverte?s?|vacante?s?)",
+    r"(n'avons|n'aurons|ne disposons|n'ai) (pas|plus|aucun) (de |d')?(besoins?|postes?|places?)",
+    r"pas de besoins?\b", r"aucune? (poste|besoin|place|recrutement)s?\b",
+    r"ne (prenons|prendrons|recrutons|recruterons|accueillons|accueillerons|cherchons) pas d'(alternants?|apprentis?"
+    r"|stagiaires?|alternance)",
+    r"ne donnerons pas (de )?suite", r"(redirige|oriente)\w* vers d'autres",
+)
+# Vague wording: a refusal only when nothing else (interview, interest, question, absence) is in the message.
+SOFT_REJECTION = _rx(
+    r"\bmalheureusement\b", r"\bunfortunately\b", r"(nous|je) vous (invitons|invite) a (consulter|postuler|vous rendre)",
+    r"d'autres (plateformes|sites)", r"nous ne sommes pas en mesure", r"aucune offre",
+)
+# "entretien" that is no invitation: refused, or the one that already took place
+NOT_AN_INVITATION = _rx(
+    r"(pas|plus|aucun|sans) (d'|de |d'un |un |une )?(entretien|rendez-vous|rdv|interview)",
+    r"(suite a|apres|lors de) (notre|votre|cet|l') ?(entretien|echange|rendez-vous|rdv)",
+)
+CONDITIONAL = re.compile(r"\bsi\b|\bs'il|au cas ou|dans le cas|lorsque|sans reponse", re.IGNORECASE)
+_NEGATION = re.compile(r"\b(?:pas|plus|jamais|aucune?|sans|ne)\b|\bn'", re.IGNORECASE)
+_CLAUSE_END = re.compile(r"[,;:.!?\n]")
 INTERVIEW_STRONG = _rx(
     r"(vos|quelles sont vos|vos prochaines) disponibilites", r"\bcreneaux?\b", r"calendly", r"google meet",
     r"meet\.google", r"zoom\.us", r"microsoft teams", r"\bvisio",
@@ -147,6 +179,47 @@ def _header_rules(msg: InboundMessage, new_text: str) -> ReplyClassification | N
     return None
 
 
+def _asserted(pattern: re.Pattern[str], text: str) -> bool:
+    """A match outside a conditional sentence (« si aucun poste ne correspond, … » is no refusal)."""
+    for match in pattern.finditer(text):
+        start = max(text.rfind(mark, 0, match.start()) for mark in ".!?\n") + 1
+        if not CONDITIONAL.search(text[start:match.start()]):
+            return True
+    return False
+
+
+def _proposes_interview(text: str) -> bool:
+    """A scheduling cue that is not negated in its clause (« nous ne pouvons pas vous recevoir » proposes nothing)."""
+    for match in INTERVIEW_STRONG.finditer(text):
+        clause = _CLAUSE_END.split(text[max(0, match.start() - 40):match.start()])[-1]
+        if not _NEGATION.search(clause):
+            return True
+    return False
+
+
+def _interview_cues(text: str) -> bool:
+    """An interview is proposed or mentioned as upcoming (« pas d'entretien », « suite à notre entretien »: no)."""
+    weak = INTERVIEW_WEAK.search(text) and not NOT_AN_INVITATION.search(text)
+    return bool(_proposes_interview(text) or weak)
+
+
+def _refusal(folded: str) -> bool:
+    """Firm refusal wording; regrets and « no opening » answers only when no interview is proposed."""
+    if FIRM_REJECTION.search(folded):
+        return True
+    if _proposes_interview(folded):
+        return False
+    return bool(REGRET.search(folded) or _asserted(NO_OPENING, folded))
+
+
+def _soft_refusal(folded: str) -> bool:
+    """Vague wording (« malheureusement », « nous vous invitons à consulter… ») with no other signal."""
+    others = (POSITIVE, INFO_REQUEST, OOF_BODY)
+    if _interview_cues(folded) or any(p.search(folded) for p in others):
+        return False
+    return _asserted(SOFT_REJECTION, folded)
+
+
 def classify_by_rules(msg: InboundMessage) -> ReplyClassification | None:
     new_text = strip_quoted(msg.body_text)
     verdict = _header_rules(msg, new_text)
@@ -156,7 +229,7 @@ def classify_by_rules(msg: InboundMessage) -> ReplyClassification | None:
     # machines cannot opt out on someone's behalf (ATS footers carry "se désinscrire" links)
     if not msg.auto_submitted and UNSUBSCRIBE.search(folded):
         return _verdict("unsubscribe", new_text, 0.9)
-    if REJECTION.search(folded):
+    if _refusal(folded):
         return _verdict("rejection", new_text, 0.85)
     if ACKNOWLEDGEMENT.search(folded) and not SCHEDULING.search(folded):
         return _verdict("auto_reply", new_text, 0.8)
@@ -164,6 +237,8 @@ def classify_by_rules(msg: InboundMessage) -> ReplyClassification | None:
         return _verdict("interview", new_text, 0.85)
     if msg.auto_submitted:
         return _verdict("auto_reply", new_text, 0.75)
+    if _soft_refusal(folded):
+        return _verdict("rejection", new_text, 0.7)
     for category, pattern, confidence in (
         ("interview", INTERVIEW_WEAK, 0.7), ("positive", POSITIVE, 0.7), ("info_request", INFO_REQUEST, 0.7),
         ("auto_reply", OOF_BODY, 0.75),

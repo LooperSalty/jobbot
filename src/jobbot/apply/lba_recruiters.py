@@ -4,6 +4,8 @@ Research (docs/research/la-bonne-alternance.md §1.2-1.3, §3.3): for companies 
 relays a « candidature spontanée » by e-mail without ever exposing the recruiter address — no e-mail hunting,
 no cold e-mail from Gmail. One application per SIRET, ever (``LbaApplier`` dedup), quota channel ``lba``,
 review mode → documents prepared and company ``pending_review`` (validated in the dashboard / « approve »).
+Recruiters outside the target (``outreach.relevance``: public works, HVAC… for a developer) are set aside
+(status ``irrelevant``) before any document is written: LBA allows 3 applications per company, ever.
 LBA does not relay follow-ups: they become manual follow-ups (listed in the dashboard).
 """
 
@@ -20,6 +22,7 @@ from jobbot.apply.base import ApplyResult
 from jobbot.apply.service import ApplyReport, build_pacer
 from jobbot.context import AppContext
 from jobbot.models import Application, ApplicationEvent, ApplyMethod, Company, JobStatus, TailoredDocuments
+from jobbot.outreach.relevance import OFF_TARGET, report_lines, set_aside, split_relevant, sweep_review_queue
 from jobbot.sources.lba_mapping import RECRUITER_SOURCE
 from jobbot.textutil import normalize_company, truncate
 
@@ -30,6 +33,10 @@ CANDIDATE_STATUSES = ("approved", "new", "enriched", "no_email")
 RECENT_DAYS = 60
 DONE_FLAG = "lba_relay_done"
 REVIEW_QUEUE_MAX = 8  # review mode: at most this many LBA companies waiting for validation
+
+
+class RelayReport(ApplyReport):
+    irrelevant: int = 0  # recruiters set aside as outside the target (never applied to)
 
 
 def candidates(ctx: AppContext) -> list[Company]:
@@ -118,24 +125,35 @@ def _one(ctx: AppContext, company: Company, applier: Any, pacer: Any, review: bo
     if result.status == JobStatus.FAILED:
         pacer.record(CHANNEL, False, truncate(f"{company.name} {result.detail}", 200))
         return "failed", result.detail
+    if OFF_TARGET in result.detail:  # the detail revealed the real sector
+        set_aside(ctx.repo, company, result.detail)
+        return "irrelevant", result.detail
     if not applier.fatal:  # already applied, no relay, company gone: never retry the relay
         _mark(ctx, company, company.status, **{DONE_FLAG: True})
     return "skipped", result.detail
 
 
-def run_lba_recruiters(ctx: AppContext, *, limit: int | None = None) -> ApplyReport:
+def _budget(ctx: AppContext, pacer: Any, review: bool, limit: int | None) -> int:
+    budget = limit if limit is not None else pacer.remaining(CHANNEL)
+    if review:  # documents cost LLM time: keep the validation queue short
+        waiting = sum(1 for c in ctx.repo.list_companies("pending_review") if c.raw.get("review_channel") == "lba")
+        budget = min(budget, max(0, REVIEW_QUEUE_MAX - waiting))
+    return budget
+
+
+def run_lba_recruiters(ctx: AppContext, *, limit: int | None = None) -> RelayReport:
     """Relay spontaneous applications through LBA (review mode: prepare + queue). One failure never stops it."""
     from jobbot.apply.lba import LbaApplier
     from jobbot.preferences import effective_mode
 
     review = effective_mode(ctx.settings) == "review"
     pacer, applier = build_pacer(ctx), LbaApplier(ctx)
-    budget = limit if limit is not None else pacer.remaining(CHANNEL)
-    if review:  # documents cost LLM time: keep the validation queue short
-        waiting = sum(1 for c in ctx.repo.list_companies("pending_review") if c.raw.get("review_channel") == "lba")
-        budget = min(budget, max(0, REVIEW_QUEUE_MAX - waiting))
+    queued_off = sweep_review_queue(ctx.repo, ctx.profile)  # before the queue is counted
+    budget = _budget(ctx, pacer, review, limit)
+    relevant, off = split_relevant(ctx.repo, ctx.profile, candidates(ctx))
+    off = queued_off + off
     counts: Counter[str] = Counter()
-    details: list[str] = []
+    details: list[str] = report_lines(off)
     attempts = [0]
 
     def pause() -> None:
@@ -143,7 +161,7 @@ def run_lba_recruiters(ctx: AppContext, *, limit: int | None = None) -> ApplyRep
             pacer.between_applications()
         attempts[0] += 1
 
-    for company in candidates(ctx):
+    for company in relevant:
         if counts["applied"] + counts["failed"] + counts["pending_review"] >= budget or applier.fatal:
             break
         try:
@@ -153,5 +171,6 @@ def run_lba_recruiters(ctx: AppContext, *, limit: int | None = None) -> ApplyRep
             kind, detail = "failed", truncate(f"erreur inattendue ({exc})", 240)
         counts[kind] += 1
         details.append(f"{company.name} : {detail}")
-    return ApplyReport(applied=counts["applied"], failed=counts["failed"], skipped=counts["skipped"],
-                       pending_review=counts["pending_review"], details=details)
+    return RelayReport(applied=counts["applied"], failed=counts["failed"], skipped=counts["skipped"],
+                       pending_review=counts["pending_review"], irrelevant=len(off) + counts["irrelevant"],
+                       details=details)

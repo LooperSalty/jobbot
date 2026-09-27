@@ -2,7 +2,8 @@
 
 Split out of ``lba.py`` (400-line rule); import from ``jobbot.sources.lba``. ``raw`` keeps what
 ``apply.lba.LbaApplier`` needs: ``source`` (detail sub-type), ``id``, ``recipient_id``, ``hasEmail``/``smart_apply``,
-``application_count``. The per-offer apply token (valid 24 h) is never stored.
+``application_count`` — and, for recruiters, what ``outreach.relevance`` judges them on (``rome_labels``,
+``keywords``; NAF label/code and size are Company fields). The per-offer apply token (valid 24 h) is never stored.
 """
 
 from __future__ import annotations
@@ -227,6 +228,19 @@ def api_recruiter_to_company(item: dict[str, Any]) -> Company | None:
         latitude=lat, longitude=lon, domain=domain_of(work.get("website")), website=work.get("website"),
         description=work.get("description"), source=RECRUITER_SOURCE, found_at=clock.now(), raw=raw,
     )
+
+
+def recruiter_detail_facts(company: Company, detail: dict[str, Any]) -> Company:
+    """Fill the NAF code/label and size a site hit lacks from the recruiter detail (``nafs``, ``company.size``)."""
+    nafs = detail.get("nafs") or []
+    naf = nafs[0] if isinstance(nafs, list) and nafs and isinstance(nafs[0], dict) else {}
+    size = (detail.get("company") or {}).get("size")
+    update: dict[str, Any] = {}
+    if naf.get("code") and not company.naf_code:
+        update.update(naf_code=str(naf["code"]), naf_label=naf.get("label") or company.naf_label)
+    if size and not company.headcount_range:
+        update["headcount_range"] = str(size)
+    return company.model_copy(update=update) if update else company
 
 
 def merge_company(site: Company, api: Company) -> Company:

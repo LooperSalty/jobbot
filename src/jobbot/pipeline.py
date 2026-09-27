@@ -104,7 +104,8 @@ def _describe(step: str, report: Any) -> str:
         "apply": lambda r: (f"{r.applied} candidature(s) envoyée(s)"
                             + (f", {r.needs_manual} à finir à la main" if r.needs_manual else "")
                             + (f", {r.pending_review} à valider" if r.pending_review else "")),
-        "spontaneous": lambda r: f"{r.sent} spontanée(s)",
+        "spontaneous": lambda r: (f"{r.sent} spontanée(s)"
+                                  + (f" ({r.irrelevant} entreprise(s) hors cible écartée(s))" if r.irrelevant else "")),
         "inbox": lambda r: f"{r.matched} réponse(s)" if r.matched else "",
         "followup": lambda r: f"{r.sent} relance(s)" if r.sent or r.manual else "",
     }
@@ -300,7 +301,8 @@ def spontaneous_applications(ctx: AppContext, mailer: Any, *, limit: int | None 
     email = run_spontaneous_campaign(effective, mailer, limit=limit)
     return CampaignReport(
         sent=email.sent + relay.applied, skipped=email.skipped + relay.skipped + relay.pending_review,
-        failed=email.failed + relay.failed, details=[*(f"LBA — {d}" for d in relay.details), *email.details],
+        failed=email.failed + relay.failed, irrelevant=email.irrelevant + getattr(relay, "irrelevant", 0),
+        details=[*(f"LBA — {d}" for d in relay.details), *email.details],
     )
 
 

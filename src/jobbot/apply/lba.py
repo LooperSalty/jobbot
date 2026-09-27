@@ -4,8 +4,9 @@ Flow (what the LBA website itself does): fetch the item detail right before appl
 24 h, never stored nor logged) → JSON POST ``/api/v2/_private/application`` with the CV as a base64 data URL
 and the cover letter as the message. LBA relays the application to the recruiter by e-mail.
 
-Safety: never twice the same offer / SIRET / recipient (server cap = 3 all-time; jobbot = 1), dry-run builds
-the payload without POSTing, recruiter questions or missing relay → NEEDS_MANUAL (the human applies on the
+Safety: never twice the same offer / SIRET / recipient (server cap = 3 all-time; jobbot = 1), never a recruiter
+outside the target (``outreach.relevance``: checked on the stored data, then on the detail's NAF / size), dry-run
+builds the payload without POSTing, recruiter questions or missing relay → NEEDS_MANUAL (the human applies on the
 LBA page). Quotas and pauses are handled by ``apply.service`` (channel ``lba``).
 """
 
@@ -27,7 +28,17 @@ from jobbot.config import Profile
 from jobbot.context import AppContext
 from jobbot.http import HostThrottle, make_client, request_with_retry
 from jobbot.models import ApplyMethod, Company, JobOffer, JobStatus, TailoredDocuments
-from jobbot.sources.lba_mapping import LBA_SITE, RECRUITER_SOURCE, SOURCE, SUB_LBA, SUB_PARTNER, SUB_RECRUITER, page_url
+from jobbot.outreach.relevance import OFF_TARGET, is_relevant_employer
+from jobbot.sources.lba_mapping import (
+    LBA_SITE,
+    RECRUITER_SOURCE,
+    SOURCE,
+    SUB_LBA,
+    SUB_PARTNER,
+    SUB_RECRUITER,
+    page_url,
+    recruiter_detail_facts,
+)
 from jobbot.textutil import truncate
 
 log = logging.getLogger(__name__)
@@ -60,6 +71,7 @@ class _Target:
     name: str  # company name (messages)
     title: str  # offer title / searched job (payload + page URL slug)
     method: ApplyMethod
+    company: Company | None = None  # recruiter targets: judged again on the detail's NAF / size before applying
 
 
 def _result(ok: bool, status: JobStatus, detail: str) -> ApplyResult:
@@ -198,10 +210,20 @@ class LbaApplier:
         siret = str(company.raw.get("siret") or company.raw.get("id") or "")
         if company.source != RECRUITER_SOURCE or not siret:
             return _result(False, JobStatus.SKIPPED, f"{company.name} : entreprise non référencée par LBA.")
+        off_target = self._off_target(company)
+        if off_target is not None:
+            return off_target
         titles = self.ctx.profile.target.job_titles
         target = _Target(SUB_RECRUITER, siret, company.name, titles[0] if titles else "Développeur web",
-                         ApplyMethod.LBA)
+                         ApplyMethod.LBA, company)
         return self._guarded(target, docs)
+
+    def _off_target(self, company: Company) -> ApplyResult | None:
+        """Never spend one of the 3 applications LBA allows per company on an employer outside the target."""
+        relevant, reason = is_relevant_employer(company, self.ctx.profile)
+        if relevant:
+            return None
+        return _result(False, JobStatus.SKIPPED, f"Entreprise {OFF_TARGET} ({reason}) : rien envoyé.")
 
     # ------------------------------------------------------------------ flow
 
@@ -254,6 +276,12 @@ class LbaApplier:
             return {}, _result(False, JobStatus.FAILED, "Détail LBA illisible (réponse non JSON).")
         return (data, None) if isinstance(data, dict) else ({}, _result(False, JobStatus.FAILED, "Détail LBA vide."))
 
+    def _detail_off_target(self, target: _Target, detail: dict[str, Any]) -> ApplyResult | None:
+        """Recruiters are judged again on the detail's real NAF / size (a search hit lacks them)."""
+        if target.company is None:
+            return None
+        return self._off_target(recruiter_detail_facts(target.company, detail))
+
     def _check_detail(self, target: _Target, detail: dict[str, Any]) -> ApplyResult | None:
         page = page_url(target.sub_type, target.item_id, target.title)
         job = detail.get("job") or {}
@@ -264,6 +292,9 @@ class LbaApplier:
         recipient = str(detail.get("recipient_id") or "")
         if (siret and self._already(f"siret:{siret}")) or (recipient and self._already(f"recipient:{recipient}")):
             return _result(False, JobStatus.SKIPPED, f"Déjà postulé chez {target.name} via La Bonne Alternance.")
+        off_target = self._detail_off_target(target, detail)  # before suggesting any manual application
+        if off_target is not None:
+            return off_target
         if not (detail.get("contact") or {}).get("hasEmail") or not recipient or not detail.get("token"):
             return _result(False, JobStatus.NEEDS_MANUAL, f"Pas de candidature simplifiée LBA : postule sur {page}")
         if job.get("to_applicant_questions"):

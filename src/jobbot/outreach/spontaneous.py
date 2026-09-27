@@ -1,6 +1,7 @@
 """Spontaneous applications ("candidatures spontanées") by e-mail to enriched companies.
 
-Safeguards: one address per company and per attempt, chosen under ``settings.outreach`` (see
+Safeguards: only employers inside the target (:mod:`jobbot.outreach.relevance`: companies outside it are set aside
+before any document is written, and counted in the report), one address per company and per attempt, chosen under ``settings.outreach`` (see
 :mod:`jobbot.outreach.selection`: recruitment address > named HR > tech manager > leader of a small company >
 contact@; unverified guesses capped per day and paused on bounces), company-level dedup (no second application
 within 60 days — except a retry with the next best address after a bounce, up to ``max_attempts_per_company``),
@@ -23,6 +24,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from jobbot import clock
 from jobbot.context import AppContext
 from jobbot.models import Application, ApplicationEvent, ApplyMethod, Company, ContactEmail, TailoredDocuments
+from jobbot.outreach import relevance
 from jobbot.outreach import selection as sel
 from jobbot.outreach._compose import OPT_OUT_SENTENCE, build_email, ensure_opt_out, is_alternance
 from jobbot.pacing import Pacer, QuotaExceeded
@@ -57,6 +59,7 @@ class CampaignReport(BaseModel):
     sent: int
     skipped: int
     failed: int
+    irrelevant: int = 0  # companies set aside as outside the target (never contacted)
     details: list[str] = Field(default_factory=list)
 
 
@@ -96,6 +99,14 @@ def _candidates(ctx: AppContext, apps: list[Application]) -> list[Company]:
     seen = {c.id for c in fresh}
     retries = [c for c in sel.bounced_companies(ctx, apps) if c.id not in seen]
     return [*retries, *fresh]
+
+
+def _targets(ctx: AppContext, run: _Run) -> tuple[list[Company], list[tuple[Company, str]]]:
+    """Candidates inside the target, and the companies set aside (review queue included) with their reason —
+    before any document is written."""
+    queued_off = relevance.sweep_review_queue(ctx.repo, ctx.profile)
+    relevant, off = relevance.split_relevant(ctx.repo, ctx.profile, _candidates(ctx, list(run.apps)))
+    return relevant, queued_off + off
 
 
 def _skip_reason(ctx: AppContext, company: Company, history: sel.History) -> str | None:
@@ -308,9 +319,10 @@ def run_spontaneous_campaign(ctx: AppContext, mailer: Mailer | None, *, limit: i
     run = _start(ctx, mailer, review)
     budget = limit if limit is not None else run.pacer.remaining(CHANNEL)
     counts = {"sent": 0, "skipped": 0, "failed": 0}
-    details: list[str] = [f"Info : {run.paused}"] if run.paused else []
+    relevant, off = _targets(ctx, run)
+    details: list[str] = ([f"Info : {run.paused}"] if run.paused else []) + relevance.report_lines(off)
     acted = real_sends = simulated_guesses = 0
-    for company in _candidates(ctx, list(run.apps)):
+    for company in relevant:
         if acted >= budget:
             break
         try:
@@ -327,6 +339,7 @@ def run_spontaneous_campaign(ctx: AppContext, mailer: Mailer | None, *, limit: i
         acted += int(outcome.kind in ("sent", "simulated", "pending", "failed"))
         real_sends += int(outcome.kind == "sent")
         simulated_guesses += int(outcome.kind == "simulated" and outcome.guess)
-    log.info("Campagne spontanée : %d envoyées, %d ignorées, %d échecs", counts["sent"], counts["skipped"],
-             counts["failed"])
-    return CampaignReport(sent=counts["sent"], skipped=counts["skipped"], failed=counts["failed"], details=details)
+    log.info("Campagne spontanée : %d envoyées, %d ignorées, %d échecs, %d hors cible", counts["sent"],
+             counts["skipped"], counts["failed"], len(off))
+    return CampaignReport(sent=counts["sent"], skipped=counts["skipped"], failed=counts["failed"],
+                          irrelevant=len(off), details=details)
