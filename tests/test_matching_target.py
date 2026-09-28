@@ -186,8 +186,8 @@ def test_alternance_only_waits_for_the_full_text_of_a_search_card(profile, make_
     assert match_job(card, alternance_only(profile))[0] > 0  # judged again once the offer is read in full
     snippet = unknown_contract(make_job, source="adzuna", raw={"description_truncated": True})
     assert match_job(snippet, alternance_only(profile))[0] > 0  # cut by its source: « alternance » may follow
-    pending = unknown_contract(make_job, raw={"needs_details": True})
-    assert match_job(pending, alternance_only(profile))[0] > 0
+    completed = unknown_contract(make_job, raw={"needs_details": True})  # flag left over once read in full
+    assert match_job(completed, alternance_only(profile))[0] == 0
 
 
 def test_alternance_only_trusts_the_school_relayed_offers(profile, make_job):

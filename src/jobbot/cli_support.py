@@ -69,6 +69,7 @@ FIELD_FR = {
     "manual": "À faire à la main", "closed": "Closes", "posts": "Publications lues",
     "new_posts": "Publications analysées", "offers": "Offres extraites", "simulated": "Simulées (--dry-run)",
     "deferred": "Reportées (nouvel essai)", "completed": "Annonces complétées avant notation",
+    "dropped": "Sorties de la file (profil actuel)",
     "irrelevant": "Hors cible (écartées)",
     "companies_found": "Entreprises trouvées", "companies_new": "Nouvelles entreprises", "relevant": "Pertinentes",
     "enriched": "Entreprises enrichies", "generic_emails": "Nouvelles adresses génériques",

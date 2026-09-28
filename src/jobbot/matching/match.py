@@ -222,9 +222,9 @@ def is_thin(job: JobOffer) -> bool:
 
 
 def _fully_read(job: JobOffer) -> bool:
-    """The whole announcement is at hand: not a search card, a snippet cut by its source (Adzuna, Jooble) nor an
-    offer still waiting for its details."""
-    return not is_thin(job) and not job.raw.get("description_truncated") and not job.raw.get("needs_details")
+    """The whole announcement is at hand: neither a search card (short text, like ``registry.needs_details``; the
+    raw ``needs_details`` flag may outlive the completion) nor a snippet cut by its source (Adzuna, Jooble)."""
+    return not is_thin(job) and not job.raw.get("description_truncated")
 
 
 def _skills_part(job: JobOffer, skills: ProfileSkills) -> _Part:

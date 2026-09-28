@@ -217,7 +217,8 @@ All contract signatures above are kept. Additive behaviour and shared convention
   range compared; never for an alternance or an unknown contract); `alternance_only(profile)` /
   `unknown_contract_reason` (alternance the only contract wanted, target + every area: an OTHER contract is ruled
   out — « contrat non précisé » — only for an offer read in full (`match._fully_read`: not thin, not
-  `description_truncated`, not `needs_details`), not relayed by the school, with no loose work-study hint anywhere
+  `description_truncated`; the raw `needs_details` flag may outlive the completion), not relayed by the school, with
+  no loose work-study hint anywhere
   (`filters.mentions_alternance`, `_ALT_CUE`)).
 - Queue sweep (`match.drop_blocked_queue`, first thing of the « score » step, `MatchReport.dropped`): SHORTLISTED /
   DOCS_READY / PENDING_REVIEW / NEEDS_MANUAL offers that now fail `hard_filter_reason` (the `_blocking_reason`
