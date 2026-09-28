@@ -16,16 +16,17 @@ llm:
 limits:                  # quotas journaliers prudents (LinkedIn bannit les comptes trop actifs)
   linkedin_per_day: 15
   hellowork_per_day: 10
-  lba_per_day: 20
+  lba_per_day: 30          # offres LBA + candidatures relayées par La Bonne Alternance (pas depuis ton Gmail)
   email_applications_per_day: 30
   spontaneous_per_day: 20  # utilisé seulement si la montée progressive ci-dessous est désactivée
-  spontaneous_ramp:        # spontanées : 20/jour, +5 par semaine depuis le premier envoi réel, 40 au plus ;
+  spontaneous_ramp:        # spontanées : 20/jour, +10 par semaine depuis le premier envoi réel, 50 au plus ;
     enabled: true          # retour à 20 (et notification) si plus de 5 % de rebonds sur 7 jours
     start: 20
-    step_per_week: 5
-    max: 40
+    step_per_week: 10
+    max: 50
     max_bounce_rate: 0.05
   followups_per_day: 10
+  prepare_per_run: 25      # offres qui reçoivent CV + lettre par exécution (celles envoyées par jobbot d'abord)
   min_delay_s: 40
   max_delay_s: 140
 

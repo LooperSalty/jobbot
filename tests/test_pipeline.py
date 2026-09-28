@@ -12,6 +12,7 @@ import pytest
 import respx
 
 from jobbot import pipeline
+from jobbot.config import Limits
 from jobbot.models import ApplyMethod, JobStatus
 from jobbot.outreach.companies import DiscoverReport
 from jobbot.outreach.spontaneous import CampaignReport
@@ -151,11 +152,71 @@ def test_prepare_shortlisted_best_first_and_isolated(ctx, make_job, monkeypatch)
     monkeypatch.setattr(registry, "ensure_details", ensure)
     monkeypatch.setattr(docs_service, "prepare_documents", prepare)
     report = pipeline.prepare_shortlisted(ctx, limit=3)
-    assert (report.prepared, report.failed, report.skipped) == (1, 1, 1)
+    assert (report.prepared, report.failed, report.skipped) == (2, 1, 1)  # the expired one gave its place to D
     assert report.details[0].startswith("A — ") and "LLM en panne" in report.details[1]
     assert ctx.repo.get_job(best.id).status == JobStatus.DOCS_READY
     only = pipeline.prepare_shortlisted(ctx, job_ids=[broken.id, "missing"])
     assert only.failed == 1 and only.prepared == 0
+
+
+def test_prepare_takes_automatic_channels_first_within_the_setting(ctx, make_job, monkeypatch):
+    import jobbot.documents.service as docs_service
+    import jobbot.sources.registry as registry
+
+    from .fixtures.orchestration.fakes import with_limits
+
+    external = store_job(ctx, make_job(external_id="x", company="X", apply_method=ApplyMethod.EXTERNAL),
+                         status=JobStatus.SHORTLISTED, score=95, docs=False)
+    email = store_job(ctx, make_job(external_id="e", company="E"), status=JobStatus.SHORTLISTED, score=70,
+                      docs=False)
+    easy = store_job(ctx, make_job(external_id="l", company="L", apply_method=ApplyMethod.LINKEDIN_EASY_APPLY),
+                     status=JobStatus.SHORTLISTED, score=60, docs=False)
+    low = store_job(ctx, make_job(external_id="w", company="W"), status=JobStatus.SHORTLISTED, score=50, docs=False)
+    prepared: list[str] = []
+
+    def prepare(c, job=None, company=None):
+        prepared.append(job.id)
+        c.repo.update_job_status(job.id, JobStatus.DOCS_READY)
+        return write_docs(c, job.id)
+
+    monkeypatch.setattr(registry, "ensure_details", lambda c, job: job)
+    monkeypatch.setattr(docs_service, "prepare_documents", prepare)
+    assert Limits().prepare_per_run == 25  # was 10, hardcoded
+    pipeline.prepare_shortlisted(with_limits(ctx, prepare_per_run=2))
+    assert prepared == [email.id, easy.id]  # sent by jobbot the same day: before a better offer to finish by hand
+    pipeline.prepare_shortlisted(with_limits(ctx, prepare_per_run=2))
+    assert prepared[2:] == [external.id, low.id]  # below the auto-apply score: waits for validation anyway
+
+
+def test_prepare_replaces_the_offers_dropped_on_the_way(ctx, make_job, monkeypatch):
+    import jobbot.documents.service as docs_service
+    import jobbot.sources.registry as registry
+
+    senior = store_job(ctx, make_job(external_id="s", company="S"), status=JobStatus.SHORTLISTED, score=90,
+                       docs=False)
+    fine = store_job(ctx, make_job(external_id="f", company="F"), status=JobStatus.SHORTLISTED, score=80, docs=False)
+
+    def ensure(c, job):
+        extra = " Expérience : 7 ans d'expérience exigés." if job.id == senior.id else ""
+        return job.model_copy(update={"description": job.description + extra})
+
+    def prepare(c, job=None, company=None):
+        c.repo.update_job_status(job.id, JobStatus.DOCS_READY)
+        return write_docs(c, job.id)
+
+    monkeypatch.setattr(registry, "ensure_details", ensure)
+    monkeypatch.setattr(docs_service, "prepare_documents", prepare)
+    report = pipeline.prepare_shortlisted(ctx, limit=1)
+    assert (report.skipped, report.prepared) == (1, 1)
+    assert ctx.repo.get_job(fine.id).status == JobStatus.DOCS_READY
+
+
+def test_prepare_stops_starting_new_offers_when_its_time_is_up(ctx, make_job, monkeypatch):
+    store_job(ctx, make_job(external_id="a", company="A"), status=JobStatus.SHORTLISTED, docs=False)
+    monkeypatch.setattr(pipeline, "PREPARE_BUDGET_S", 0)
+    report = pipeline.prepare_shortlisted(ctx)
+    assert report.prepared == 0
+    assert "prochaine exécution" in report.details[-1]
 
 
 def test_prepare_rescores_after_full_description(ctx, make_job, monkeypatch):
@@ -188,6 +249,55 @@ def test_prepare_rescores_after_full_description(ctx, make_job, monkeypatch):
     kept = ctx.repo.get_job(fine.id)
     assert kept.status == JobStatus.DOCS_READY
     assert kept.match_score != 65
+
+
+def test_score_step_drops_queued_offers_the_profile_now_rules_out(ctx, make_job, monkeypatch):
+    import dataclasses
+
+    from jobbot.models import ContractType
+
+    monkeypatch.setattr("jobbot.sources.registry.complete_new_offers", lambda c: 0)
+    target = ctx.profile.target
+    lux = [loc.model_copy(update={"contract_types": None}) for loc in target.locations]
+    strict = dataclasses.replace(ctx, profile=ctx.profile.model_copy(update={"target": target.model_copy(
+        update={"contract_types": [ContractType.ALTERNANCE], "locations": lux})}))
+    plain = dict(title="Développeur React (H/F)", source="linkedin")
+    full_text = "Stack : TypeScript, React, Next.js, Node.js, PostgreSQL, Docker, Git. " * 7
+    cdi = store_job(ctx, make_job(external_id="c", company="C", contract_type=ContractType.CDI, **plain))
+    unknown = store_job(ctx, make_job(external_id="u", company="U", contract_type=ContractType.OTHER,
+                                      description=full_text, **plain), status=JobStatus.PENDING_REVIEW)
+    approved = store_job(ctx, make_job(external_id="p", company="P", contract_type=ContractType.CDI, **plain),
+                         status=JobStatus.APPROVED)
+    card = store_job(ctx, make_job(external_id="k", company="K", contract_type=ContractType.OTHER,
+                                   description="React, Node.js.", **plain), status=JobStatus.SHORTLISTED, docs=False)
+    by_hand = store_job(ctx, make_job(external_id="m", company="M", contract_type=ContractType.CDI, **plain),
+                        status=JobStatus.NEEDS_MANUAL)
+    alternance = store_job(ctx, make_job(external_id="a", company="A"), score=80)
+
+    report = pipeline.score_new_offers(strict)
+
+    assert report.dropped == 3
+    for job in (cdi, unknown, by_hand):
+        stored = ctx.repo.get_job(job.id)
+        assert stored.status == JobStatus.FILTERED_OUT
+        assert stored.match_reasons[0].startswith("Écartée : ")
+    assert ctx.repo.get_job(approved.id).status == JobStatus.APPROVED  # the user's decision
+    assert ctx.repo.get_job(card.id).status == JobStatus.SHORTLISTED  # judged once read in full
+    kept = ctx.repo.get_job(alternance.id)
+    assert (kept.status, kept.match_score) == (JobStatus.DOCS_READY, 80)
+
+
+def test_queue_sweep_never_overrides_a_decision_taken_meanwhile(ctx, make_job, monkeypatch):
+    from jobbot.matching import match
+    from jobbot.models import ContractType
+
+    job = store_job(ctx, make_job(external_id="c", company="C", title="Développeur React (H/F)",
+                                  contract_type=ContractType.STAGE))
+    snapshot = ctx.repo.list_jobs(match.SWEEP_STATUSES)
+    ctx.repo.update_job_status(job.id, JobStatus.APPROVED)  # approved in the dashboard during the sweep
+    monkeypatch.setattr(ctx.repo, "list_jobs", lambda *a, **k: snapshot)
+    assert match.drop_blocked_queue(ctx) == 0
+    assert ctx.repo.get_job(job.id).status == JobStatus.APPROVED
 
 
 def test_prepare_skips_company_already_applied(ctx, make_job, monkeypatch):

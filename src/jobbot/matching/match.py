@@ -43,6 +43,8 @@ HANDLED_STATUSES = frozenset(
     {JobStatus.SHORTLISTED, JobStatus.DOCS_READY, JobStatus.PENDING_REVIEW, JobStatus.APPROVED, JobStatus.APPLIED,
      JobStatus.NEEDS_MANUAL}
 )
+SWEEP_STATUSES = (JobStatus.SHORTLISTED, JobStatus.DOCS_READY, JobStatus.PENDING_REVIEW,  # not applied yet,
+                  JobStatus.NEEDS_MANUAL)  # never approved
 _FRESHNESS = ((3, 1.0), (7, 0.9), (14, 0.75), (30, 0.5), (60, 0.25))
 
 
@@ -53,6 +55,7 @@ class MatchReport(BaseModel):
     shortlisted: int = 0
     filtered_out: int = 0
     completed: int = 0  # short offers completed through their source before scoring (pipeline « score » step)
+    dropped: int = 0  # queued offers the current profile now rules out (pipeline « score » step)
 
 
 @dataclass(frozen=True)
@@ -84,9 +87,20 @@ def match_jobs(jobs: list[JobOffer], profile: Profile) -> list[tuple[float, list
     return [_match(job, profile, skills) for job in jobs]
 
 
+def hard_filter_reason(job: JobOffer, profile: Profile) -> str | None:
+    """The profile's hard filter ruling the offer out (contract, excluded words, experience, salary…), place
+    aside; None when the offer passes."""
+    contract, text = filters.detect_contract(job), _match_text(job)
+    return _blocking_reason(job, profile, contract, filters.required_experience_years(text), text)
+
+
+def _match_text(job: JobOffer) -> str:
+    return f"{job.title}\n{job.description or ''}\n{job.raw.get('experienceLibelle') or ''}"
+
+
 def _match(job: JobOffer, profile: Profile, skills: ProfileSkills) -> tuple[float, list[str]]:
     contract = filters.detect_contract(job)
-    text = f"{job.title}\n{job.description or ''}\n{job.raw.get('experienceLibelle') or ''}"
+    text = _match_text(job)
     years = filters.required_experience_years(text)
     blocking = _blocking_reason(job, profile, contract, years, text)
     if blocking:
@@ -119,6 +133,8 @@ def _blocking_reason(
     reason = filters.sales_title_reason(job) or school  # a school-relayed post names the school: not a fake offer
     reason = reason or _excluded_title(job, profile) or _excluded_description(job, profile)
     reason = reason or target_rules.contract_reason(job, profile, contract)
+    if not relayed.is_relayed(job):  # the school's job board posts alternance offers only
+        reason = reason or target_rules.unknown_contract_reason(job, profile, contract, fully_read=_fully_read(job))
     if reason:
         return reason
     limit = profile.target.max_experience_years
@@ -203,6 +219,12 @@ def _skill_credit(skill: str, skills: ProfileSkills) -> float:
 def is_thin(job: JobOffer) -> bool:
     """Short description (search card / alert): the skill overlap is weak evidence, the score provisional."""
     return len(job.description or "") < THIN_DESCRIPTION_CHARS
+
+
+def _fully_read(job: JobOffer) -> bool:
+    """The whole announcement is at hand: not a search card, a snippet cut by its source (Adzuna, Jooble) nor an
+    offer still waiting for its details."""
+    return not is_thin(job) and not job.raw.get("description_truncated") and not job.raw.get("needs_details")
 
 
 def _skills_part(job: JobOffer, skills: ProfileSkills) -> _Part:
@@ -307,6 +329,25 @@ def score_new_jobs(ctx: AppContext) -> MatchReport:
     log.info("Scoring : %d offre(s) notée(s), %d retenue(s), %d écartée(s), %d doublon(s)",
              report.scored, report.shortlisted, report.filtered_out, counts["skipped"])
     return report
+
+
+def drop_blocked_queue(ctx: AppContext) -> int:
+    """Offers not applied to yet (never the approved ones: the user's decision) that the current profile rules out
+    leave the queue (FILTERED_OUT, with the reason) — e.g. after the search turned alternance-only. Offline: the
+    hard filters of ``hard_filter_reason`` only (country areas and school deadlines included), never the distance
+    nor the score. Returns how many left."""
+    dropped = 0
+    for job in ctx.repo.list_jobs(SWEEP_STATUSES):
+        try:
+            reason = hard_filter_reason(job, ctx.profile)
+            if reason is not None and ctx.repo.set_job_match(job.id, 0.0, [reason], JobStatus.FILTERED_OUT,
+                                                             only_from=SWEEP_STATUSES):
+                dropped += 1
+        except Exception:  # noqa: BLE001 — isolate each job
+            log.exception("Nouvelle vérification impossible pour l'offre %s", job.id)
+    if dropped:
+        log.info("File d'attente : %d offre(s) écartée(s) par le profil actuel", dropped)
+    return dropped
 
 
 def score_one(ctx: AppContext, job: JobOffer) -> JobOffer:

@@ -79,7 +79,8 @@ def test_check_reset_records_notifies_once_and_restarts_the_weeks(ctx, monkeypat
     ramp.check_reset(live)
     assert len(notes) == 1  # already at the start: nothing more to reset
     later = clock.now() + timedelta(days=8)  # a week after the reset, bounces now older than 7 days
-    assert ramp.ramp_state(live.repo, live.settings.limits, now=later).cap == 25
+    cfg = live.settings.limits.spontaneous_ramp
+    assert ramp.ramp_state(live.repo, live.settings.limits, now=later).cap == min(cfg.max, cfg.start + cfg.step_per_week)
 
 
 def test_check_reset_in_dry_run_changes_nothing(ctx, monkeypatch):

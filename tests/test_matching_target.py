@@ -142,6 +142,71 @@ def test_empty_target_contracts_accept_every_contract(profile, make_job):
     assert match_job(cdi(make_job, contract_type=ContractType.CDD), anything)[0] > 0
 
 
+# --------------------------------------------------------------------------- alternance only
+
+STACK_DESC = "Stack : TypeScript, React, Next.js, Node.js, PostgreSQL, Docker, Git. " * 7  # full text, no contract
+
+
+def alternance_only(profile):
+    return with_target(profile, contract_types=[ContractType.ALTERNANCE],
+                       locations=locations(profile, Luxembourg={"contract_types": None}))
+
+
+def unknown_contract(make_job, **overrides):
+    base = dict(source="linkedin", title="Développeur Full-Stack React / Node.js (H/F)",
+                contract_type=ContractType.OTHER, description=STACK_DESC)
+    return make_job(**{**base, **overrides})
+
+
+def test_alternance_only_filters_an_unknown_contract_read_in_full(profile, make_job):
+    score, reasons = match_job(unknown_contract(make_job), alternance_only(profile))
+    assert score == 0 and reasons == ["Écartée : contrat non précisé (seule l'alternance est recherchée)"]
+
+
+def test_alternance_only_keeps_what_says_alternance(profile, make_job):
+    strict = alternance_only(profile)
+    assert match_job(make_job(), strict)[0] > 45
+    in_text = unknown_contract(make_job, description=STACK_DESC + " Poste à pourvoir en alternance, 24 mois.")
+    assert match_job(in_text, strict)[0] > 45
+    in_title = unknown_contract(make_job, title="Alternant développeur React (H/F)")
+    assert match_job(in_title, strict)[0] > 45
+
+
+@pytest.mark.parametrize("wording", [
+    "Type de contrat : Alternance (24 mois)", "Contrat : Apprentissage", "Poste à pourvoir en apprentissage",
+    "Alternance 3 semaines entreprise / 1 semaine école", "#alternance", "Contrat pro de 12 mois",
+])
+def test_alternance_only_keeps_any_loose_mention_of_alternance(profile, make_job, wording):
+    job = unknown_contract(make_job, source="indeed", description=f"{STACK_DESC} {wording}")
+    assert match_job(job, alternance_only(profile))[0] > 45
+
+
+def test_alternance_only_waits_for_the_full_text_of_a_search_card(profile, make_job):
+    card = unknown_contract(make_job, description="React, Node.js.")
+    assert match_job(card, alternance_only(profile))[0] > 0  # judged again once the offer is read in full
+    snippet = unknown_contract(make_job, source="adzuna", raw={"description_truncated": True})
+    assert match_job(snippet, alternance_only(profile))[0] > 0  # cut by its source: « alternance » may follow
+    pending = unknown_contract(make_job, raw={"needs_details": True})
+    assert match_job(pending, alternance_only(profile))[0] > 0
+
+
+def test_alternance_only_trusts_the_school_relayed_offers(profile, make_job):
+    relayed = unknown_contract(make_job, source="classroom", raw={"relayed_by_school": True})
+    assert match_job(relayed, alternance_only(profile))[0] > 0
+
+
+def test_alternance_only_drops_cdi_everywhere(profile, make_job):
+    strict = alternance_only(profile)
+    assert "non recherché (CDI)" in match_job(cdi(make_job), strict)[1][0]
+    esch = cdi(make_job, location="Esch-sur-Alzette, Luxembourg", postal_code="4361",
+               latitude=49.500956, longitude=5.98)
+    assert "non recherché (CDI)" in match_job(esch, strict)[1][0]
+
+
+def test_unknown_contract_still_kept_when_other_contracts_are_wanted(profile, make_job):
+    assert match_job(unknown_contract(make_job), profile)[0] > 0  # alternance + CDI searched
+
+
 # --------------------------------------------------------------------------- relocation
 
 

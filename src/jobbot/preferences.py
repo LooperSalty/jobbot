@@ -260,7 +260,7 @@ SETUP_QUESTIONS: tuple[Question, ...] = (
     Question("limits.email_applications_per_day", "Candidatures par e-mail (offres) max par jour", "int", SEC_AUTO),
     # --- Candidatures spontanées
     Question("limits.spontaneous_per_day", "Candidatures spontanées max par jour", "int", SEC_OUTREACH,
-             help="Seulement si la montée progressive (limits.spontaneous_ramp : 20/jour, +5 par semaine, 40 max) "
+             help="Seulement si la montée progressive (limits.spontaneous_ramp : départ, pas par semaine, maximum) "
                   "est désactivée."),
     Question("outreach.allow_nominative", "Écrire aux personnes nommées (dirigeants, salariés) ?", "bool",
              SEC_OUTREACH),

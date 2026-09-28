@@ -16,6 +16,7 @@ from __future__ import annotations
 import re
 
 from jobbot.config import LocationPref, Profile
+from jobbot.matching import filters
 from jobbot.matching._text import norm
 from jobbot.matching.geo import department_from_location, department_from_postal, haversine_km, lookup_known_place
 from jobbot.matching.location import (
@@ -133,6 +134,22 @@ def _wanted_contracts(profile: Profile) -> set[ContractType]:
     if not target.contract_types:
         return set()  # no restriction at all
     return set(target.contract_types) | {c for loc in target.locations for c in loc.contract_types or []}
+
+
+def alternance_only(profile: Profile) -> bool:
+    """Alternance is the only contract searched, in every area."""
+    return _wanted_contracts(profile) == {ContractType.ALTERNANCE}
+
+
+def unknown_contract_reason(job: JobOffer, profile: Profile, contract: ContractType, *,
+                            fully_read: bool) -> str | None:
+    """Alternance only: an offer read in full that never names its contract nor hints at a work-study one is a
+    regular job (an alternance offer says so) — unlike a search card or a snippet whose full text is not known."""
+    if contract != ContractType.OTHER or not fully_read or not alternance_only(profile):
+        return None
+    if filters.mentions_alternance(job):
+        return None
+    return "Écartée : contrat non précisé (seule l'alternance est recherchée)"
 
 
 def contract_reason(job: JobOffer, profile: Profile, contract: ContractType) -> str | None:

@@ -3,7 +3,8 @@
 - Mode = ``preferences.effective_mode`` (review during the warm-up, then ``settings.mode``).
 - One applier per channel, built lazily; the Playwright browser is opened at most once per run and closed.
 - Quotas (``Pacer``) per channel, human-like pause between two submissions, dedup (same job, same company within
-  60 days, blacklist), channel-level problems (quota, login, SMTP/LBA down) leave the job untouched for a retry.
+  60 days, blacklist), channel-level problems (quota, login, SMTP/LBA down, network lost) leave the job untouched
+  for a retry.
 - APPLIED → ``Application`` + ``applied`` event + ``next_followup_at``; EXTERNAL → NEEDS_MANUAL (``jobbot assist``).
 """
 
@@ -42,6 +43,15 @@ EXTERNAL_DETAIL = ("Candidature sur le site de l'employeur : documents prêts, l
 MAX_NOTE_CHARS = 500
 _QUOTA_RE = re.compile(r"quota", re.I)
 _LOGIN_RE = re.compile(r"jobbot login|limite quotidienne", re.I)  # also LinkedIn's own daily cap: retry tomorrow
+# The machine lost its network (DNS / connection down): the offer is fine, try it again at the next run.
+_NETWORK_RE = re.compile(
+    r"net::ERR_(?:NAME_NOT_RESOLVED|INTERNET_DISCONNECTED|NETWORK_CHANGED|NETWORK_ACCESS_DENIED|ADDRESS_UNREACHABLE"
+    r"|CONNECTION_(?:REFUSED|RESET|CLOSED|TIMED_OUT|FAILED))|temporary failure in name resolution"
+    r"|name or service not known|getaddrinfo failed|network is unreachable",
+    re.I,
+)
+MAX_NETWORK_RETRIES = 3  # runs in a row lost to the network on one offer before it is set aside (FAILED)
+NETWORK_RETRIES_KEY = "network_retries"
 
 
 class ApplyReport(BaseModel):
@@ -303,7 +313,26 @@ def _channel_problem(applier: Applier, result: ApplyResult, fatal_before: str | 
         return result.detail
     if result.status == JobStatus.NEEDS_MANUAL and _LOGIN_RE.search(result.detail):
         return result.detail
+    if _network_outage(result):
+        return f"réseau indisponible ({truncate(result.detail, 160)})"
     return None
+
+
+def _network_outage(result: ApplyResult) -> bool:
+    return result.status == JobStatus.FAILED and bool(_NETWORK_RE.search(result.detail))
+
+
+def _note_network_retry(ctx: AppContext, job: JobOffer, detail: str) -> bool:
+    """Count one run lost to the network on this offer; after ``MAX_NETWORK_RETRIES`` it is set aside (FAILED,
+    visible in the dashboard) instead of waiting forever. True when set aside."""
+    fresh = ctx.repo.get_job(job.id) or job
+    retries = int(fresh.raw.get(NETWORK_RETRIES_KEY) or 0) + 1
+    counted = fresh.model_copy(update={"raw": {**fresh.raw, NETWORK_RETRIES_KEY: retries}})
+    if retries < MAX_NETWORK_RETRIES:
+        ctx.repo.save_job(counted)
+        return False
+    set_job_status(ctx, counted, JobStatus.FAILED, f"{detail} (réseau indisponible {retries} fois de suite)")
+    return True
 
 
 def _outcome(ctx: AppContext, job: JobOffer, result: ApplyResult, docs: TailoredDocuments) -> str:
@@ -334,6 +363,8 @@ def _submit(ctx: AppContext, job: JobOffer, channel: str, res: _Resources) -> tu
     problem = _channel_problem(applier, result, fatal_before)
     if problem:
         res.blocked[channel] = problem
+        if _network_outage(result) and _note_network_retry(ctx, job, result.detail):
+            return "failed", f"{problem} : offre mise de côté après {MAX_NETWORK_RETRIES} essais"
         return "skipped", f"{problem} (sera retentée)"
     if result.status in (JobStatus.APPLIED, JobStatus.FAILED):
         res.pacer.record(channel, result.status == JobStatus.APPLIED, truncate(f"{job.id} {result.detail}", 200))

@@ -22,6 +22,7 @@ from jobbot.apply.base import ApplyResult
 from jobbot.apply.service import ApplyReport, build_pacer
 from jobbot.context import AppContext
 from jobbot.models import Application, ApplicationEvent, ApplyMethod, Company, JobStatus, TailoredDocuments
+from jobbot.outreach.holds import hold_raw
 from jobbot.outreach.relevance import OFF_TARGET, report_lines, set_aside, split_relevant, sweep_review_queue
 from jobbot.sources.lba_mapping import RECRUITER_SOURCE
 from jobbot.textutil import normalize_company, truncate
@@ -110,8 +111,9 @@ def _one(ctx: AppContext, company: Company, applier: Any, pacer: Any, review: bo
         return "skipped", reason
     docs = _documents(ctx, company)
     if (review or docs.truth_warnings) and company.status != "approved":  # unbacked CV claims: user checks first
-        _mark(ctx, company, "pending_review", review_contact="via La Bonne Alternance", review_channel="lba",
-              review_cv=docs.cv_pdf)
+        raw = hold_raw(company, review_contact="via La Bonne Alternance", review_channel="lba",
+                       review_cv=docs.cv_pdf or "")
+        ctx.repo.upsert_company(company.model_copy(update={"status": "pending_review", "raw": raw}))
         check = f" — CV à vérifier : {' ; '.join(docs.truth_warnings[:3])}" if docs.truth_warnings else ""
         return "pending_review", f"documents prêts, en attente de validation (relais La Bonne Alternance){check}"
     pause()

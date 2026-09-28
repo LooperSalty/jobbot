@@ -166,6 +166,11 @@ locations:
   pays, Indeed Luxembourg, Free-Work, LinkedIn, WTTJ) ; La Bonne Alternance et l'APEC restent en France. Une
   alternance au Luxembourg est écartée avec la raison « contrats recherchés dans ce pays : CDI ». Pour y accepter
   aussi un CDD : `jobbot config set loc.luxembourg_contracts "[cdi, cdd]"` — ce contrat n'est alors cherché que là.
+- **Alternance seulement.** Avec `contract_types: [alternance]` et aucune zone qui accepte un autre contrat, une
+  offre lue en entier qui ne dit jamais son contrat est écartée (« contrat non précisé ») : une offre d'alternance
+  le précise toujours. Une fiche de recherche encore courte attend d'être lue en entier, et les offres relayées par
+  l'école sont toujours gardées. Les offres déjà en file que le profil écarte en sortent à la notation suivante
+  (jamais celles que tu as validées).
 - **Déménagement.** `profile.target.willing_to_relocate: true` garde aussi les offres situées en France hors de tes
   zones, avec une note plus faible. `relocation_regions` limite aux régions voulues (ex. `[Grand Est, Alsace,
   Île-de-France]` ; vide = toute la France). Jamais à l'étranger.
@@ -361,9 +366,14 @@ status`, `jobbot doctor` et la page « Entreprises » du tableau de bord montren
 `jobbot night --dry-run --budget 30` : essai sans génération de dossiers.
 
 **Montée progressive des envois spontanés** (`limits.spontaneous_ramp`, la vraie limite est la délivrabilité) :
-20 par jour au départ, +5 par semaine complète depuis le premier envoi réel, 40 au plus ; si plus de 5 % des envois
+20 par jour au départ, +10 par semaine complète depuis le premier envoi réel, 50 au plus ; si plus de 5 % des envois
 spontanés des 7 derniers jours rebondissent, retour à 20 (tu es prévenu) et la montée reprend une semaine plus tard.
 `limits.spontaneous_ramp.enabled: false` revient au quota fixe `limits.spontaneous_per_day`.
+
+**Fin du rodage** : les entreprises mises « à valider » seulement parce que le mode validation était actif (jours de
+rodage, `mode: review`) repartent dans la file dès que le mode automatique s'applique, avec leur statut d'avant et
+leurs dossiers déjà prêts. Celles dont le CV contient une affirmation à vérifier restent à valider, et un choix fait
+entre-temps dans le tableau de bord n'est jamais écrasé.
 
 Le script `scripts\install_task.ps1` fait la même chose ; il accepte `-Matin 08:45 -Soir 18:30` et `-Supprimer`. Les
 tâches tournent quand ta session Windows est ouverte, parce que LinkedIn et HelloWork ont besoin du navigateur. Si le PC

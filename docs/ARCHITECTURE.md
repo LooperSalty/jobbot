@@ -214,7 +214,25 @@ All contract signatures above are kept. Additive behaviour and shared convention
   `relocation_regions` = current regions, pre-2016 regions, short names, department codes/names; empty list =
   anywhere in France; score 0.6); `annual_salary(text)` / `salary_reason` (`min_salary_eur`, gross per year; FR/EN
   formats, k€, monthly × "sur N mois", hourly × 1607, daily × 218; non-euro or unparsable → never filters; top of the
-  range compared; never for an alternance or an unknown contract).
+  range compared; never for an alternance or an unknown contract); `alternance_only(profile)` /
+  `unknown_contract_reason` (alternance the only contract wanted, target + every area: an OTHER contract is ruled
+  out — « contrat non précisé » — only for an offer read in full (`match._fully_read`: not thin, not
+  `description_truncated`, not `needs_details`), not relayed by the school, with no loose work-study hint anywhere
+  (`filters.mentions_alternance`, `_ALT_CUE`)).
+- Queue sweep (`match.drop_blocked_queue`, first thing of the « score » step, `MatchReport.dropped`): SHORTLISTED /
+  DOCS_READY / PENDING_REVIEW / NEEDS_MANUAL offers that now fail `hard_filter_reason` (the `_blocking_reason`
+  filters, never distance nor score) → FILTERED_OUT with the reason; `Repository.set_job_match(only_from=…)` never
+  overrides a status changed meanwhile (APPROVED in the dashboard).
+- Preparation (`pipeline.prepare_shortlisted`): `limits.prepare_per_run` (25) offers per run, those sent the same day
+  first (auto mode, automatic channel, score ≥ `auto_apply_min_score`), an offer dropped on the way leaves its place,
+  no new one started after `PREPARE_BUDGET_S` (2 h).
+- Network outage while applying (`apply.service._NETWORK_RE`: `net::ERR_NAME_NOT_RESOLVED`, DNS failures…): a
+  channel-level problem (job left DOCS_READY, retried next run); after `MAX_NETWORK_RETRIES` (3) runs on the same
+  offer (`raw.network_retries`) → FAILED.
+- `outreach/holds.release_review_holds` (start of `pipeline.spontaneous_applications`, effective auto mode, never in
+  dry-run): companies `pending_review` without truth warnings → back to `raw.review_prev_status` (recorded by
+  `hold_raw` in the e-mail campaign and the LBA relay; older holds: `enriched` with contacts, else `new`), review
+  keys removed; atomic `update_company` (a dashboard decision taken meanwhile wins).
 
 ## v2 — Interview prep sheets & weekly report (`reports/`)
 

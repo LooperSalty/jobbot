@@ -188,6 +188,7 @@ class Limits(Frozen):
     spontaneous_per_day: int = 20  # used when the ramp below is disabled
     spontaneous_ramp: SpontaneousRamp = Field(default_factory=SpontaneousRamp)
     followups_per_day: int = 10
+    prepare_per_run: int = Field(default=25, ge=1)  # offers given a tailored CV + letter per run (LLM time)
     min_delay_s: float = 40.0  # between two applications / emails
     max_delay_s: float = 140.0
     action_min_ms: int = 400  # between two browser actions

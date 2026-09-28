@@ -244,12 +244,19 @@ class Repository:
                 [status.value, clock.iso(clock.now()), job_id],
             )
 
-    def set_job_match(self, job_id: str, score: float, reasons: list[str], status: JobStatus) -> None:
+    def set_job_match(self, job_id: str, score: float, reasons: list[str], status: JobStatus, *,
+                      only_from: Iterable[JobStatus] | None = None) -> bool:
+        """New score, reasons and status; with ``only_from``, only while the job still has one of those statuses
+        (a decision taken meanwhile elsewhere, e.g. in the dashboard, wins). Returns True when written."""
+        sql = "UPDATE jobs SET match_score = ?, match_reasons = ?, status = ?, updated_at = ? WHERE id = ?"
+        params: list[Any] = [score, json.dumps(reasons, ensure_ascii=False), status.value, clock.iso(clock.now()),
+                             job_id]
+        if only_from is not None:
+            allowed = [s.value for s in only_from]
+            sql += f" AND status IN ({','.join('?' * len(allowed))})"
+            params.extend(allowed)
         with self._tx() as conn:
-            conn.execute(
-                "UPDATE jobs SET match_score = ?, match_reasons = ?, status = ?, updated_at = ? WHERE id = ?",
-                [score, json.dumps(reasons, ensure_ascii=False), status.value, clock.iso(clock.now()), job_id],
-            )
+            return conn.execute(sql, params).rowcount > 0
 
     def find_duplicate_jobs(self, job: JobOffer) -> list[JobOffer]:
         """Other jobs (different id) that look like the same offer on another board."""

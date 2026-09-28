@@ -46,7 +46,8 @@ def score(ctx: typer.Context) -> None:
 
 def prepare(
     ctx: typer.Context,
-    limit: Annotated[int, typer.Option("--limit", "-n", help="Nombre maximum d'offres.")] = 10,
+    limit: Annotated[int | None, typer.Option(
+        "--limit", "-n", min=1, help="Nombre maximum d'offres (défaut : limits.prepare_per_run).")] = None,
     job: Annotated[list[str] | None, typer.Option("--job", "-j", help="Id d'offre (répétable).")] = None,
 ) -> None:
     """Génère CV + lettre ciblés (score ATS) pour les meilleures offres retenues."""

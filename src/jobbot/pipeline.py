@@ -40,8 +40,8 @@ log = logging.getLogger(__name__)
 STEPS: tuple[str, ...] = (
     "classroom", "collect", "score", "prepare", "apply", "discover", "enrich", "spontaneous", "inbox", "followup",
 )
-PREPARE_LIMIT = 10  # tailored CV + letter per run (LLM time), best match scores first
 PREPARE_MAX_FAILURES = 3  # a job whose documents keep failing leaves the SHORTLISTED queue (status FAILED)
+PREPARE_BUDGET_S = 2 * 3600  # no new preparation started after this (LLM time; the run lock goes stale at 6 h)
 ENRICH_LIMIT = 50
 LOCK_FILE = "jobbot.lock"
 LOCK_STALE_S = 6 * 3600
@@ -99,7 +99,8 @@ def _describe(step: str, report: Any) -> str:
         "classroom": lambda r: (f"école : {r.offers} offre(s), {r.applied + r.simulated} candidature(s)"
                                 if r.offers or r.applied or r.simulated else ""),
         "collect": lambda r: f"{r.new} nouvelle(s) offre(s)",
-        "score": lambda r: f"{r.shortlisted} retenue(s)",
+        "score": lambda r: (f"{r.shortlisted} retenue(s)"
+                            + (f", {r.dropped} sortie(s) de la file" if r.dropped else "")),
         "prepare": lambda r: f"{r.prepared} dossier(s) prêt(s)",
         "apply": lambda r: (f"{r.applied} candidature(s) envoyée(s)"
                             + (f", {r.needs_manual} à finir à la main" if r.needs_manual else "")
@@ -167,16 +168,42 @@ def _prepare_one(ctx: AppContext, job: JobOffer) -> tuple[str, str]:
     return "prepared", ats
 
 
-def prepare_shortlisted(ctx: AppContext, *, limit: int = PREPARE_LIMIT,
+def _preparation_queue(ctx: AppContext) -> list[JobOffer]:
+    """SHORTLISTED jobs sent the same day once their documents are ready first (auto mode, an automatic channel,
+    a score high enough to go without validation), then the others; best score first inside each group."""
+    from jobbot.apply.service import channel_of
+    from jobbot.preferences import effective_mode
+
+    auto = effective_mode(ctx.settings) == "auto"
+    threshold = ctx.settings.thresholds.auto_apply_min_score
+
+    def sent_today(job: JobOffer) -> bool:
+        return auto and channel_of(job) != "external" and (job.match_score or 0) >= threshold
+
+    return sorted(ctx.repo.list_jobs(JobStatus.SHORTLISTED), key=lambda job: not sent_today(job))  # stable
+
+
+def prepare_shortlisted(ctx: AppContext, *, limit: int | None = None,
                         job_ids: list[str] | None = None) -> PrepareReport:
-    """Tailored documents for the best SHORTLISTED jobs (or the given ids). One failure never stops the batch."""
+    """Tailored documents for the best SHORTLISTED jobs (``limits.prepare_per_run`` unless ``limit``; an offer
+    dropped on the way leaves its place to the next one) or the given ids, within ``PREPARE_BUDGET_S``. One
+    failure never stops the batch."""
     if job_ids is not None:
         jobs = [job for job in (ctx.repo.get_job(i) for i in job_ids) if job is not None]
+        cap = len(jobs)
     else:
-        jobs = ctx.repo.list_jobs(JobStatus.SHORTLISTED, limit=limit)
+        jobs = _preparation_queue(ctx)
+        cap = ctx.settings.limits.prepare_per_run if limit is None else limit
     counts = {"prepared": 0, "failed": 0, "skipped": 0}
     details: list[str] = []
+    started = time.monotonic()
     for job in jobs:
+        if counts["prepared"] + counts["failed"] >= cap:
+            break
+        if time.monotonic() - started >= PREPARE_BUDGET_S:
+            details.append(f"Temps de préparation écoulé ({PREPARE_BUDGET_S // 60} min) : la suite à la prochaine "
+                           "exécution.")
+            break
         try:
             kind, detail = _prepare_one(ctx, job)
         except Exception as exc:
@@ -233,16 +260,22 @@ def _collect(ctx: AppContext, shared: _Shared) -> CollectReport:
 
 
 def score_new_offers(ctx: AppContext) -> MatchReport:
-    """« score » step: short search cards read in full first (capped per run, never blocking), then scoring."""
-    from jobbot.matching.match import score_new_jobs
+    """« score » step: queued offers the profile now rules out leave the queue, short search cards are read in
+    full (capped per run, never blocking), then the new offers are scored."""
+    from jobbot.matching.match import drop_blocked_queue, score_new_jobs
     from jobbot.sources.registry import complete_new_offers
 
+    try:
+        dropped = drop_blocked_queue(ctx)
+    except Exception:  # the new offers are still scored
+        log.exception("Nouvelle vérification de la file d'attente impossible")
+        dropped = 0
     try:
         completed = complete_new_offers(ctx)
     except Exception:
         log.exception("Lecture des annonces complètes impossible avant la notation")
         completed = 0
-    return score_new_jobs(ctx).model_copy(update={"completed": completed})
+    return score_new_jobs(ctx).model_copy(update={"completed": completed, "dropped": dropped})
 
 
 def _score(ctx: AppContext, shared: _Shared) -> MatchReport:
@@ -288,21 +321,30 @@ def _enrich(ctx: AppContext, shared: _Shared) -> EnrichReport:
 
 
 def spontaneous_applications(ctx: AppContext, mailer: Any, *, limit: int | None = None) -> CampaignReport:
-    """LBA-relayed applications to « recruteurs LBA » first, then the e-mail campaign (effective mode)."""
+    """LBA-relayed applications to « recruteurs LBA » first, then the e-mail campaign (effective mode); in auto
+    mode the companies held by review mode go back to the queue before."""
     from jobbot.apply.lba_recruiters import run_lba_recruiters
+    from jobbot.outreach.holds import release_review_holds
     from jobbot.outreach.spontaneous import run_spontaneous_campaign
 
     effective = with_effective_mode(ctx)
+    try:
+        released = release_review_holds(effective)
+    except Exception:  # the campaigns still run on the current queue
+        log.exception("Remise en file des entreprises en attente impossible")
+        released = 0
     try:
         relay = run_lba_recruiters(effective, limit=limit)
     except Exception as exc:  # the e-mail campaign still runs
         log.exception("Relais La Bonne Alternance en échec")
         relay = ApplyReport(failed=1, details=[truncate(f"erreur : {exc}", MAX_ERROR_CHARS)])
     email = run_spontaneous_campaign(effective, mailer, limit=limit)
+    freed = ([f"{released} entreprise(s) en attente de validation remise(s) dans la file (mode automatique)"]
+             if released else [])
     return CampaignReport(
         sent=email.sent + relay.applied, skipped=email.skipped + relay.skipped + relay.pending_review,
         failed=email.failed + relay.failed, irrelevant=email.irrelevant + getattr(relay, "irrelevant", 0),
-        details=[*(f"LBA — {d}" for d in relay.details), *email.details],
+        details=[*freed, *(f"LBA — {d}" for d in relay.details), *email.details],
     )
 
 

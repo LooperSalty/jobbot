@@ -43,7 +43,8 @@ STALE_DAYS = 60
 WAITING_STATUSES = ("new", "enriched", "no_email")
 # statuses (and their raw keys) the day may set while a night worker holds an older copy of the company
 PROTECTED_STATUSES = frozenset({"contacted", "pending_review", "approved", "rejected", "blacklisted", "irrelevant"})
-PROTECTED_RAW = ("contacted_at", "contacted_email", "review_contact", "review_cv", "irrelevant_reason")
+PROTECTED_RAW = ("contacted_at", "contacted_email", "review_contact", "review_cv", "review_channel",
+                 "review_prev_status", "irrelevant_reason")
 
 
 # --------------------------------------------------------------------------- candidates

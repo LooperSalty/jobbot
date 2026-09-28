@@ -32,6 +32,7 @@ from jobbot.models import Application, ApplicationEvent, ApplyMethod, Company, C
 from jobbot.outreach import relevance
 from jobbot.outreach import selection as sel
 from jobbot.outreach._compose import OPT_OUT_SENTENCE, build_email, ensure_opt_out, is_alternance
+from jobbot.outreach.holds import hold_raw
 from jobbot.outreach.priority import company_priority
 from jobbot.pacing import Pacer, QuotaExceeded
 from jobbot.textutil import normalize_company
@@ -229,7 +230,7 @@ def _prepare_for_review(ctx: AppContext, company: Company, contact: ContactEmail
 def _hold_for_review(ctx: AppContext, company: Company, contact: ContactEmail, docs: TailoredDocuments,
                      history: sel.History) -> _Outcome:
     """Company → ``pending_review`` with its documents (review mode, or a CV whose claims need checking)."""
-    raw = {**company.raw, "review_contact": contact.email, "review_cv": docs.cv_pdf}
+    raw = hold_raw(company, review_contact=contact.email, review_cv=docs.cv_pdf)
     ctx.repo.upsert_company(company.model_copy(update={"status": "pending_review", "raw": raw}))
     again = " (nouvel essai après un rebond)" if history.state == "retry" else ""
     check = f" — CV à vérifier : {' ; '.join(docs.truth_warnings[:3])}" if docs.truth_warnings else ""

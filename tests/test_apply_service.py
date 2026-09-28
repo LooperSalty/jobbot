@@ -144,6 +144,44 @@ def test_login_problem_blocks_channel_without_touching_jobs(ctx, make_job, detai
     assert all(ctx.repo.get_job(j.id).status == JobStatus.DOCS_READY for j in jobs)
 
 
+@pytest.mark.parametrize("detail", [
+    "Erreur LinkedIn : Page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.linkedin.com/jobs/view/1",
+    "Erreur inattendue : Page.goto: net::ERR_INTERNET_DISCONNECTED at https://www.hellowork.com/fr-fr/emplois/1",
+    "Erreur inattendue : [Errno -3] Temporary failure in name resolution",
+])
+def test_network_outage_blocks_channel_without_failing_jobs(ctx, make_job, detail):
+    method = ApplyMethod.LINKEDIN_EASY_APPLY
+    jobs = [store_job(ctx, _job(make_job, n, source="linkedin", apply_method=method), score=90 - n) for n in (1, 2)]
+    fake = FakeApplier("linkedin", [result(JobStatus.FAILED, detail)])
+    report = _run(ctx, {"linkedin": fake})
+    assert fake.calls == [jobs[0].id]
+    assert (report.failed, report.skipped) == (0, 2)
+    assert all(ctx.repo.get_job(j.id).status == JobStatus.DOCS_READY for j in jobs)  # tried again next run
+    assert "sera retentée" in report.details[0]
+
+
+def test_network_outage_that_never_ends_fails_the_offer(ctx, make_job):
+    method = ApplyMethod.LINKEDIN_EASY_APPLY
+    job = store_job(ctx, _job(make_job, 1, source="linkedin", apply_method=method))
+    outage = "Erreur LinkedIn : Page.goto: net::ERR_CONNECTION_RESET at https://www.linkedin.com/jobs/view/1"
+    for _ in range(service.MAX_NETWORK_RETRIES - 1):
+        _run(ctx, {"linkedin": FakeApplier("linkedin", [result(JobStatus.FAILED, outage)])})
+        assert ctx.repo.get_job(job.id).status == JobStatus.DOCS_READY
+    last = _run(ctx, {"linkedin": FakeApplier("linkedin", [result(JobStatus.FAILED, outage)])})
+    assert last.failed == 1
+    assert ctx.repo.get_job(job.id).status == JobStatus.FAILED
+
+
+@pytest.mark.parametrize("detail", ["Page.goto: net::ERR_ABORTED at https://www.linkedin.com/jobs/view/1",
+                                    "Page.goto: net::ERR_CERT_DATE_INVALID", "Timeout 30000ms exceeded."])
+def test_other_errors_still_fail_the_offer(ctx, make_job, detail):
+    method = ApplyMethod.LINKEDIN_EASY_APPLY
+    job = store_job(ctx, _job(make_job, 1, source="linkedin", apply_method=method))
+    report = _run(ctx, {"linkedin": FakeApplier("linkedin", [result(JobStatus.FAILED, detail)])})
+    assert report.failed == 1
+    assert ctx.repo.get_job(job.id).status == JobStatus.FAILED
+
+
 def test_fatal_channel_and_failures(ctx, make_job):
     jobs = [store_job(ctx, _job(make_job, n), score=90 - n) for n in (1, 2)]
     fake = FakeApplier("email", [result(JobStatus.FAILED, "SMTP refusé", method=ApplyMethod.EMAIL)],

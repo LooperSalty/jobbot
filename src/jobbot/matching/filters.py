@@ -95,6 +95,11 @@ _ALT_TITLE = re.compile(
     r"\b(?:alternance|alternante?s?|apprentie?s?|apprentissage|contrat\s+(?:d'\s*)?apprentissage|"
     r"contrat\s+de\s+professionnalisation|contrat\s+pro|work\s*study|apprenticeship)\b"
 )
+# Any hint of a work-study contract, even loose (« Contrat : Apprentissage », « #alternance »): under an
+# alternance-only search an unknown contract is ruled out only when none appears (a false hint such as
+# « apprentissage automatique » merely leaves the offer to the normal scoring).
+_ALT_CUE = re.compile(r"alternan|apprenti|professionnalisation|\bcontrat\s+pro\b|work\s*study|apprenticeship|"
+                      r"ausbildung|\bdual(?:es)?\s+studium")
 _ALT_DESC = re.compile(
     r"\ben\s+alternance\b|\balternante?s?\b|\bapprentie?s?\b|contrat\s+(?:d'\s*)?apprentissage|"
     r"contrat\s+de\s+professionnalisation|\bcontrat\s+pro\b|rythme\s+(?:d'|de\s+l')?alternance|"
@@ -127,6 +132,11 @@ def detect_contract(job: JobOffer) -> ContractType:
             if rx.search(text):
                 return contract
     return ContractType.OTHER
+
+
+def mentions_alternance(job: JobOffer) -> bool:
+    """The title or the description hints at a work-study contract, however loosely (see ``_ALT_CUE``)."""
+    return bool(_ALT_CUE.search(_flat(f"{job.title}\n{job.description or ''}")))
 
 
 # --------------------------------------------------------------------------- experience
