@@ -71,13 +71,22 @@ def searxng_health(ctx: AppContext) -> tuple[str, str]:
     last = searx.last_backoff(ctx.repo)
     if until is not None:
         reason = (last or {}).get("reason") or "blocage"
-        fallback = "Brave, " if ctx.secrets.brave_api_key else ""
+        fallback = f"{brave_usage(ctx)}, " if ctx.secrets.brave_api_key else ""
         return "warn", (f"moteurs bloqués ({reason}) : pause jusqu'au {clock.to_paris(until):%d/%m %H:%M}, repli sur "
                         f"{fallback}Clearbit, slug + DNS, Wikidata — {used}")
     detail = f"moteurs : {engines} — {used}"
     if last:
         detail += f" — dernier blocage le {str(last.get('at') or '')[:10]} ({last.get('reason')})"
+    if ctx.secrets.brave_api_key:
+        detail += f" — repli {brave_usage(ctx)}"
     return "ok", detail
+
+
+def brave_usage(ctx: AppContext) -> str:
+    """'Brave 12/900 requêtes ce mois' (paid queries: monthly budget ``night.max_brave_queries``)."""
+    from jobbot.outreach._brave import used_this_month
+
+    return f"Brave {used_this_month(ctx.repo)}/{ctx.settings.night.max_brave_queries} requêtes ce mois"
 
 
 def doctor_checks(ctx: AppContext) -> list[Any]:

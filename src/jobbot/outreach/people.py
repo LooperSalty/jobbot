@@ -29,6 +29,7 @@ from jobbot.config import OutreachSettings, Secrets
 from jobbot.http import make_client, request_with_retry
 from jobbot.models import Company, ContactEmail
 from jobbot.outreach import domains as _domains
+from jobbot.outreach._brave import BraveEngine
 from jobbot.outreach._extract import page_links
 from jobbot.outreach._mailcheck import hunter_contact, hunter_domain_data
 from jobbot.outreach._patterns import is_valid_pattern
@@ -278,11 +279,11 @@ def _hunter(domain: str, key: str, client: httpx.Client) -> PeopleSearch:
 # --------------------------------------------------------------------------- search engines
 
 
-def _brave_titles(client: httpx.Client, query: str, api_key: str) -> list[str]:
+def _brave_titles(client: httpx.Client, query: str, brave: BraveEngine) -> list[str]:
     resp = request_with_retry(
-        client, "GET", _domains.BRAVE_URL, retries=1,
+        client, "GET", _domains.BRAVE_URL, retries=0,  # a retry would be one more (uncounted) paid query
         params={"q": query, "country": "FR", "search_lang": "fr", "count": 20},
-        headers={"X-Subscription-Token": api_key, "Accept": "application/json"},
+        headers={"X-Subscription-Token": brave.api_key, "Accept": "application/json"},
     )
     if resp.status_code != 200:
         log.warning("Brave Search (personnes) : HTTP %s", resp.status_code)
@@ -307,9 +308,10 @@ def _ddg_titles(client: httpx.Client, query: str) -> list[str]:
     return [a.get_text(" ", strip=True) for a in BeautifulSoup(resp.text, "lxml").select("a.result__a")]
 
 
-def _search_titles(client: httpx.Client, company: Company, secrets: Secrets | None,
+def _search_titles(client: httpx.Client, company: Company, brave: BraveEngine | None,
                    search_url: SearxEngine | str | None = None) -> list[str]:
-    """Result titles: SearXNG first (self-hosted, ``settings.search_engine_url``), else Brave (key) / DuckDuckGo."""
+    """Result titles: SearXNG first (self-hosted, ``settings.search_engine_url``), else Brave (key, within its
+    monthly budget) / DuckDuckGo."""
     names = _domains.company_names(company)
     if not names:
         return []
@@ -317,9 +319,8 @@ def _search_titles(client: httpx.Client, company: Company, secrets: Secrets | No
     titles = [title for _, title in searxng_search(client, search_url, query) if title]
     if titles:
         return titles
-    key = secrets.brave_api_key if secrets is not None else None
-    if key:
-        return _brave_titles(client, query + BRAVE_ROLE_TERMS, key)
+    if brave is not None and brave.take():
+        return _brave_titles(client, query + BRAVE_ROLE_TERMS, brave)
     return _ddg_titles(client, query)
 
 
@@ -345,9 +346,10 @@ def find_people_detailed(
     use_hunter: bool = True,
     use_search: bool = True,
     search_url: SearxEngine | str | None = None,
+    brave: BraveEngine | None = None,
 ) -> PeopleSearch:
     """Every source at once; ``pages`` (already crawled company pages) avoids fetching the site again;
-    ``search_url``: SearXNG base URL tried before Brave / DuckDuckGo."""
+    ``search_url``: SearXNG base URL tried before Brave (``_brave.brave_for(ctx)``) / DuckDuckGo."""
     own = client is None
     http = client or make_client()
     site = domain or _domains.normalize_domain(company.domain or company.website)
@@ -368,7 +370,7 @@ def find_people_detailed(
             people += hunter.people
         if use_search:
             used.append("search")
-            titles = _safe("moteur de recherche", lambda: _search_titles(http, company, secrets, search_url), [])
+            titles = _safe("moteur de recherche", lambda: _search_titles(http, company, brave, search_url), [])
             people += people_from_titles(titles, _domains.company_names(company))
     finally:
         if own:

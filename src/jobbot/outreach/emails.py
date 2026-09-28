@@ -42,6 +42,7 @@ from jobbot.outreach._extract import (
     scrape_emails,
 )
 from jobbot.outreach._mailcheck import guess_patterns, has_mx, hunter_domain_search
+from jobbot.outreach._brave import brave_for
 from jobbot.outreach._searxng import engine_for
 from jobbot.outreach.companies import PURGED_KEY
 from jobbot.outreach.relevance import split_relevant
@@ -279,7 +280,7 @@ def enrich_company(ctx: AppContext, company: Company) -> Company:
         return company.model_copy(update={"status": "blacklisted"})
     with make_client() as client:
         match = _known_domain(company) or _domains.find_domain_verified(
-            company, client=client, secrets=ctx.secrets, contact=_domains.profile_contact(ctx.profile),
+            company, client=client, brave=brave_for(ctx), contact=_domains.profile_contact(ctx.profile),
             search_url=engine_for(ctx))
         if match is None:
             return _finish(company, rank_contacts(list(company.contacts)), {"enrich_note": "site web introuvable"}, cfg)

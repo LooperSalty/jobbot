@@ -60,6 +60,7 @@ night:                     # « jobbot night » (0 h 30) : entreprises + adresse
   max_search_queries: 300  # SearXNG : requêtes par jour
   search_backoff_hours: 6  # SearXNG laissé tranquille après un CAPTCHA / blocage de ses moteurs
   max_siren_lookups: 200   # recherches au registre par nuit pour identifier les employeurs des offres
+  max_brave_queries: 900   # Brave Search (si BRAVE_API_KEY) : requêtes par mois, facturées au-delà du crédit offert
 
 search_engine_engines: [bing]  # moteurs demandés à SearXNG (search_engine_url : settings.local.yaml du serveur)
 

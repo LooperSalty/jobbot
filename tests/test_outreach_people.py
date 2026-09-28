@@ -11,6 +11,7 @@ import respx
 from jobbot.config import Secrets
 from jobbot.http import HostThrottle
 from jobbot.outreach import domains, people
+from jobbot.outreach._brave import BraveEngine
 from jobbot.outreach._mailcheck import HUNTER_BASE
 from jobbot.outreach._people_parse import looks_like_name, split_name
 from jobbot.outreach.people import (
@@ -229,14 +230,15 @@ def _hunter_payload():
 
 
 @respx.mock
-def test_find_people_detailed_combines_every_source(bromaker):
+def test_find_people_detailed_combines_every_source(bromaker, repo):
     _mock_site()
     hunter = respx.get(f"{HUNTER_BASE}/domain-search").mock(return_value=httpx.Response(200, json=_hunter_payload()))
     brave = respx.get(domains.BRAVE_URL).mock(return_value=httpx.Response(200, json={"web": {"results": [
         {"title": "Claire Dubois - Chargée de recrutement - Bromaker | LinkedIn", "url": "https://fr.linkedin.com/in/c"},
         {"title": "Karim Benali – CTO chez Bromaker | LinkedIn", "url": "https://fr.linkedin.com/in/k"},
     ]}}))
-    found = find_people_detailed(bromaker, secrets=_secrets(hunter_api_key="hk", brave_api_key="bk"))
+    found = find_people_detailed(bromaker, secrets=_secrets(hunter_api_key="hk"),
+                                 brave=BraveEngine(api_key="bk", repo=repo, monthly_cap=5))
 
     assert found.sources == ["registry", "website", "hunter", "search"]
     assert found.pattern == "{first}.{last}"
@@ -271,12 +273,23 @@ def test_find_people_uses_duckduckgo_politely_and_stops_on_bot_flag(bromaker, _o
 
 
 @respx.mock
-def test_find_people_isolates_failing_sources(bromaker):
+def test_find_people_skips_brave_once_its_monthly_budget_is_spent(bromaker, repo):
+    brave = respx.get(domains.BRAVE_URL).mock(return_value=httpx.Response(200, json={}))
+    ddg = respx.get(domains.DDG_URL).mock(return_value=httpx.Response(200, text=_fx("ddg_linkedin.html")))
+    found = find_people_detailed(bromaker, pages=[], use_hunter=False,
+                                 brave=BraveEngine(api_key="bk", repo=repo, monthly_cap=0))
+    assert not brave.called and ddg.called  # free last resort instead of a paid query
+    assert "Claire Dubois" in [p.name for p in found.people]
+
+
+@respx.mock
+def test_find_people_isolates_failing_sources(bromaker, repo):
     respx.get("https://bromaker.fr/").mock(side_effect=httpx.ConnectError("down"))
     respx.get("https://www.bromaker.fr/").mock(side_effect=httpx.ConnectError("down"))
     respx.get(f"{HUNTER_BASE}/domain-search").mock(side_effect=httpx.ConnectError("down"))
     respx.get(domains.BRAVE_URL).mock(return_value=httpx.Response(429, json={}))
-    found = find_people_detailed(bromaker, secrets=_secrets(hunter_api_key="hk", brave_api_key="bk"))
+    found = find_people_detailed(bromaker, secrets=_secrets(hunter_api_key="hk"),
+                                 brave=BraveEngine(api_key="bk", repo=repo, monthly_cap=5))
     assert [p.name for p in found.people] == ["Luc VERDIER"] and found.pattern is None and found.contacts == []
 
 

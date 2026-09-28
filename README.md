@@ -757,6 +757,9 @@ En `--dry-run`, rien n'est envoyé (les e-mails sont écrits dans `output/outbox
   signale ses moteurs bloqués (CAPTCHA, trop de requêtes, accès refusé), SearXNG est laissé tranquille
   `night.search_backoff_hours` (6 h) : Clearbit, noms de domaine devinés + DNS + SIREN, Wikidata et Brave (si
   `BRAVE_API_KEY`) prennent le relais. `jobbot doctor` montre l'état (« SearXNG ») et la dernière nuit.
+- Brave Search facture chaque requête au-delà du crédit de ta formule : jobbot n'en envoie jamais plus de
+  `night.max_brave_queries` (900) par mois, jour et nuit confondus ; au-delà, DuckDuckGo prend le relais.
+  `jobbot doctor` affiche la consommation du mois.
 
 ### 12.8 Dépannage du serveur
 

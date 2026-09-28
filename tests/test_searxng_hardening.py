@@ -10,9 +10,10 @@ import pytest
 import respx
 
 from jobbot import clock
-from jobbot.config import Secrets, Settings
+from jobbot.config import Settings
 from jobbot.http import HostThrottle
 from jobbot.outreach import _searxng, domains
+from jobbot.outreach._brave import BraveEngine
 from jobbot.outreach._searxng import SearxEngine, engine_for, searxng_search
 from jobbot.outreach.domains import find_domain_verified
 
@@ -157,7 +158,7 @@ def test_domain_search_falls_back_to_brave_during_a_backoff(searx_ctx, make_comp
         {"url": "https://exemple-numerique.fr/"}]}}))
     respx.get("https://exemple-numerique.fr/").mock(return_value=httpx.Response(
         200, text="<p>EXEMPLE NUMERIQUE — SIREN 900 000 001</p>", headers=HTML))
-    match = find_domain_verified(company, secrets=Secrets(_env_file=None, brave_api_key="cle"),
+    match = find_domain_verified(company, brave=BraveEngine(api_key="cle", repo=searx_ctx.repo, monthly_cap=5),
                                  search_url=engine_for(searx_ctx))
     assert match.domain == "exemple-numerique.fr" and match.method == "brave"
     assert not engine.called and brave.called

@@ -6,9 +6,10 @@ import httpx
 import pytest
 import respx
 
-from jobbot.config import Secrets, Settings
+from jobbot.config import Settings
 from jobbot.http import HostThrottle
 from jobbot.outreach import _searxng, domains
+from jobbot.outreach._brave import BraveEngine
 from jobbot.outreach._searxng import searxng_search
 from jobbot.outreach.domains import find_domain_verified
 from jobbot.outreach.people import find_people_detailed
@@ -70,7 +71,7 @@ def test_searxng_failures_return_nothing():
 
 
 @respx.mock
-def test_find_domain_uses_searxng_before_brave_and_duckduckgo(yaaka):
+def test_find_domain_uses_searxng_before_brave_and_duckduckgo(yaaka, repo):
     respx.get(domains.CLEARBIT_URL).mock(return_value=httpx.Response(200, json=[]))
     respx.get(domains.WIKIDATA_URL).mock(return_value=httpx.Response(200, json={"results": {"bindings": []}}))
     engine = respx.get(SEARCH).mock(return_value=httpx.Response(200, json={"results": [
@@ -82,7 +83,7 @@ def test_find_domain_uses_searxng_before_brave_and_duckduckgo(yaaka):
     respx.get(url__startswith="https://yaakadev-metz.fr/").mock(return_value=httpx.Response(404))
     brave = respx.get(domains.BRAVE_URL).mock(return_value=httpx.Response(200, json={}))
     ddg = respx.get(domains.DDG_URL).mock(return_value=httpx.Response(200, text=""))
-    match = find_domain_verified(yaaka, secrets=Secrets(_env_file=None, brave_api_key="k"), search_url=ENGINE)
+    match = find_domain_verified(yaaka, brave=BraveEngine(api_key="k", repo=repo, monthly_cap=5), search_url=ENGINE)
     assert match.method == "searxng" and match.domain == "yaakadev-metz.fr"
     assert engine.called and not brave.called and not ddg.called
 
@@ -100,7 +101,7 @@ def test_people_search_titles_come_from_searxng(make_company):
 
 
 @respx.mock
-def test_people_search_falls_back_when_searxng_is_down(make_company, monkeypatch):
+def test_people_search_falls_back_when_searxng_is_down(make_company, monkeypatch, repo):
     monkeypatch.setattr(domains, "_sleep", lambda s: None)
     company = make_company(name="BROMAKER", siren="800065146", domain=None, website=None, contacts=[],
                            leaders=[], raw={"leaders_detail": [], "names": ["BROMAKER"]})
@@ -108,5 +109,5 @@ def test_people_search_falls_back_when_searxng_is_down(make_company, monkeypatch
     brave = respx.get(domains.BRAVE_URL).mock(return_value=httpx.Response(200, json={"web": {"results": [
         {"title": "Karim Benali – CTO chez Bromaker | LinkedIn", "url": "https://fr.linkedin.com/in/k"}]}}))
     found = find_people_detailed(company, use_hunter=False, search_url=ENGINE,
-                                 secrets=Secrets(_env_file=None, brave_api_key="bk"))
+                                 brave=BraveEngine(api_key="bk", repo=repo, monthly_cap=5))
     assert brave.called and [p.name for p in found.people] == ["Karim Benali"]

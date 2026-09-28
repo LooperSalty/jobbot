@@ -25,9 +25,10 @@ from pydantic import BaseModel, ConfigDict
 from rapidfuzz import fuzz
 from rapidfuzz.utils import default_process
 
-from jobbot.config import Profile, Secrets
+from jobbot.config import Profile
 from jobbot.http import HostThrottle, make_client, request_with_retry
 from jobbot.models import Company
+from jobbot.outreach._brave import BraveEngine
 from jobbot.outreach._geocode import GEOCODE_URL, geocode_address  # noqa: F401
 from jobbot.outreach._searxng import SearxEngine, searxng_search
 
@@ -261,11 +262,13 @@ def _hosts_from_urls(urls: list[str]) -> list[str]:
     return list(dict.fromkeys(h for h in hosts if h and not is_directory_host(h)))[:3]
 
 
-def _brave(client: httpx.Client, query: str, api_key: str) -> list[str]:
+def _brave(client: httpx.Client, query: str, brave: BraveEngine) -> list[str]:
+    if not brave.take():  # monthly budget spent: the free providers carry on
+        return []
     resp = request_with_retry(
-        client, "GET", BRAVE_URL, retries=1,
+        client, "GET", BRAVE_URL, retries=0,
         params={"q": query, "country": "FR", "search_lang": "fr", "count": 10},
-        headers={"X-Subscription-Token": api_key, "Accept": "application/json"},
+        headers={"X-Subscription-Token": brave.api_key, "Accept": "application/json"},
     )
     if resp.status_code != 200:
         log.warning("Brave Search : HTTP %s", resp.status_code)
@@ -318,7 +321,7 @@ def _ddg(client: httpx.Client, query: str) -> list[str]:
 
 
 def _providers(
-    company: Company, names: list[str], secrets: Secrets | None, contact: str | None,
+    company: Company, names: list[str], brave: BraveEngine | None, contact: str | None,
     search_url: SearxEngine | str | None = None,
 ) -> list[tuple[str, bool, Callable]]:
     """(method, costly, fetch(client) -> domains). Costly ones are skipped once a name match exists."""
@@ -334,9 +337,8 @@ def _providers(
     if search_url:
         providers.append(("searxng", True,
                           lambda c: _hosts_from_urls([u for u, _ in searxng_search(c, search_url, query)])))
-    if secrets is not None and secrets.brave_api_key:
-        key = secrets.brave_api_key
-        providers.append(("brave", True, lambda c: _brave(c, query, key)))
+    if brave is not None:
+        providers.append(("brave", True, lambda c: _brave(c, query, brave)))
     providers.append(("duckduckgo", True, lambda c: _ddg(c, query)))
     return providers
 
@@ -345,18 +347,19 @@ def _providers(
 
 
 def find_domain_verified(
-    company: Company, *, client: httpx.Client | None = None, secrets: Secrets | None = None,
+    company: Company, *, client: httpx.Client | None = None, brave: BraveEngine | None = None,
     contact: str | None = None, search_url: SearxEngine | str | None = None,
 ) -> DomainMatch | None:
     """Best verified domain with its confidence, or None. ``contact``: see :func:`profile_contact`;
-    ``search_url``: SearXNG (``_searxng.engine_for(ctx)``, or a bare base URL), tried before Brave / DuckDuckGo."""
+    ``search_url``: SearXNG (``_searxng.engine_for(ctx)``, or a bare base URL), tried before Brave
+    (``_brave.brave_for(ctx)``, monthly budget) / DuckDuckGo."""
     names = company_names(company)
     own = client is None
     http = client or make_client()
     tried: set[str] = set()
     best: DomainMatch | None = None
     try:
-        for method, costly, fetch in _providers(company, names, secrets, contact, search_url):
+        for method, costly, fetch in _providers(company, names, brave, contact, search_url):
             if costly and best is not None:
                 break
             try:
@@ -380,9 +383,9 @@ def find_domain_verified(
 
 
 def find_domain(
-    company: Company, *, client: httpx.Client | None = None, secrets: Secrets | None = None,
+    company: Company, *, client: httpx.Client | None = None, brave: BraveEngine | None = None,
     contact: str | None = None, search_url: SearxEngine | str | None = None,
 ) -> str | None:
     """Verified website domain of ``company`` (SIREN on the site, else strong name match), or None."""
-    match = find_domain_verified(company, client=client, secrets=secrets, contact=contact, search_url=search_url)
+    match = find_domain_verified(company, client=client, brave=brave, contact=contact, search_url=search_url)
     return match.domain if match else None

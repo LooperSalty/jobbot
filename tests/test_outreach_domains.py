@@ -8,9 +8,9 @@ import httpx
 import pytest
 import respx
 
-from jobbot.config import Secrets
 from jobbot.http import HostThrottle
 from jobbot.outreach import domains
+from jobbot.outreach._brave import BraveEngine, used_this_month
 from jobbot.outreach.domains import (
     DomainMatch,
     find_domain,
@@ -186,7 +186,7 @@ def test_bot_user_agent_contact_comes_from_the_profile(profile):
 
 
 @respx.mock
-def test_find_domain_brave_then_name_match_skips_duckduckgo(yaaka):
+def test_find_domain_brave_then_name_match_skips_duckduckgo(yaaka, repo):
     respx.get(domains.CLEARBIT_URL).mock(return_value=httpx.Response(200, json=[]))
     respx.get(domains.WIKIDATA_URL).mock(return_value=httpx.Response(403))
     brave = respx.get(domains.BRAVE_URL).mock(return_value=httpx.Response(200, json={"web": {"results": [
@@ -197,10 +197,21 @@ def test_find_domain_brave_then_name_match_skips_duckduckgo(yaaka):
         200, text="<h1>Yaakadev</h1> agence web, 57070 Metz", headers=HTML))
     respx.get(url__startswith="https://yaakadev-metz.fr/").mock(return_value=httpx.Response(404))
     ddg = respx.get(domains.DDG_URL).mock(return_value=httpx.Response(200, text=""))
-    match = find_domain_verified(yaaka, secrets=Secrets(_env_file=None, brave_api_key="k"))
+    match = find_domain_verified(yaaka, brave=BraveEngine(api_key="k", repo=repo, monthly_cap=5))
     assert match.method == "brave" and match.verified_by == "name" and match.confidence < 1.0
     assert brave.calls[0].request.headers["x-subscription-token"] == "k"
     assert not ddg.called
+    assert used_this_month(repo) == 1
+
+
+@respx.mock
+def test_find_domain_skips_brave_once_its_monthly_budget_is_spent(yaaka, repo):
+    respx.get(domains.CLEARBIT_URL).mock(return_value=httpx.Response(200, json=[]))
+    respx.get(domains.WIKIDATA_URL).mock(return_value=httpx.Response(403))
+    brave = respx.get(domains.BRAVE_URL).mock(return_value=httpx.Response(200, json={}))
+    ddg = respx.get(domains.DDG_URL).mock(return_value=httpx.Response(200, text=""))
+    assert find_domain_verified(yaaka, brave=BraveEngine(api_key="k", repo=repo, monthly_cap=0)) is None
+    assert not brave.called and ddg.called  # free last resort instead of a paid query
 
 
 @respx.mock

@@ -59,6 +59,7 @@ class NightSettings(Frozen):
     max_search_queries: int = Field(300, ge=0)  # SearXNG queries per day
     search_backoff_hours: float = Field(6.0, ge=0)  # SearXNG left alone after a CAPTCHA / block
     max_siren_lookups: int = Field(200, ge=0)  # registry queries per night to identify the offers' employers
+    max_brave_queries: int = Field(900, ge=0)  # Brave Search API queries per month (billed beyond the plan's credit)
 
     @field_validator("until")
     @classmethod

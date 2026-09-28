@@ -581,7 +581,10 @@ ever sent at night**. The day campaign works through the queue by priority, unde
 
 - **Settings** (`config_sections.py`, re-exported by `config`): `NightSettings` (`settings.night`: `enabled`, `until`
   "06:30", `extra_radius_km` 20 (≤ 50), `workers` 4, `max_llm_summaries` 80, `prepare_margin` 5, `retention_days`
-  365, `search_min_interval_s` 6, `max_search_queries` 300, `search_backoff_hours` 6, `max_siren_lookups` 200),
+  365, `search_min_interval_s` 6, `max_search_queries` 300, `search_backoff_hours` 6, `max_siren_lookups` 200,
+  `max_brave_queries` 900 a month — `outreach/_brave.py`: `BraveEngine(api_key, repo, monthly_cap).take()` counts kv
+  **`brave:queries:YYYY-MM`** under a lock, `brave_for(ctx)` (None without key) is passed as `brave=` to
+  `find_domain_verified` / `find_people_detailed`; spent budget → no query (DuckDuckGo), never retried),
   `SpontaneousRamp`
   (`settings.limits.spontaneous_ramp`: `enabled`, `start` 20, `step_per_week` 5, `max` 40, `max_bounce_rate` 0.05;
   `start ≤ max`), `parse_clock`; `Settings.search_engine_engines` (["bing"], comma string accepted).
