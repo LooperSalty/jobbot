@@ -13,6 +13,8 @@ from .session import Deployment
 SESSIONS_DIR = "data/sessions"
 SESSION_SITES = ("linkedin", "hellowork", "wttj", "classroom")
 PROFILE = "config/profile.yaml"
+# Google Classroom API mode (classroom.backend: api): OAuth client + authorised token, not tied to the PC's device
+GOOGLE_API_FILES = ("config/google_oauth_client.json", "data/classroom_token.json")
 SETTINGS_LOCAL = "config/settings.local.yaml"
 ENV_PC = ".env.pc"  # last filtered .env sent by the PC (kept on the server: idempotency, never contains root keys)
 
@@ -25,13 +27,15 @@ def sha256(data: bytes) -> str:
 
 
 def private_files(dep: Deployment) -> list[tuple[str, bytes]]:
-    """(path relative to ~/jobbot, content) of the profile and the exported sessions present on the PC."""
+    """(path relative to ~/jobbot, content) of the profile, the Google Classroom API files and the exported
+    sessions present on the PC."""
     files: list[tuple[str, bytes]] = []
     profile = dep.root / PROFILE
     if profile.is_file():
         files.append((PROFILE, profile.read_bytes()))
     else:
         dep.notes.append("Profil absent du PC (config/profile.yaml) : le serveur garde le modèle fictif.")
+    files.extend((name, (dep.root / name).read_bytes()) for name in GOOGLE_API_FILES if (dep.root / name).is_file())
     sessions = sorted(p for p in (dep.root / SESSIONS_DIR).glob("*.json") if p.stem in SESSION_SITES)
     files.extend((f"{SESSIONS_DIR}/{p.name}", p.read_bytes()) for p in sessions)
     if not sessions:

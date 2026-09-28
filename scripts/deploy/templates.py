@@ -134,7 +134,7 @@ def deps_script() -> str:
 {LOCAL_PATH}
 cd "$HOME/{APP_DIR}"
 [ -x .venv/bin/python ] || uv venv --python 3.12 .venv
-uv pip install --python .venv/bin/python -e ".[dashboard]"
+uv pip install --python .venv/bin/python -e ".[dashboard,classroom]"
 .venv/bin/python -m playwright install chromium
 echo "DEPS_OK"
 """

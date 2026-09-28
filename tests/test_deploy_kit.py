@@ -143,6 +143,19 @@ def test_full_install_runs_every_step_in_order(pc):
     assert "127.0.0.1:8501" in out and "dashboard_serveur.ps1" in out and "Résumé" in out
 
 
+def test_google_classroom_api_files_are_sent_when_present(pc):
+    (pc / "config" / "google_oauth_client.json").write_text('{"installed": {}}', encoding="utf-8")
+    (pc / "data" / "classroom_token.json").write_text('{"refresh_token": "r"}', encoding="utf-8")
+    server = healthy_server()
+    code, _ = _run(pc, server, "--only", "private")
+    assert code == 0
+    assert {"jobbot/config/google_oauth_client.json", "jobbot/data/classroom_token.json"} <= set(server.uploads())
+
+
+def test_dependencies_include_the_classroom_api_client():
+    assert '-e ".[dashboard,classroom]"' in templates.deps_script()
+
+
 def test_private_files_are_filtered_and_sent_only_when_changed(pc):
     server = healthy_server()
     code, _ = _run(pc, server, "--only", "private")

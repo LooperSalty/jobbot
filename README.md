@@ -252,6 +252,15 @@ commence aussi par une vérification du Classroom.
 puis `jobbot config set classroom.backend api` et `jobbot login classroom` (autorisation dans le navigateur ; le
 jeton va dans `data/classroom_token.json`). Ces deux fichiers sont ignorés par git.
 
+**Sur un serveur, le mode API est le seul qui dure.** Chrome lie désormais la session Google à l'appareil où tu
+t'es connecté (cookies `__Secure-1PSIDRTS`) : une session exportée vers le serveur est refusée au bout de quelques
+heures (« Classroom : reconnecte-toi »). Le jeton OAuth, lui, se renouvelle seul. Dans Google Cloud, passe l'écran
+de consentement en **« En production »** (en « Test », Google annule l'autorisation au bout de 7 jours) ; l'écran
+« application non validée » s'accepte via « Paramètres avancés ». `deploy_server.py --only private` envoie
+`config/google_oauth_client.json` et `data/classroom_token.json` au serveur, et l'étape `deps` y installe
+`google-auth-oauthlib`. Si l'administrateur Google de l'école bloque les applications tierces, l'autorisation est
+refusée : reste alors en mode navigateur.
+
 ### 3.7 Sources d'offres en plus : Adzuna, Jooble, pages carrières, Indeed
 
 Ces sources sont dans `search.sources` par défaut. Sans leur clé, une source est simplement ignorée ;
