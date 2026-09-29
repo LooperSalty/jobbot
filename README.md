@@ -738,6 +738,20 @@ powershell -ExecutionPolicy Bypass -File scripts\dashboard_serveur.ps1   # tunne
 Avec un VPN (Tailscale) : `--dashboard-vpn` le met sur l'IP VPN du serveur (`SERVER_IP_TAILSCALE`), jamais sur
 `0.0.0.0`.
 
+**Depuis tout appareil du réseau local : http://jobbot.local** (identifiant et mot de passe : `DASHBOARD_USER` /
+`DASHBOARD_PASSWORD` du `.env` du PC). Installé à la main sur le serveur (root), en dehors de `deploy_server.py` :
+
+- nom : machine renommée `jobbot`, publiée en mDNS par Avahi (`/etc/avahi/avahi-daemon.conf` : `eno1` seulement,
+  IPv4 seulement) ; un appareil qui ne résout pas `.local` (vieux Android) passe par `http://<IP du serveur>` ;
+- accès : Caddy (`/etc/caddy/Caddyfile`) sur le port 80, mot de passe obligatoire (le tableau de bord n'en a pas),
+  réponse 403 hors de `192.168.1.0/24`, puis relais vers Streamlit, qui reste sur `127.0.0.1:8501` ;
+- pare-feu : port 80 ouvert au seul réseau local (`ufw`), jamais redirigé par la box vers internet ;
+- changer le mot de passe : `caddy hash-password` sur le serveur, remplacer le hachage dans le Caddyfile,
+  `systemctl reload caddy`, puis mettre à jour `DASHBOARD_PASSWORD` dans le `.env` du PC.
+
+Pas de nom de domaine public (du type `jobbot.fr`, déjà pris) : il faudrait le posséder, et le tableau de bord
+n'a pas à être visible depuis internet.
+
 ### 12.6 Être prévenu quand le serveur travaille seul
 
 Chaque notification a un niveau : `info` (bilans), `important` (réponse, offre de l'école à traiter, fiche
