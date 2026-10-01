@@ -76,11 +76,20 @@ SOFT_REJECTION = _rx(
     r"\bmalheureusement\b", r"\bunfortunately\b", r"(nous|je) vous (invitons|invite) a (consulter|postuler|vous rendre)",
     r"d'autres (plateformes|sites)", r"nous ne sommes pas en mesure", r"aucune offre",
 )
-# "entretien" that is no invitation: refused, or the one that already took place
+# "entretien" that is no invitation: refused, the one that already took place, or a mere possibility
 NOT_AN_INVITATION = _rx(
     r"(pas|plus|aucun|sans) (d'|de |d'un |un |une )?(entretien|rendez-vous|rdv|interview)",
     r"(suite a|apres|lors de) (notre|votre|cet|l') ?(entretien|echange|rendez-vous|rdv)",
+    r"eventuel(le)?s? (entretien|rendez-vous|echange)",
 )
+# « Sans réponse de notre part d'ici 30 jours, considérez que votre candidature n'a pas été retenue »: the usual
+# disclaimer of an acknowledgement, no refusal — the whole sentence is left out of the rules.
+_NO_NEWS = (
+    r"sans (reponse|retour|nouvelles?)( de (notre|ma) part)?",
+    r"(si|faute de) [^.!?\n]{0,40}(pas|aucune?) (de |d')?(reponse|retour|nouvelles?)",
+    r"without (a |any )?(response|reply|news) from us", r"if you (do not|don't) hear (back )?from us",
+)
+NO_NEWS_SENTENCE = re.compile(r"[^.!?\n]*(?:" + "|".join(_NO_NEWS) + r")[^.!?\n]*[.!?]?", re.IGNORECASE)
 CONDITIONAL = re.compile(r"\bsi\b|\bs'il|au cas ou|dans le cas|lorsque|sans reponse", re.IGNORECASE)
 _NEGATION = re.compile(r"\b(?:pas|plus|jamais|aucune?|sans|ne)\b|\bn'", re.IGNORECASE)
 _CLAUSE_END = re.compile(r"[,;:.!?\n]")
@@ -161,9 +170,14 @@ def summarize(text: str) -> str:
     return truncate(flat, SUMMARY_CHARS) if flat else "(message vide)"
 
 
+def rule_text(text: str) -> str:
+    """What the rules read: folded text without the « no news means no » disclaimer."""
+    return NO_NEWS_SENTENCE.sub(" ", fold(text)[:MAX_RULE_CHARS])
+
+
 def is_rejection(text: str) -> bool:
     """Content rule shared with platform notifications (their footers carry 'unsubscribe' links)."""
-    return bool(REJECTION.search(fold(text)[:MAX_RULE_CHARS]))
+    return bool(REJECTION.search(rule_text(text)))
 
 
 def _verdict(category: ReplyCategory, text: str, confidence: float) -> ReplyClassification:
@@ -220,32 +234,43 @@ def _soft_refusal(folded: str) -> bool:
     return _asserted(SOFT_REJECTION, folded)
 
 
+def _content_rules(folded: str, *, auto_submitted: bool = False) -> tuple[ReplyCategory, float] | None:
+    """(category, confidence) from the words of a reply (``rule_text``), None when no rule decides."""
+    # machines cannot opt out on someone's behalf (ATS footers carry "se désinscrire" links)
+    if not auto_submitted and UNSUBSCRIBE.search(folded):
+        return "unsubscribe", 0.9
+    if _refusal(folded):
+        return "rejection", 0.85
+    if ACKNOWLEDGEMENT.search(folded) and not SCHEDULING.search(folded):
+        return "auto_reply", 0.8
+    if INTERVIEW_STRONG.search(folded):
+        return "interview", 0.85
+    if auto_submitted:
+        return "auto_reply", 0.75
+    if _soft_refusal(folded):
+        return "rejection", 0.7
+    for category, pattern, confidence in (
+        ("interview", INTERVIEW_WEAK, 0.7), ("positive", POSITIVE, 0.7), ("info_request", INFO_REQUEST, 0.7),
+        ("auto_reply", OOF_BODY, 0.75),
+    ):
+        if pattern.search(folded) and (category != "interview" or _interview_cues(folded)):
+            return category, confidence
+    return None
+
+
+def classify_text(text: str) -> ReplyCategory | None:
+    """Category of a recruiter's own words relayed by a platform (La Bonne Alternance), None when undecided."""
+    found = _content_rules(rule_text(text))
+    return found[0] if found else None
+
+
 def classify_by_rules(msg: InboundMessage) -> ReplyClassification | None:
     new_text = strip_quoted(msg.body_text)
     verdict = _header_rules(msg, new_text)
     if verdict is not None:
         return verdict
-    folded = fold(f"{msg.subject}\n{new_text}")[:MAX_RULE_CHARS]
-    # machines cannot opt out on someone's behalf (ATS footers carry "se désinscrire" links)
-    if not msg.auto_submitted and UNSUBSCRIBE.search(folded):
-        return _verdict("unsubscribe", new_text, 0.9)
-    if _refusal(folded):
-        return _verdict("rejection", new_text, 0.85)
-    if ACKNOWLEDGEMENT.search(folded) and not SCHEDULING.search(folded):
-        return _verdict("auto_reply", new_text, 0.8)
-    if INTERVIEW_STRONG.search(folded):
-        return _verdict("interview", new_text, 0.85)
-    if msg.auto_submitted:
-        return _verdict("auto_reply", new_text, 0.75)
-    if _soft_refusal(folded):
-        return _verdict("rejection", new_text, 0.7)
-    for category, pattern, confidence in (
-        ("interview", INTERVIEW_WEAK, 0.7), ("positive", POSITIVE, 0.7), ("info_request", INFO_REQUEST, 0.7),
-        ("auto_reply", OOF_BODY, 0.75),
-    ):
-        if pattern.search(folded):
-            return _verdict(category, new_text, confidence)
-    return None
+    found = _content_rules(rule_text(f"{msg.subject}\n{new_text}"), auto_submitted=msg.auto_submitted)
+    return _verdict(found[0], new_text, found[1]) if found else None
 
 
 def _llm_prompt(msg: InboundMessage, new_text: str) -> str:

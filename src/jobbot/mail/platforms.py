@@ -10,7 +10,7 @@ import re
 
 from pydantic import BaseModel, ConfigDict
 
-from jobbot.mail.classify import INTERVIEW_WEAK, fold, is_rejection
+from jobbot.mail.classify import INTERVIEW_WEAK, classify_text, fold, is_rejection
 from jobbot.mail.messages import InboundMessage
 from jobbot.mail.parsing import strip_quoted
 from jobbot.models import ApplicationStatus, ApplyMethod
@@ -31,9 +31,10 @@ PLATFORM_METHODS: dict[str, tuple[ApplyMethod, ...]] = {
 }
 _I = re.IGNORECASE
 _DASH = r"\s*[-–—:]\s*"
+LBA_REPLY = "reply"  # « Suite donnée »: any answer of the recruiter, its status comes from the recruiter's words
 _LBA_RULES: tuple[tuple[re.Pattern[str], ApplicationStatus | None, str, str], ...] = (
     (re.compile(r"^\s*suite donn[ée]e [àa] votre candidature" + _DASH + r"(?P<company>.+)$", _I),
-     ApplicationStatus.INTERVIEW, "interview", "Le recruteur a répondu via La Bonne Alternance"),
+     ApplicationStatus.RESPONSE, LBA_REPLY, "Le recruteur a répondu via La Bonne Alternance"),
     (re.compile(r"^\s*r[ée]ponse n[ée]gative de (?P<company>.+?) [àa] la candidature", _I),
      ApplicationStatus.REJECTED, "rejected", "Réponse négative via La Bonne Alternance"),
     (re.compile(r"^\s*votre candidature n'a pas pu [êe]tre envoy[ée]e [àa] (?P<company>.+)$", _I),
@@ -75,15 +76,47 @@ def _clean_subject(subject: str) -> str:
     return re.sub(r"^\s*((re|tr|fw|fwd)\s*:\s*)+", "", subject.replace("’", "'"), flags=_I).strip()
 
 
-def _lba_notice(subject: str) -> PlatformNotice | None:
+# The recruiter's own words inside LBA's template (« … vous répond : <message> À vous maintenant ! ✅ … »); the
+# template's footer (« Préparez-vous pour un éventuel entretien ») is LBA's, in every reply.
+_LBA_RECRUITER_TEXT = re.compile(r"vous r[ée]pond\s*:(?P<text>.*?)(?:[àa] vous maintenant|$)", _I | re.DOTALL)
+_LBA_VERDICTS: dict[str, tuple[ApplicationStatus, str, str]] = {
+    "interview": (ApplicationStatus.INTERVIEW, "interview", "Le recruteur propose un entretien (La Bonne Alternance)"),
+    "rejection": (ApplicationStatus.REJECTED, "rejected", "Refus du recruteur via La Bonne Alternance"),
+    "unsubscribe": (ApplicationStatus.REJECTED, "rejected", "Refus du recruteur via La Bonne Alternance"),
+    "info_request": (ApplicationStatus.RESPONSE, LBA_REPLY,
+                     "Le recruteur demande des informations (La Bonne Alternance)"),
+    "positive": (ApplicationStatus.RESPONSE, LBA_REPLY, "Le recruteur s'intéresse à ta candidature (La Bonne Alternance)"),
+    "auto_reply": (ApplicationStatus.RESPONSE, LBA_REPLY,
+                   "Le recruteur a accusé réception de ta candidature (La Bonne Alternance)"),
+}
+
+
+def lba_recruiter_text(body: str) -> str:
+    """The recruiter's message relayed by LBA ('' when the template is not recognised)."""
+    match = _LBA_RECRUITER_TEXT.search(body or "")
+    return match.group("text").strip() if match else ""
+
+
+def _lba_reply(notice: PlatformNotice, body: str) -> PlatformNotice:
+    """« Suite donnée »: interview, refusal or plain response according to what the recruiter wrote."""
+    text = lba_recruiter_text(body)
+    verdict = _LBA_VERDICTS.get(classify_text(text) or "") if text else None
+    if verdict is None:
+        return notice
+    status, kind, detail = verdict
+    return notice.model_copy(update={"status": status, "event_kind": kind, "detail": detail})
+
+
+def _lba_notice(subject: str, body: str) -> PlatformNotice | None:
     for pattern, status, kind, detail in _LBA_RULES:
         match = pattern.search(subject)
         if match:
             company = match.groupdict().get("company")
-            return PlatformNotice(
+            notice = PlatformNotice(
                 platform="lba", company=company.strip(" .") if company else None, status=status,
                 event_kind=kind, detail=detail, methods=PLATFORM_METHODS["lba"],
             )
+            return _lba_reply(notice, body) if kind == LBA_REPLY else notice
     return None
 
 
@@ -108,7 +141,7 @@ def detect_platform_notice(msg: InboundMessage) -> PlatformNotice | None:
         return None
     subject = _clean_subject(msg.subject)
     if platform in (None, "lba"):
-        return _lba_notice(subject)
+        return _lba_notice(subject, msg.body_text)
     body = strip_quoted(msg.body_text)[:3000]
     if not _APPLICATION_WORDS.search(subject):
         return None

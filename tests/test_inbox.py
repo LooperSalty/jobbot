@@ -180,7 +180,7 @@ def test_platform_notices():
     assert refus.platform == "lba" and refus.company == "Acme Logiciels" and refus.status == ApplicationStatus.REJECTED
     suite = detect_platform_notice(_msg(make_raw(frm="LBA <nepasrepondre@apprentissage.beta.gouv.fr>",
                                                  subject="Suite donnée à votre candidature - Acme Logiciels")))
-    assert suite.status == ApplicationStatus.INTERVIEW and suite.company == "Acme Logiciels"
+    assert suite.status == ApplicationStatus.RESPONSE and suite.company == "Acme Logiciels"  # no recruiter text
     viewed = detect_platform_notice(_msg(make_raw(frm="HelloWork <notification@hellowork.com>",
                                                   subject="Votre candidature a été consultée par Acme Logiciels")))
     assert viewed.platform == "hellowork" and viewed.status is None and viewed.company == "Acme Logiciels"
@@ -191,6 +191,48 @@ def test_platform_notices():
     assert detect_platform_notice(_msg(make_raw(frm="LinkedIn <jobs-noreply@linkedin.com>",
                                                 subject="12 nouvelles offres pour développeur"))) is None
     assert detect_platform_notice(_msg(make_raw())) is None
+
+
+LBA_ACK = (
+    "Nous avons bien reçu votre candidature et vous en remercions.\n\nVotre candidature a retenu notre attention.\n\n"
+    "Nous examinons l'ensemble des candidatures reçues, et reviendrons vers vous prochainement.\n\n"
+    "Sans réponse de notre part d’ici 30 jours, veuillez considérer que votre candidature n’a pas été retenue."
+)
+
+
+def _lba_reply(recruiter_text: str) -> bytes:
+    """« Suite donnée » e-mail of La Bonne Alternance: its template around the recruiter's own words."""
+    body = ("Bonjour Jean DUPONT,\n\nLe recruteur ACME LOGICIELS a bien reçu votre candidature et vous répond :\n\n"
+            f"Bonjour,\n\n{recruiter_text}\n\nCordialement,\n\nÀ vous maintenant !\n\n"
+            "✅ Lisez attentivement leur message.\n✅ Suivez les instructions proposées par le recruteur pour "
+            "poursuivre le processus de candidature.\n✅ Préparez-vous pour un éventuel entretien.\n")
+    return make_raw(frm="La bonne alternance <nepasrepondre@apprentissage.beta.gouv.fr>",
+                    subject="Suite donnée à votre candidature - ACME LOGICIELS", body=body)
+
+
+@pytest.mark.parametrize(("recruiter_text", "status"), [
+    (LBA_ACK, ApplicationStatus.RESPONSE),  # acknowledgement, « retenu notre attention »: no interview, no refusal
+    ("Votre profil nous intéresse. Seriez-vous disponible mardi 6 octobre à 14h pour un entretien en visio ?",
+     ApplicationStatus.INTERVIEW),
+    ("Nous sommes au regret de ne pas pouvoir donner suite à votre candidature.", ApplicationStatus.REJECTED),
+    ("Pourriez-vous nous transmettre votre calendrier d'alternance ?", ApplicationStatus.RESPONSE),
+])
+def test_lba_reply_status_comes_from_the_recruiter_words(recruiter_text, status):
+    notice = detect_platform_notice(_msg(_lba_reply(recruiter_text)))
+    assert notice.platform == "lba" and notice.company == "ACME LOGICIELS"
+    assert notice.status == status
+
+
+def test_lba_template_alone_never_announces_an_interview():
+    """« Préparez-vous pour un éventuel entretien » is LBA's footer in every reply, not an invitation."""
+    notice = detect_platform_notice(_msg(_lba_reply("Merci pour votre candidature.")))
+    assert notice.status == ApplicationStatus.RESPONSE
+    assert "entretien" not in notice.detail.lower()
+
+
+def test_a_conditional_refusal_is_no_refusal():
+    msg = _msg(make_raw(subject="Re: Candidature", body=LBA_ACK))
+    assert classify_reply(msg, None).category != "rejection"
 
 
 # --------------------------------------------------------------------------- IMAP
@@ -316,7 +358,9 @@ def test_process_inbox_domain_fallback_and_gmail_thread(mail_ctx, notified, no_a
 def test_process_inbox_platform_notice_and_spam_folder(mail_ctx, notified, no_alerts):
     app = make_app(mail_ctx.repo, method=ApplyMethod.LBA, email_to=None, email_message_id=None, email_thread_ids=[])
     suite = make_raw(frm="LBA <nepasrepondre@apprentissage.beta.gouv.fr>",
-                     subject="Suite donnée à votre candidature - Acme Logiciels")
+                     subject="Suite donnée à votre candidature - Acme Logiciels",
+                     body="Le recruteur ACME LOGICIELS vous répond : Seriez-vous disponible jeudi pour un entretien en "
+                          "visio ? À vous maintenant ! Préparez-vous pour un éventuel entretien.")
     unknown = make_raw(frm="LBA <nepasrepondre@apprentissage.beta.gouv.fr>",
                        subject="Réponse négative de Zeta SAS à la candidature de Jean DUPONT")
     report = process_inbox(mail_ctx, imap_factory=lambda h, p: gmail({}, {4: (suite, "1"), 5: (unknown, "2")}))
