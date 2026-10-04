@@ -10,6 +10,9 @@ from jobbot.matching.ats import keyword_coverage, score_document
 from jobbot.models import KeywordHit
 
 FIXTURES = Path(__file__).parent / "fixtures" / "matching"
+# private (git-ignored): text of a real CV and cover letter, kept off the public repo
+if not (FIXTURES / "cv_candidat.txt").exists() or not (FIXTURES / "lettre_candidat.txt").exists():
+    pytest.skip("CV / lettre de test privés absents (non publiés)", allow_module_level=True)
 CV = (FIXTURES / "cv_candidat.txt").read_text(encoding="utf-8")
 LETTER = (FIXTURES / "lettre_candidat.txt").read_text(encoding="utf-8")
 TITLE = "Développeur Full-Stack React / Node.js en alternance (H/F)"

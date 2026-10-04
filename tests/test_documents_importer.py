@@ -14,7 +14,10 @@ from jobbot.documents.models import DocumentError
 from jobbot.llm import FakeLLM, LLMError
 
 FIXTURES = Path(__file__).parent / "fixtures" / "documents"
-CV_TEXT = (FIXTURES / "cv_candidat_original.txt").read_text(encoding="utf-8")
+CV_FILE = FIXTURES / "cv_candidat_original.txt"  # private (git-ignored): text of a real CV, kept off the public repo
+if not CV_FILE.exists():
+    pytest.skip("CV de test privé absent (non publié)", allow_module_level=True)
+CV_TEXT = CV_FILE.read_text(encoding="utf-8")
 
 LLM_PROFILE = {
     "identity": {"first_name": "Jean", "last_name": "DUPONT", "email": "jean.dupont@example.com",
