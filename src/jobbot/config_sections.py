@@ -68,6 +68,47 @@ class NightSettings(Frozen):
         return value.strip()
 
 
+_EMPLOYER_TRANCHES = ("00", "01", "02", "03", "11", "12", "21", "22", "31", "32", "41", "42", "51", "52", "53")
+_DIVISION_RE = re.compile(r"^\d\d$")
+
+
+class LargeCompanies(Frozen):
+    """« Grandes entreprises » spontaneous targets: ETI / GE of any sector (field work, car dealers, stores, hotels,
+    care homes and personal services aside) whose local site has ≥ ``min_site_tranche`` employees (INSEE code: 21 = 50-99),
+    within ``max_km`` of the first French search area; the campaign writes ring by ring (``rings_km``), nearest
+    first (:mod:`jobbot.night.large`, :func:`jobbot.outreach.priority.focus_ring`)."""
+
+    enabled: bool = False
+    min_site_tranche: str = "21"
+    max_km: int = Field(75, ge=1)
+    rings_km: list[int] = Field(default_factory=lambda: [15, 30, 50, 75])
+    # car dealers / garages, stores, hotels, care homes, social work, personal services, household employers
+    skip_divisions: list[str] = Field(default_factory=lambda: ["45", "47", "55", "87", "88", "96", "97"])
+
+    @field_validator("min_site_tranche")
+    @classmethod
+    def _valid_tranche(cls, value: str) -> str:
+        if value not in _EMPLOYER_TRANCHES:
+            raise ValueError(f"Code de tranche d'effectif invalide « {value} » (codes INSEE : "
+                             f"{', '.join(_EMPLOYER_TRANCHES)} ; ex. 21 = 50 à 99 salariés)")
+        return value
+
+    @field_validator("skip_divisions")
+    @classmethod
+    def _valid_divisions(cls, value: list[str]) -> list[str]:
+        bad = [d for d in value if not _DIVISION_RE.match(str(d))]
+        if bad:
+            raise ValueError(f"Division NAF invalide : {', '.join(map(str, bad))} (deux chiffres, ex. 47)")
+        return value
+
+    @field_validator("rings_km")
+    @classmethod
+    def _sorted_rings(cls, value: list[int]) -> list[int]:
+        if not value or any(r <= 0 for r in value):
+            raise ValueError("Cercles d'envoi : au moins un rayon positif (ex. [15, 30, 50, 75])")
+        return sorted(value)
+
+
 class OutreachSettings(Frozen):
     """Spontaneous applications: who may be contacted and how aggressively."""
 
@@ -81,6 +122,7 @@ class OutreachSettings(Frozen):
         default_factory=lambda: ["rh", "recrutement", "talent", "cto", "directeur technique", "lead", "gérant",
                                  "président"]
     )
+    large_companies: LargeCompanies = Field(default_factory=LargeCompanies)
 
 
 class ReportSettings(Frozen):

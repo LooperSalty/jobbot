@@ -64,10 +64,37 @@ def _with_local_place(merged: Company, source: Company | None) -> Company:
     return merged.model_copy(update={**update, "raw": {**raw, LOCAL_KEY: True}})
 
 
+SITE_KEY = "site_tranche"  # set by jobbot.night.large: the candidate carries a big local site of its own
+
+
+def _big_site_place(merged: Company, existing: Company, fresh: Company) -> Company:
+    """A « grandes entreprises » candidate brings its local site: it becomes the place only when the stored one is
+    not as good (no place known, or farther from the search areas) and is neither an LBA recruiter's establishment
+    nor the one near the offers; otherwise the stored place keeps its own siret / distance (never mixed)."""
+    if SITE_KEY not in fresh.raw:
+        return merged
+    def distance(company: Company) -> float:
+        value = company.raw.get("distance_km")
+        return float(value) if isinstance(value, (int, float)) else float("inf")
+
+    keep = (existing.source == "lba_recruteur" or existing.raw.get(LOCAL_KEY)
+            or (existing.latitude is not None and distance(existing) <= distance(fresh)))
+    raw = dict(merged.raw)
+    if keep:
+        for key in (*PLACE_RAW, SITE_KEY):
+            raw.pop(key, None)
+            if key in existing.raw:
+                raw[key] = existing.raw[key]
+        return merged.model_copy(update={"raw": raw})
+    raw.update({k: fresh.raw[k] for k in (*PLACE_RAW, SITE_KEY) if k in fresh.raw})
+    return merged.model_copy(update={**{f: getattr(fresh, f) for f in PLACE_FIELDS}, "raw": raw})
+
+
 def merge_company(existing: Company, fresh: Company) -> Company:
     """Registry refresh (:func:`jobbot.outreach.companies.merge_company`) + hiring signals + known website + the
-    establishment near the offers."""
-    merged = _with_local_place(_merge_registry(existing, fresh), _local_source(existing, fresh))
+    establishment near the offers + the big local site of a « grandes entreprises » candidate."""
+    merged = _big_site_place(_merge_registry(existing, fresh), existing, fresh)
+    merged = _with_local_place(merged, _local_source(existing, fresh))
     raw = dict(merged.raw)
     signals = merge_signals(existing.raw.get(SIGNAL_KEY), fresh.raw.get(SIGNAL_KEY))
     if signals:

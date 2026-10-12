@@ -7,8 +7,10 @@ Website summaries use the fast model, one call at a time, at most ``settings.nig
 (:class:`jobbot.llm.CappedLLM`; beyond: the page's meta description).
 
 Candidates: ``new`` companies, ``enriched`` / ``no_email`` ones enriched more than 60 days ago (stale) and
-``enriched`` ones without an address usable under the current settings — inside the target only, most promising
-first (:func:`jobbot.outreach.priority.potential`). No new company is started once the deadline is reached.
+``enriched`` ones without an address usable under the current settings — inside the target only, ring by ring
+around the first search area when the « grandes entreprises » focus is on (:func:`jobbot.outreach.priority.focus_ring`),
+most promising first (:func:`jobbot.outreach.priority.potential`). No new company is started once the deadline is
+reached.
 """
 
 from __future__ import annotations
@@ -30,7 +32,7 @@ from jobbot.night.budget import Deadline
 from jobbot.night.models import EnrichResult
 from jobbot.outreach.domains import normalize_domain
 from jobbot.outreach.emails import enrich_or_note_failure
-from jobbot.outreach.priority import potential
+from jobbot.outreach.priority import focus_ring, potential
 from jobbot.outreach.relevance import is_relevant_employer, split_relevant
 from jobbot.outreach.selection import is_nominative, usable
 from jobbot.textutil import normalize_company
@@ -77,7 +79,9 @@ def enrichment_queue(ctx: AppContext, *, now: datetime | None = None,
     else:
         relevant = [c for c in waiting if is_relevant_employer(c, ctx.profile)[0]]
         outside = len(waiting) - len(relevant)
-    return sorted(relevant, key=lambda c: -potential(c, ctx.profile, now=at)), outside
+    cfg = ctx.settings.outreach  # ring by ring around the first search area when the large-company focus is on
+    return sorted(relevant, key=lambda c: (focus_ring(c, ctx.profile, cfg),
+                                           -potential(c, ctx.profile, now=at, cfg=cfg))), outside
 
 
 def domain_key(company: Company) -> str:

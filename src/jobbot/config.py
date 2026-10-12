@@ -13,6 +13,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from jobbot.config_sections import (  # noqa: F401
     ClassroomSettings,
     Frozen,
+    LargeCompanies,
     NightSettings,
     OutreachSettings,
     ReportSettings,

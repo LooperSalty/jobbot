@@ -635,9 +635,14 @@ ever sent at night**. The day campaign works through the queue by priority, unde
   contacted, in the database for more than `retention_days`; dry-run counts only) → `harvest` (`harvest.harvest`:
   `/near_point` around every French area with coordinates, radius + extra (≤ 50), NAF = profile full codes + IT list
   + telecoms/72.19Z, every page (≤ 10 000 results, else one query per NAF), profile `min_headcount_code` applied
-  client-side; LBA recruiters for `ROMES_DEV`; `hiring.hiring_companies`; 35 % of the time, storing until the
-  final deadline) → `enrich` (`enrich.run_enrichment`: `new`, stale > 60 days `enriched`/`no_email`, `enriched`
-  without usable address; relevant only, most promising first; `run_parallel` on `workers` threads, one worker per
+  client-side; `large.large_companies` when `outreach.large_companies.enabled`: `/search` per profile department
+  with `categorie_entreprise=ETI,GE` (`/near_point` ignores it), the largest active local establishment ≥
+  `min_site_tranche` within `max_km` of `priority.center_of` (first French area), divisions neither
+  `relevance.FIELD_DIVISIONS` nor `skip_divisions`, placed at that site, raw `large_target` / `site_tranche`; LBA
+  recruiters for `ROMES_DEV`; `hiring.hiring_companies`; 35 % of the time, storing until the final deadline) →
+  `enrich` (`enrich.run_enrichment`: `new`, stale > 60 days `enriched`/`no_email`, `enriched` without usable
+  address; relevant only, ring by ring (`priority.focus_ring`, 0 for all when the focus is off) then most promising
+  first; `run_parallel` on `workers` threads, one worker per
   `domain_key`; `save_enriched` keeps a status the day set meanwhile; 75 % of what is left) → `prioritize`
   (`prioritize.prioritize`: stores the priority of enriched/approved/pending_review companies when it changed) →
   `prepare` (`prepare.prepare_ahead`: top `cap + prepare_margin` of `ready_queue`, `enriched` companies only — an

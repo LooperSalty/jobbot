@@ -118,9 +118,15 @@ def target_block(job: JobOffer | None, company: Company | None, title: str) -> s
                 f"Description :\n{(job.description or '')[:MAX_DESCRIPTION_CHARS]}")
     if company is None:
         return f"## Candidature spontanée\nPoste recherché : {title}"
-    return (f"## Candidature spontanée\nPoste recherché : {title}\nEntreprise : {company.name}\n"
-            f"Activité : {company.naf_label or '(inconnue)'}\nVille : {company.city}\n"
-            f"Description : {company.description or '(aucune)'}")
+    activity = company.naf_label or (f"code NAF {company.naf_code}" if company.naf_code else "(inconnue)")
+    block = (f"## Candidature spontanée\nPoste recherché : {title}\nEntreprise : {company.name}\n"
+             f"Activité : {activity}\nVille : {company.city}\n"
+             f"Description : {company.description or '(aucune)'}")
+    if company.raw.get("large_target"):  # « grandes entreprises » of any sector (jobbot.night.large)
+        block += ("\nContexte : grande structure dont le métier n'est pas forcément le numérique ; le candidat vise son "
+                  "service informatique interne (applications et outils métier, transformation numérique). Ne cite "
+                  "aucun projet informatique précis de l'entreprise qui ne figure pas ci-dessus.")
+    return block
 
 
 def keywords_line(keywords: list[KeywordHit]) -> str:

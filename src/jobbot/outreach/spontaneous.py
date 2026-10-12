@@ -33,7 +33,7 @@ from jobbot.outreach import relevance
 from jobbot.outreach import selection as sel
 from jobbot.outreach._compose import OPT_OUT_SENTENCE, build_email, ensure_opt_out, is_alternance
 from jobbot.outreach.holds import hold_raw
-from jobbot.outreach.priority import company_priority
+from jobbot.outreach.priority import company_priority, focus_ring
 from jobbot.pacing import Pacer, QuotaExceeded
 from jobbot.textutil import normalize_company
 
@@ -106,10 +106,12 @@ def _priority(ctx: AppContext, company: Company) -> float:
 
 
 def _candidates(ctx: AppContext, apps: list[Application]) -> list[Company]:
-    """Retries after a bounce first (already chosen, never reached), then approved, then enriched by priority
-    (then discovery score)."""
+    """Retries after a bounce first (already chosen, never reached), then approved, then enriched ring by ring
+    around the first search area (« grandes entreprises » focus), by priority (then discovery score)."""
+    cfg = ctx.settings.outreach
     fresh = sorted(ctx.repo.list_companies(status=["approved", "enriched"]),
-                   key=lambda c: (c.status != "approved", -_priority(ctx, c), -_score(c)))
+                   key=lambda c: (c.status != "approved", focus_ring(c, ctx.profile, cfg), -_priority(ctx, c),
+                                  -_score(c)))
     seen = {c.id for c in fresh}
     retries = [c for c in sel.bounced_companies(ctx, apps) if c.id not in seen]
     return [*retries, *fresh]

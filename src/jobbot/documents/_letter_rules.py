@@ -265,8 +265,13 @@ def _you(inp: LetterInput) -> str:
                 "Contribuer à des applications utilisées au quotidien, au sein d'une équipe qui livre régulièrement "
                 "en production, est exactement le cadre dans lequel je veux progresser.")
     company = inp.company
-    activity = f"votre activité ({company.naf_label.lower()})" if company and company.naf_label else "votre activité"
     city = f" à {company.city}" if company and company.city else ""
+    if company is not None and company.raw.get("large_target"):  # « grande entreprise » outside the digital sector
+        return (f"Je m'adresse à votre service informatique{city} : les applications et les outils métier qu'une "
+                f"structure comme la vôtre fait vivre au quotidien sont le cadre dans lequel je veux progresser. Mes "
+                f"compétences en {skills} peuvent y être utiles, qu'il s'agisse de faire évoluer des applications "
+                "existantes ou d'en concevoir de nouvelles.")
+    activity = f"votre activité ({company.naf_label.lower()})" if company and company.naf_label else "votre activité"
     return (f"Je m'adresse à vous car {activity}{city} correspond au domaine dans lequel je souhaite construire "
             f"mon parcours de développeur. Mes compétences en {skills} peuvent être utiles à vos projets, "
             "qu'il s'agisse de faire évoluer vos applications existantes ou d'en concevoir de nouvelles.")

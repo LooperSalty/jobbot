@@ -3,7 +3,9 @@
 Points (the night stores them in ``raw["priority"]`` / ``raw["priority_reasons"]``; the campaign sorts by them):
 
 - sector: core IT NAF +30, else adjacent (other digital NAF / label, targeted NAF, IT consulting) +15, else large
-  organisation (≥ 250 employees, IT department likely) +10;
+  organisation (≥ 250 employees, IT department likely) +10 — +30 with the « grandes entreprises » focus
+  (``outreach.large_companies``), which also orders the queue ring by ring around the first search area
+  (:func:`focus_ring`);
 - hiring signal: a developer offer published in the last 60 days (``raw["hiring_signal"]``) +25;
 - contact quality (the address the campaign would pick): recruitment / HR role address +20, named HR or tech
   manager (website / Hunter) +15, guess from the domain's learned pattern +5, unverified guess -10, no usable
@@ -37,6 +39,7 @@ from jobbot.outreach.selection import is_guess, is_nominative, is_role_address, 
 from jobbot.textutil import normalize_company, truncate
 
 PRIORITY_KEY, REASONS_KEY, AT_KEY = "priority", "priority_reasons", "priority_at"
+LARGE_FLAG = "large_target"  # set by jobbot.night.large: « grande entreprise » outside the digital sector
 AGENCY_NOTES_KEY = "agency_notes"  # French notes on the company's place (no local agency, closer group entity…)
 CORE_POINTS, ADJACENT_POINTS, LARGE_POINTS = 30, 15, 10
 HIRING_POINTS, HIRING_DAYS = 25, 60
@@ -62,7 +65,7 @@ class Ranked(NamedTuple):
 # --------------------------------------------------------------------------- parts
 
 
-def _sector(company: Company, profile: Profile) -> Part:
+def _sector(company: Company, profile: Profile, cfg: OutreachSettings | None = None) -> Part:
     code = company.naf_code or company.naf_label or ""
     if naf_key(company.naf_code) in _CORE_KEYS:
         return CORE_POINTS, f"Secteur numérique cœur de cible (NAF {code}) +{CORE_POINTS}"
@@ -70,8 +73,53 @@ def _sector(company: Company, profile: Profile) -> Part:
     if fit in ("digital", "consulting"):
         return ADJACENT_POINTS, f"Secteur proche du numérique ({truncate(code, 50)}) +{ADJACENT_POINTS}"
     if fit == "large":
-        return LARGE_POINTS, f"Grande structure (≥ 250 salariés) : service informatique probable +{LARGE_POINTS}"
+        focus = cfg is not None and cfg.large_companies.enabled and company.raw.get(LARGE_FLAG)
+        points = CORE_POINTS if focus else LARGE_POINTS
+        site = TRANCHE_LABELS.get(str(company.raw.get("site_tranche") or ""))
+        where = f", site local de {site.lower()}" if site else ""
+        return points, f"Grande structure (≥ 250 salariés{where}) : service informatique probable +{points}"
     return 0, ""
+
+
+def center_of(profile: Profile) -> tuple[float, float] | None:
+    """Coordinates of the first French search area (where the « grandes entreprises » campaign starts)."""
+    for loc in profile.target.locations:
+        if loc.latitude is not None and loc.longitude is not None and (loc.country or "FR").upper() == "FR":
+            return loc.latitude, loc.longitude
+    return None
+
+
+def _center_km(company: Company, center: tuple[float, float]) -> float | None:
+    if company.latitude is not None and company.longitude is not None:
+        return haversine_km(company.latitude, company.longitude, *center)
+    stored = company.raw.get("distance_km")  # distance to the nearest area, stored at discovery
+    return float(stored) if isinstance(stored, (int, float)) else None
+
+
+def focus_ring(company: Company, profile: Profile, cfg: OutreachSettings | None, *,
+               now: datetime | None = None) -> int:
+    """Ring of ``outreach.large_companies.rings_km`` around the first search area (0 = nearest; past the last ring
+    or no place known: after every ring). A company that published a developer offer lately never waits: ring 0.
+    Always 0 when the focus is disabled: the order is unchanged."""
+    large = (cfg or OutreachSettings()).large_companies
+    center = center_of(profile)
+    if not large.enabled or center is None or _hiring(company, now or clock.now())[0]:
+        return 0
+    km = _center_km(company, center)
+    if km is None:
+        return len(large.rings_km)
+    return next((i for i, radius in enumerate(large.rings_km) if km <= radius), len(large.rings_km))
+
+
+def _ring_note(company: Company, profile: Profile, cfg: OutreachSettings | None, now: datetime) -> list[str]:
+    """« Cercle 1 (≤ 15 km de ta première zone) » when the focus orders the queue, else nothing."""
+    large = (cfg or OutreachSettings()).large_companies
+    if not large.enabled or center_of(profile) is None:
+        return []
+    ring = focus_ring(company, profile, cfg, now=now)
+    if ring >= len(large.rings_km):
+        return [f"Cercle {ring + 1} (au-delà de {large.rings_km[-1]} km de ta première zone) : en dernier"]
+    return [f"Cercle {ring + 1} (≤ {large.rings_km[ring]} km de ta première zone)"]
 
 
 def _signal_date(signal: dict) -> datetime | None:
@@ -174,10 +222,11 @@ def best_contact(company: Company, repo: Repository, cfg: OutreachSettings) -> C
     return None
 
 
-def potential(company: Company, profile: Profile, *, now: datetime | None = None) -> float:
+def potential(company: Company, profile: Profile, *, now: datetime | None = None,
+              cfg: OutreachSettings | None = None) -> float:
     """Priority without the contact part (order of enrichment: the most promising companies first)."""
     at = now or clock.now()
-    parts = (_sector(company, profile), _hiring(company, at), _distance(company, profile), _size(company))
+    parts = (_sector(company, profile, cfg), _hiring(company, at), _distance(company, profile), _size(company))
     return float(sum(points for points, _ in parts))
 
 
@@ -190,10 +239,11 @@ def company_priority(company: Company, profile: Profile, repo: Repository, *, cf
     contact = best_contact(company, repo, cfg or OutreachSettings())
     if contact is None:
         return 0.0, ["Aucune adresse utilisable : hors file d'attente"]
-    parts = [_sector(company, profile), _hiring(company, now or clock.now()), _contact(company, contact),
+    at = now or clock.now()
+    parts = [_sector(company, profile, cfg), _hiring(company, at), _contact(company, contact),
              _distance(company, profile), _size(company), _skills(company, profile)]
     score = max(1.0, min(100.0, float(sum(points for points, _ in parts))))
-    return score, [text for _, text in parts if text] + place_notes(company)
+    return score, [text for _, text in parts if text] + _ring_note(company, profile, cfg, at) + place_notes(company)
 
 
 def place_notes(company: Company) -> list[str]:
@@ -215,12 +265,15 @@ def _outreach_score(company: Company) -> int:
 
 
 def ready_queue(ctx: AppContext, *, now: datetime | None = None) -> list[Ranked]:
-    """Companies the campaign can write to, validated ones first, then by priority (then discovery score)."""
+    """Companies the campaign can write to, validated ones first, then ring by ring around the first search area
+    (« grandes entreprises » focus), then by priority (then discovery score)."""
+    cfg = ctx.settings.outreach
     ranked: list[Ranked] = []
     for company in ctx.repo.list_companies(QUEUE_STATUSES):
         if not is_relevant_employer(company, ctx.profile)[0]:
             continue
-        score, reasons = company_priority(company, ctx.profile, ctx.repo, cfg=ctx.settings.outreach, now=now)
+        score, reasons = company_priority(company, ctx.profile, ctx.repo, cfg=cfg, now=now)
         if score > 0:
             ranked.append(Ranked(company, score, reasons))
-    return sorted(ranked, key=lambda r: (r.company.status != "approved", -r.score, -_outreach_score(r.company)))
+    return sorted(ranked, key=lambda r: (r.company.status != "approved", focus_ring(r.company, ctx.profile, cfg),
+                                         -r.score, -_outreach_score(r.company)))

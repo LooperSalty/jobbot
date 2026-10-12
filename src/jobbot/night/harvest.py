@@ -4,8 +4,10 @@
    ``settings.night.extra_radius_km``, API maximum 50 km) for every relevant NAF code (profile ``naf_codes`` + the
    built-in IT list of :mod:`jobbot.outreach.relevance`), every page up to the API limit (10 000 results; beyond,
    one query per NAF code), ≤ 4 requests/s (shared throttle of :mod:`jobbot.outreach.companies`);
-2. « recruteurs La Bonne Alternance » for the developer ROME codes around each French alternance area;
-3. employers of the job offers stored in the database (:mod:`jobbot.night.hiring`).
+2. « grandes entreprises » of any sector with a big local site, when ``outreach.large_companies`` is enabled
+   (:mod:`jobbot.night.large`);
+3. « recruteurs La Bonne Alternance » for the developer ROME codes around each French alternance area;
+4. employers of the job offers stored in the database (:mod:`jobbot.night.hiring`).
 
 Foreign areas (Luxembourg) have no registry: their employers come from the offers only. Everything goes through
 the relevance gate and is deduplicated (:mod:`jobbot.night.store`).
@@ -182,8 +184,14 @@ def harvest(ctx: AppContext, deadline: Deadline, *, store_until: Deadline | None
     relevance gate until ``store_until`` (default: ``deadline``) — collected candidates are never thrown away."""
     from jobbot.night.hiring import hiring_companies
 
+    from jobbot.night.large import large_companies
+
     errors: list[str] = []
     registry, stopped = registry_companies(ctx, deadline, errors)
+    large: list[Company] = []
+    if not deadline.expired():
+        large, large_stopped = large_companies(ctx, deadline, errors)
+        stopped = stopped or large_stopped
     lba = [] if deadline.expired() else lba_recruiters(ctx, deadline, errors)
     try:
         hiring = [] if deadline.expired() else hiring_companies(ctx, deadline)
@@ -192,8 +200,9 @@ def harvest(ctx: AppContext, deadline: Deadline, *, store_until: Deadline | None
         hiring, errors = [], [*errors, f"employeurs des offres : {exc}"]
     stopped = stopped or deadline.expired()
     locations = list(ctx.profile.target.locations)
-    candidates = [with_distance_score(c, locations) for c in (*registry, *lba, *hiring)]
+    candidates = [with_distance_score(c, locations) for c in (*registry, *large, *lba, *hiring)]
     stored = store_candidates(ctx, candidates, store_until or deadline)
-    details = [f"Registre : {len(registry)}, recruteurs LBA : {len(lba)}, employeurs des offres : {len(hiring)}"]
+    details = [f"Registre : {len(registry)}, grandes entreprises : {len(large)}, recruteurs LBA : {len(lba)}, "
+               f"employeurs des offres : {len(hiring)}"]
     return stored.model_copy(update={"stopped": stopped or stored.stopped, "errors": [*errors, *stored.errors],
                                      "details": details})

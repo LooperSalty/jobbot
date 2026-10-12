@@ -49,6 +49,13 @@ search:
   max_detail_fetches_per_run: 60  # annonces courtes complétées (page de l'offre) avant la notation, par exécution
   max_ats_boards_per_run: 80      # pages carrières d'entreprises (Lever, Greenhouse, Teamtailor…) lues par exécution
 
+outreach:
+  large_companies:         # candidatures spontanées aux grandes entreprises (ETI / GE) de tous secteurs
+    enabled: true          # site local d'au moins 50 salariés (code INSEE 21), hors terrain, garages, magasins, hôtels, EHPAD
+    min_site_tranche: "21"
+    max_km: 75             # autour de la première zone (Metz)
+    rings_km: [15, 30, 50, 75]  # envoi cercle par cercle : Metz d'abord, puis de plus en plus loin
+
 night:                     # « jobbot night » (0 h 30) : entreprises + adresses + dossiers du lendemain, rien n'est envoyé
   until: "06:30"           # arrêt propre à cette heure (ou jobbot night --budget MINUTES)
   extra_radius_km: 20      # ajouté au rayon de chaque zone (50 km au plus)

@@ -359,13 +359,21 @@ suivantes) et l'ensemble arrêté proprement à `night.until` (06:30) ou après 
    près de l'offre, pas le siège parisien) ; au plus `night.max_siren_lookups` (200) recherches par nuit, un employeur
    non identifié est recherché de nouveau 7 jours plus tard ; au Luxembourg (pas de SIREN), par leur nom. Tout passe
    par le filtre « hors cible ».
+   **Grandes entreprises** (`outreach.large_companies.enabled`) : en plus, les entreprises de taille intermédiaire
+   et les grandes entreprises (ETI / GE) de **tous secteurs** de tes départements dont le site local compte au moins
+   50 salariés (`min_site_tranche` : 21), jusqu'à `max_km` (75) de ta première zone : sièges régionaux, usines,
+   banques, collectivités, hôpitaux… mais ni terrain (BTP, restauration, intérim, nettoyage), ni garages, magasins,
+   hôtels, EHPAD (`skip_divisions`). Leur service informatique interne est la cible : la lettre le dit, sans inventer
+   de projet.
 3. **Contacts** : sites, pages carrières, personnes, format d'adresse, sur `night.workers` (4) fils, jamais deux à la
    fois sur le même site ; résumés du site par le modèle rapide, `night.max_llm_summaries` (80) au plus.
-4. **Priorités** (0-100, raisons en français) : numérique cœur +30 / proche +15 / grande structure +10, offre de
-   développeur publiée depuis moins de 60 jours +25, adresse recrutement/RH +20, RH ou responsable technique nommé
-   +15, adresse devinée d'après le format appris +5, devinée non vérifiée -10 (sans adresse : hors file), à 20 km
-   +10 / 40 km +5, 10 à 249 salariés (tuteur possible) +10, tes compétences sur son site jusqu'à +10. La campagne
-   du jour prend les entreprises **par priorité décroissante**.
+4. **Priorités** (0-100, raisons en français) : numérique cœur +30 / proche +15 / grande structure +10 (+30 avec
+   les grandes entreprises), offre de développeur publiée depuis moins de 60 jours +25, adresse recrutement/RH +20,
+   RH ou responsable technique nommé +15, adresse devinée d'après le format appris +5, devinée non vérifiée -10
+   (sans adresse : hors file), à 20 km +10 / 40 km +5, 10 à 249 salariés (tuteur possible) +10, tes compétences sur
+   son site jusqu'à +10. La campagne du jour prend les entreprises **par priorité décroissante** ; avec les grandes
+   entreprises, **cercle par cercle** autour de ta première zone (`rings_km` : 15, 30, 50, 75 km — Metz d'abord, un
+   cercle n'est entamé qu'une fois le précédent épuisé), et la recherche d'adresses de la nuit suit le même ordre.
 5. **Dossiers du lendemain** : CV + lettre pour les premières de la file (plafond du jour + `night.prepare_margin`) ;
    la campagne du matin les réutilise pendant 7 jours au lieu de les régénérer.
 
