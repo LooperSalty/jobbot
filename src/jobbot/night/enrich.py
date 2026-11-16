@@ -61,7 +61,9 @@ def needs_enrichment(company: Company, cfg: OutreachSettings, now: datetime) -> 
         enriched_at = clock.parse_dt(str(company.raw.get("enriched_at") or ""))
     except ValueError:
         enriched_at = None
-    if enriched_at is None or now - enriched_at > timedelta(days=STALE_DAYS):
+    retry_days = 7 if (cfg.country and company.status == "no_email"
+                       and str(company.raw.get("country", "")).upper() == cfg.country.upper()) else STALE_DAYS
+    if enriched_at is None or now - enriched_at > timedelta(days=retry_days):
         return True
     return company.status == "enriched" and not any(usable(c, cfg) for c in company.contacts)
 
@@ -73,6 +75,9 @@ def enrichment_queue(ctx: AppContext, *, now: datetime | None = None,
     at = now or clock.now()
     waiting = [c for c in ctx.repo.list_companies(WAITING_STATUSES)
                if needs_enrichment(c, ctx.settings.outreach, at)]
+    country = ctx.settings.outreach.country
+    if country:
+        waiting = [c for c in waiting if str(c.raw.get("country", "")).upper() == country.upper()]
     if set_aside:
         relevant, off = split_relevant(ctx.repo, ctx.profile, waiting)
         outside = len(off)

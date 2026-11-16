@@ -35,6 +35,21 @@ LUC_GUESS = ContactEmail(email="luc.verdier@111111111.fr", confidence=0.3, sourc
                          person_name="Luc VERDIER")
 
 
+def test_country_limit_excludes_french_and_unknown_companies(live_ctx, make_company, docs_calls, sleeps):
+    ctx = _outreach(live_ctx, country="LU")
+    french = _company(make_company, "111111111", "Alpha")
+    unknown = _company(make_company, "222222222", "Beta")
+    lux = _company(make_company, "333333333", "Gamma")
+    french = french.model_copy(update={"raw": {**french.raw, "country": "FR"}})
+    lux = lux.model_copy(update={"raw": {**lux.raw, "country": "LU"}})
+    _store(ctx, french, unknown, lux)
+    mailer = FakeMailer()
+
+    run_spontaneous_campaign(ctx, mailer)
+
+    assert [mail.to for mail in mailer.sent] == ["recrutement@333333333.fr"]
+
+
 def _guess_company(make_company, siren: str, name: str):
     guess = LUC_GUESS.model_copy(update={"email": f"luc.verdier@{siren}.fr"})
     company = _company(make_company, siren, name, contacts=[guess])

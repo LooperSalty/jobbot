@@ -382,6 +382,10 @@ Au réveil, une notification (Telegram / e-mail si activés) : « Nuit : +X entr
 status`, `jobbot doctor` et la page « Entreprises » du tableau de bord montrent la file et la dernière nuit.
 `jobbot night --dry-run --budget 30` : essai sans génération de dossiers.
 
+Pour limiter les candidatures spontanées à un pays, définir `outreach.country: LU` dans les réglages : seules les
+entreprises identifiées comme luxembourgeoises sont contactées et recherchées pendant l'enrichissement nocturne.
+Les entreprises sans pays identifié sont exclues. Les offres classiques conservent leurs propres zones de recherche.
+
 **Montée progressive des envois spontanés** (`limits.spontaneous_ramp`, la vraie limite est la délivrabilité) :
 20 par jour au départ, +10 par semaine complète depuis le premier envoi réel, 50 au plus ; si plus de 5 % des envois
 spontanés des 7 derniers jours rebondissent, retour à 20 (tu es prévenu) et la montée reprend une semaine plus tard.

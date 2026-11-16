@@ -122,6 +122,9 @@ def _targets(ctx: AppContext, run: _Run) -> tuple[list[Company], list[tuple[Comp
     before any document is written."""
     queued_off = relevance.sweep_review_queue(ctx.repo, ctx.profile)
     relevant, off = relevance.split_relevant(ctx.repo, ctx.profile, _candidates(ctx, list(run.apps)))
+    country = ctx.settings.outreach.country
+    if country:
+        relevant = [c for c in relevant if str(c.raw.get("country", "")).upper() == country.upper()]
     return relevant, queued_off + off
 
 

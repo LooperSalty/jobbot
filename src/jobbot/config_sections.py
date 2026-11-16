@@ -112,6 +112,7 @@ class LargeCompanies(Frozen):
 class OutreachSettings(Frozen):
     """Spontaneous applications: who may be contacted and how aggressively."""
 
+    country: str | None = None  # restrict spontaneous campaigns to explicitly identified country codes
     allow_nominative: bool = True  # named people (leaders, employees) and not only rh@/contact@
     allow_employee_search: bool = True  # look for HR / tech managers (team pages, Hunter, search engines)
     allow_unverified_guesses: bool = True  # send to a best-guess pattern (prenom.nom@) when it can't be verified

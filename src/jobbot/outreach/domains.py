@@ -42,7 +42,7 @@ DDG_URL = "https://html.duckduckgo.com/html/"
 _BOT_PURPOSE = "jobbot/0.1 (recherche d'emploi personnelle"
 BOT_UA = f"{_BOT_PURPOSE})"
 
-SLUG_TLDS = ("fr", "com", "eu", "io", "tech", "dev", "net")
+SLUG_TLDS = ("fr", "lu", "com", "eu", "io", "tech", "dev", "net")
 MAX_VERIFICATIONS = 8
 MIN_NAME_CONFIDENCE = 0.75
 MAX_PAGE_BYTES = 2_000_000
