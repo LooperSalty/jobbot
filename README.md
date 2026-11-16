@@ -385,6 +385,9 @@ status`, `jobbot doctor` et la page « Entreprises » du tableau de bord montren
 Pour limiter les candidatures spontanées à un pays, définir `outreach.country: LU` dans les réglages : seules les
 entreprises identifiées comme luxembourgeoises sont contactées et recherchées pendant l'enrichissement nocturne.
 Les entreprises sans pays identifié sont exclues. Les offres classiques conservent leurs propres zones de recherche.
+Les réponses liées à une candidature sont examinées : une demande explicite de renvoi vers une autre adresse du
+même domaine peut être suivie automatiquement ; les autres adresses et liens sont signalés pour vérification.
+Le bilan quotidien par e-mail résume les offres écartées et les rebonds des candidatures spontanées.
 
 **Montée progressive des envois spontanés** (`limits.spontaneous_ramp`, la vraie limite est la délivrabilité) :
 20 par jour au départ, +10 par semaine complète depuis le premier envoi réel, 50 au plus ; si plus de 5 % des envois

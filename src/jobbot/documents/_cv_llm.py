@@ -87,8 +87,9 @@ _RULES = """Règles impératives :
 8. Pas de bourrage : un mot-clé apparaît au plus 3 fois dans tout le CV."""
 
 
-def profile_block(profile: Profile) -> str:
-    lines = [f"Titre actuel : {profile.headline}", f"Résumé : {' '.join(profile.summary.split())}"]
+def profile_block(profile: Profile, *, include_alternance: bool = True) -> str:
+    lines = ([f"Titre actuel : {profile.headline}", f"Résumé : {' '.join(profile.summary.split())}"]
+             if include_alternance else [])
     if profile.qualities:
         lines.append("Qualités : " + ", ".join(profile.qualities))
     lines.append("Expériences (ne réécris que les puces ; employeur, intitulé et dates sont repris tels quels) :")
@@ -105,7 +106,7 @@ def profile_block(profile: Profile) -> str:
     lines.append("Langues : " + ", ".join(f"{lang.name} {lang.level}" for lang in profile.languages))
     lines.append("Centres d'intérêt : " + " ; ".join(merge_unbalanced(profile.interests)))
     alt = profile.alternance
-    if alt is not None:
+    if alt is not None and include_alternance:
         lines.append(f"Alternance : {alt.degree} à {alt.school}, {alt.duration_months} mois, début {alt.start_date}, "
                      f"rythme {alt.rhythm}")
     return "\n".join(lines)
@@ -140,7 +141,7 @@ def build_prompt(inp: TailorInput, previous: CVPlan | None = None, report: ATSRe
         "## Mots-clés ATS de l'offre que le candidat possède (à intégrer naturellement)\n"
         + keywords_line(inp.truthful),
         "## Mots-clés que le candidat NE possède PAS (interdits)\n" + keywords_line(inp.forbidden),
-        "## Profil du candidat (SOURCE DE VÉRITÉ)\n" + profile_block(inp.profile),
+        "## Profil du candidat (SOURCE DE VÉRITÉ)\n" + profile_block(inp.profile, include_alternance=inp.alternance),
         _RULES.format(headline=build_headline(inp)),
     ]
     if previous is not None:

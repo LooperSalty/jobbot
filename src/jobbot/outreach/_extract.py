@@ -60,7 +60,7 @@ ROLE_GENERIC = re.compile(r"^(contact|bonjour|hello|hi|info|infos|accueil|secret
                           r"commercial|office|admin|metz|nancy|team|equipe)\b")
 ROLE_EXCLUDE = re.compile(
     r"^(dpo|rgpd|privacy|gdpr|donnees|donnees-personnelles|compta|comptabilite|facturation|factures?|invoices?|"
-    r"billing|support|sav|technique|abuse|postmaster|hostmaster|webmaster|noreply|no-reply|no\.reply|"
+    r"billing|support|sav|technique|retractation|rétractation|resiliation|résiliation|abuse|postmaster|hostmaster|webmaster|noreply|no-reply|no\.reply|"
     r"donotreply|do-not-reply|mailer-daemon|newsletter|news|presse|press|marketing|ne-pas-repondre|"
     r"nepasrepondre|unsubscribe|bounce|error-lite)\b"
 )

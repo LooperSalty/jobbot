@@ -110,6 +110,14 @@ def is_alternance(ctx: AppContext) -> bool:
     return ContractType.ALTERNANCE in ctx.profile.target.contract_types and ctx.profile.alternance is not None
 
 
+def documents_match_target(ctx: AppContext, docs: TailoredDocuments) -> bool:
+    """Prevent a draft seeking an apprenticeship from being sent for a CDD/CDI search."""
+    if is_alternance(ctx):
+        return True
+    text = f"{docs.email_subject}\n{docs.email_body}\n{docs.letter_text}"
+    return not re.search(r"\b(?:alternance|apprentissage|apprenti(?:e|ssage)?)\b", text, re.I)
+
+
 def default_subject(ctx: AppContext) -> str:
     name = ctx.profile.identity.full_name
     if is_alternance(ctx):

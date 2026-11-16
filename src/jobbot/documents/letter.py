@@ -84,7 +84,7 @@ def _prompt(inp: LetterInput, feedback: list[str]) -> str:
     title = inp.job.title if inp.job is not None else inp.role
     parts = [
         target_block(inp.job, inp.company, title),
-        "## Profil du candidat (seuls faits utilisables)\n" + profile_block(inp.profile),
+        "## Profil du candidat (seuls faits utilisables)\n" + profile_block(inp.profile, include_alternance=inp.alternance),
         "## Consignes\nRédige le corps de la lettre de motivation en 4 paragraphes (vous / moi / nous), "
         "270 à 330 mots au total (350 au maximum) :\n" + _intro_rule(inp) + "\n"
         "2. « Vous » : ce qui attire le candidat dans l'offre ou l'entreprise, avec un fait précis tiré du texte "
@@ -104,7 +104,8 @@ def _prompt(inp: LetterInput, feedback: list[str]) -> str:
                          and lexicon.canonicalize(k.keyword) not in inp.truth.skills]) + "\n"
         "\"email_pitch\" : 2 phrases (50 mots au plus) pour le corps de l'e-mail, placées juste après « Je vous "
         "adresse ma candidature au poste de … au sein de … » : ne répète ni le poste ni l'entreprise ; "
-        "formation / alternance puis une réalisation concrète ; sans salutation ni signature.",
+        + ("formation / alternance" if inp.alternance else "formation")
+        + " puis une réalisation concrète ; sans salutation ni signature.",
     ]
     if feedback:
         parts.append("## Corrige ta version précédente\n- " + "\n- ".join(feedback))

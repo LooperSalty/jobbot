@@ -145,6 +145,8 @@ def _budget(ctx: AppContext, pacer: Any, review: bool, limit: int | None) -> int
 
 def run_lba_recruiters(ctx: AppContext, *, limit: int | None = None) -> RelayReport:
     """Relay spontaneous applications through LBA (review mode: prepare + queue). One failure never stops it."""
+    if ctx.settings.outreach.country and ctx.settings.outreach.country.upper() != "FR":
+        return RelayReport(details=["Relais La Bonne Alternance réservé à la France : ignoré pour ce pays."])
     from jobbot.apply.lba import LbaApplier
     from jobbot.preferences import effective_mode
 

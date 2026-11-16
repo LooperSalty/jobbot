@@ -16,7 +16,7 @@ from collections import Counter
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from rapidfuzz import fuzz
 
 from jobbot import clock
@@ -56,6 +56,7 @@ class MatchReport(BaseModel):
     filtered_out: int = 0
     completed: int = 0  # short offers completed through their source before scoring (pipeline « score » step)
     dropped: int = 0  # queued offers the current profile now rules out (pipeline « score » step)
+    rejection_reasons: dict[str, int] = Field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -315,6 +316,7 @@ def score_new_jobs(ctx: AppContext) -> MatchReport:
     threshold = ctx.settings.thresholds.min_match_score
     skills = profile_skills(ctx.profile)
     counts: Counter[str] = Counter()
+    rejected: Counter[str] = Counter()
     for job in ctx.repo.list_jobs(JobStatus.NEW):
         try:
             outcome = _score_and_store(ctx, job, skills, threshold)
@@ -323,8 +325,13 @@ def score_new_jobs(ctx: AppContext) -> MatchReport:
             continue
         counts["scored"] += 1
         counts[outcome] += 1
+        if outcome == JobStatus.FILTERED_OUT.value:
+            stored = ctx.repo.get_job(job.id)
+            reason = stored.match_reasons[0] if stored and stored.match_reasons and stored.match_score == 0 else "Score insuffisant"
+            rejected[reason] += 1
     report = MatchReport(
-        scored=counts["scored"], shortlisted=counts["shortlisted"], filtered_out=counts["filtered_out"]
+        scored=counts["scored"], shortlisted=counts["shortlisted"], filtered_out=counts["filtered_out"],
+        rejection_reasons=dict(rejected.most_common(5)),
     )
     log.info("Scoring : %d offre(s) notée(s), %d retenue(s), %d écartée(s), %d doublon(s)",
              report.scored, report.shortlisted, report.filtered_out, counts["skipped"])

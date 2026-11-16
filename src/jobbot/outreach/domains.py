@@ -325,7 +325,8 @@ def _providers(
     search_url: SearxEngine | str | None = None,
 ) -> list[tuple[str, bool, Callable]]:
     """(method, costly, fetch(client) -> domains). Costly ones are skipped once a name match exists."""
-    query = f"{names[0]} {company.city}".strip()
+    country = str(company.raw.get("country", "")).upper()
+    query = f"{names[0]} {company.city} {'Luxembourg' if country == 'LU' else ''}".strip()
     known = [d for d in (normalize_domain(company.domain), normalize_domain(company.website)) if d]
     user_agent = bot_user_agent(contact)
     providers: list[tuple[str, bool, Callable]] = [

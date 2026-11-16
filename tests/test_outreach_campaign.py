@@ -50,6 +50,29 @@ def test_country_limit_excludes_french_and_unknown_companies(live_ctx, make_comp
     assert [mail.to for mail in mailer.sent] == ["recrutement@333333333.fr"]
 
 
+def test_excluded_address_is_not_used_even_if_already_saved(live_ctx, make_company, docs_calls, sleeps):
+    contact = ContactEmail(email="retractation@111111111.fr", kind="generic")
+    _store(live_ctx, _company(make_company, "111111111", "Alpha", contacts=[contact]))
+    mailer = FakeMailer()
+    run_spontaneous_campaign(live_ctx, mailer)
+    assert not mailer.sent
+
+
+def test_cdd_cdi_does_not_send_old_alternance_draft(live_ctx, make_company, docs_calls, sleeps, monkeypatch):
+    from jobbot.models import ContractType
+    from jobbot.outreach import spontaneous
+
+    target = live_ctx.profile.target.model_copy(update={"contract_types": [ContractType.CDD, ContractType.CDI]})
+    ctx = dataclasses.replace(live_ctx, profile=live_ctx.profile.model_copy(update={"target": target}))
+    _store(ctx, _company(make_company, "111111111", "Alpha"))
+    original = spontaneous._docs_for
+    monkeypatch.setattr(spontaneous, "_docs_for", lambda *args: original(*args).model_copy(
+        update={"email_subject": "Candidature en alternance"}))
+    mailer = FakeMailer()
+    result = run_spontaneous_campaign(ctx, mailer)
+    assert not mailer.sent and result.failed == 1
+
+
 def _guess_company(make_company, siren: str, name: str):
     guess = LUC_GUESS.model_copy(update={"email": f"luc.verdier@{siren}.fr"})
     company = _company(make_company, siren, name, contacts=[guess])

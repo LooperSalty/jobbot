@@ -26,7 +26,7 @@ from jobbot.config import OutreachSettings
 from jobbot.context import AppContext
 from jobbot.db import Repository
 from jobbot.models import Application, ApplicationStatus, Company, ContactEmail
-from jobbot.outreach._extract import ROLE_APPLY, ROLE_GENERIC, classify_email
+from jobbot.outreach._extract import ROLE_APPLY, ROLE_EXCLUDE, ROLE_GENERIC, classify_email
 from jobbot.outreach.people import is_small_company
 from jobbot.ramp import is_spontaneous
 from jobbot.textutil import normalize_company
@@ -78,6 +78,8 @@ def is_nominative(contact: ContactEmail) -> bool:
 
 def usable(contact: ContactEmail, cfg: OutreachSettings) -> bool:
     """Static policy (no quota): may this address ever be used with these settings?"""
+    if ROLE_EXCLUDE.match(contact.email.split("@", 1)[0].lower()):
+        return False
     if is_nominative(contact) and not cfg.allow_nominative:
         return False
     return not is_guess(contact) or cfg.allow_unverified_guesses

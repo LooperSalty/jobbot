@@ -31,6 +31,28 @@ from .fixtures.orchestration.fakes import (
 )
 
 
+def test_lba_relay_is_disabled_for_luxembourg(ctx):
+    import dataclasses
+    from jobbot.apply.lba_recruiters import run_lba_recruiters
+
+    settings = ctx.settings.model_copy(update={"outreach": ctx.settings.outreach.model_copy(update={"country": "LU"})})
+    report = run_lba_recruiters(dataclasses.replace(ctx, settings=settings))
+    assert report.applied == 0
+    assert "France" in report.details[0]
+
+
+def test_daily_email_includes_rejection_reasons_and_deduplicates(ctx, monkeypatch):
+    from jobbot.matching.match import MatchReport
+
+    ctx = live(ctx)
+    sent = []
+    monkeypatch.setattr("jobbot.notify_remote.send_email_notice", lambda *args: sent.append(args) or True)
+    report = pipeline.DailyReport(score=MatchReport(scored=2, filtered_out=2, rejection_reasons={"Contrat": 2}))
+    pipeline._daily_email(ctx, report)
+    pipeline._daily_email(ctx, report)
+    assert len(sent) == 1 and "Contrat (2)" in sent[0][2]
+
+
 def _fast_documents(monkeypatch: pytest.MonkeyPatch) -> None:
     """Keep the real tailoring/letter code but skip Chromium (PDF rendering)."""
     import jobbot.documents.service as docs_service

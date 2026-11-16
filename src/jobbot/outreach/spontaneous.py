@@ -155,6 +155,14 @@ def fresh_documents(repo: Any, company_id: str, *, days: int = DOCS_FRESH_DAYS) 
     if docs is None or not docs.cv_pdf or not Path(docs.cv_pdf).is_file():
         return None
     created = clock.parse_dt(docs.created_at)
+    changed = repo.kv_get("documents:target_changed_at")
+    if changed:
+        try:
+            cutoff = clock.parse_dt(changed)
+            if created is None or cutoff is None or created < cutoff:
+                return None
+        except ValueError:
+            return None
     return docs if created is not None and clock.now() - created < timedelta(days=days) else None
 
 
@@ -189,6 +197,8 @@ def _describe(contact: ContactEmail) -> str:
     parts = [contact.kind, contact.source]
     if sel.is_guess(contact):
         parts.append("devinée, non vérifiée")
+    elif contact.verified:
+        parts.append("vérifiée")
     if contact.person_name:
         parts.append(contact.person_name)
     return f"Adresse {parts[0]} ({', '.join(parts[1:])})"
@@ -287,6 +297,10 @@ def _send(ctx: AppContext, company: Company, contact: ContactEmail, run: _Run, p
           history: sel.History) -> _Outcome:
     try:
         docs = _docs_for(ctx, company, history)
+        from jobbot.outreach._compose import documents_match_target
+
+        if not documents_match_target(ctx, docs):
+            return _Outcome("failed", f"{company.name} : documents mentionnant une alternance, à vérifier")
         if docs.truth_warnings and company.status != "approved":  # never send unbacked claims unreviewed
             return _hold_for_review(ctx, company, contact, docs, history)
         email = build_email(ctx, company, contact, docs)

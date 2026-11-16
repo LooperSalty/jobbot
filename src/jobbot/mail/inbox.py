@@ -222,6 +222,18 @@ def _handle_reply(ctx: AppContext, app: Application, msg: InboundMessage, *, str
         line = f"{_label(app)} : message reçu de {msg.from_addr} (non classé)"
     else:
         line = _human_reply(ctx, app, msg, cls)
+    if cls.category not in {"bounce", "unsubscribe"}:
+        try:
+            from jobbot.mail.redirect import follow_redirect
+
+            continuation = follow_redirect(ctx, app, msg, strong=strong)
+            if continuation:
+                line += f" — {continuation}"
+        except Exception:
+            log.exception("Redirection de candidature impossible pour %s", app.id)
+            notify(ctx, "Candidature à poursuivre", f"{app.company_name} : redirection à vérifier dans le message.",
+                   level="important")
+            line += " — redirection à vérifier"
     return _Outcome(True, line + _junk_note(msg))
 
 

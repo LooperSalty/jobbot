@@ -299,13 +299,17 @@ def _alert_expired_session(ctx: AppContext, report: ApplyReport) -> None:
     lines = [d for d in report.details if "jobbot login" in d]
     if not lines:
         return
-    key = f"{LOGIN_ALERT_KV}{clock.to_paris(clock.now()).date().isoformat()}"
-    if ctx.repo.kv_get(key):
+    sites = [site for site in ("linkedin", "hellowork") if any(site in line.lower() for line in lines)]
+    today = clock.to_paris(clock.now()).date().isoformat()
+    pending = [site for site in (sites or ["autre"]) if not ctx.repo.kv_get(f"{LOGIN_ALERT_KV}{today}:{site}")]
+    if not pending:
         return
-    ctx.repo.kv_set(key, "1")
+    for site in pending:
+        ctx.repo.kv_set(f"{LOGIN_ALERT_KV}{today}:{site}", "1")
     from jobbot.notify import notify
 
-    notify(ctx, "Session à renouveler", f"{truncate(lines[0], 160)} — {LOGIN_HELP}", level="urgent")
+    affected = ", ".join(pending) if sites else truncate(lines[0], 100)
+    notify(ctx, "Session à renouveler", f"{affected} — {LOGIN_HELP}", level="urgent")
 
 
 def _discover(ctx: AppContext, shared: _Shared) -> DiscoverReport:
@@ -416,6 +420,8 @@ def run_daily(ctx: AppContext, *, steps: list[str] | None = None) -> DailyReport
             results[name] = _run_step(ctx, name, shared)
     report = DailyReport(**results)
     _notify(ctx, report)
+    if steps is None:
+        _daily_email(ctx, report)
     weekly = _weekly(ctx, shared)
     return report if weekly is None else report.model_copy(update={"weekly": weekly})
 
@@ -439,3 +445,48 @@ def _notify(ctx: AppContext, report: DailyReport) -> None:
         notify(ctx, title, report.summary())
     except Exception:  # notification is best effort
         log.debug("Notification du bilan impossible", exc_info=True)
+
+
+def _daily_email(ctx: AppContext, report: DailyReport) -> None:
+    """A concise daily e-mail, only after a complete run and at most once a day."""
+    if ctx.dry_run:
+        return
+    try:
+        from jobbot.notify_remote import send_email_notice
+        from jobbot.outreach.selection import bounce_stats
+        from jobbot.ramp import is_spontaneous
+        from datetime import timedelta
+
+        key = f"notify:daily_report:{clock.to_paris(clock.now()).date().isoformat()}"
+        if ctx.repo.kv_get(key):
+            return
+        parts = [report.summary()]
+        if isinstance(report.score, MatchReport) and report.score.rejection_reasons:
+            reasons = sorted(report.score.rejection_reasons.items(), key=lambda item: -item[1])[:3]
+            parts.append("Offres écartées : " + "; ".join(f"{reason} ({count})" for reason, count in reasons))
+        apps = ctx.repo.list_applications()
+        bounced, sent = bounce_stats(apps)
+        parts.append(f"Spontanées : {bounced} rebond(s) sur {sent} envoi(s) récents (30 jours).")
+        recent = [a for a in apps if is_spontaneous(a) and clock.parse_dt(a.applied_at) >= clock.now() - timedelta(days=30)]
+        guessed = [a for a in recent if "devinée, non vérifiée" in a.notes]
+        if guessed:
+            from jobbot.models import ApplicationStatus
+
+            parts.append(f"Adresses devinées : {sum(a.status == ApplicationStatus.BOUNCED for a in guessed)} "
+                         f"rebond(s) sur {len(guessed)} envoi(s).")
+        verified = [a for a in recent if "vérifiée" in a.notes and "non vérifiée" not in a.notes]
+        if verified:
+            from jobbot.models import ApplicationStatus
+
+            parts.append(f"Adresses vérifiées : {sum(a.status == ApplicationStatus.BOUNCED for a in verified)} "
+                         f"rebond(s) sur {len(verified)} envoi(s).")
+        if isinstance(report.classroom, ClassroomReport) and report.classroom.errors:
+            parts.append("Classroom : " + "; ".join(report.classroom.errors[:2]))
+        if isinstance(report.apply, ApplyReport):
+            blocked = [line for line in report.apply.details if "jobbot login" in line]
+            if blocked:
+                parts.append("Sessions à renouveler : " + "; ".join(blocked[:2]))
+        if send_email_notice(ctx, "Bilan quotidien", "\n".join(parts), "important"):
+            ctx.repo.kv_set(key, "1")
+    except Exception:
+        log.exception("Bilan quotidien par e-mail impossible")
