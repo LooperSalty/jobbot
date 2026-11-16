@@ -186,6 +186,7 @@ class Limits(Frozen):
     hellowork_per_day: int = 10
     lba_per_day: int = 20
     email_applications_per_day: int = 30
+    external_per_day: int = 5  # offres sur les plateformes externes prises en charge
     spontaneous_per_day: int = 20  # used when the ramp below is disabled
     spontaneous_ramp: SpontaneousRamp = Field(default_factory=SpontaneousRamp)
     followups_per_day: int = 10

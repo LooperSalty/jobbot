@@ -21,6 +21,7 @@ CHANNEL_QUOTA = {
     "hellowork": "hellowork_per_day",
     "lba": "lba_per_day",
     "email": "email_applications_per_day",
+    "external": "external_per_day",
     "spontaneous": "spontaneous_per_day",
     "followup": "followups_per_day",
 }

@@ -325,6 +325,11 @@ jobbot dashboard           # tableau de bord dans le navigateur
 jobbot export              # Excel (ou --format csv) de tout le suivi
 ```
 
+En mode automatique, les formulaires directs hébergés sur Lever et Greenhouse peuvent être envoyés par le bot
+après remplissage et contrôle des champs et du CV (5 candidatures externes par jour par défaut). L'envoi n'est
+compté comme réussi qu'après confirmation affichée par le site. Les autres sites et les formulaires bloqués ou
+incomplets restent à finir à la main ; une confirmation manquante demande une vérification avant toute reprise.
+
 Pour que jobbot tourne tout seul chaque jour :
 
 ```powershell

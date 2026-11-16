@@ -96,7 +96,13 @@ def dedup_reason(ctx: AppContext, job: JobOffer) -> tuple[str, JobStatus] | None
 
 def _candidates(ctx: AppContext, job_ids: list[str] | None, details: list[str]) -> list[JobOffer]:
     if job_ids is None:
-        return ctx.repo.list_jobs(QUEUE_STATUSES)
+        from jobbot.apply.external import supported_url
+
+        ready = ctx.repo.list_jobs(QUEUE_STATUSES)
+        # Only reconsider the old generic manual handoff, never a form already attempted or uncertain.
+        waiting = [job for job in ctx.repo.list_jobs(JobStatus.NEEDS_MANUAL)
+                   if job.raw.get("apply_detail") == EXTERNAL_DETAIL and supported_url(job.apply_url or job.url)]
+        return [*ready, *waiting]
     jobs: list[JobOffer] = []
     for job_id in dict.fromkeys(job_ids):
         job = ctx.repo.get_job(job_id)
@@ -257,6 +263,10 @@ def make_applier(ctx: AppContext, channel: str, res: _Resources) -> Applier | No
 
         mailer = res.mailer()
         return EmailApplier(ctx, mailer) if mailer is not None else None
+    if channel == "external":
+        from jobbot.apply.external import ExternalApplier
+
+        return ExternalApplier(ctx, res.browser(), res.answerer_factory())
     return None
 
 
@@ -379,8 +389,11 @@ def _process(ctx: AppContext, job: JobOffer, res: _Resources) -> tuple[str, str]
         return "skipped", dup[0]
     channel = channel_of(job)
     if channel == "external":
-        set_job_status(ctx, job, JobStatus.NEEDS_MANUAL, EXTERNAL_DETAIL)
-        return "needs_manual", "candidature externe, documents prêts"
+        from jobbot.apply.external import supported_url
+
+        if not supported_url(job.apply_url or job.url):
+            set_job_status(ctx, job, JobStatus.NEEDS_MANUAL, EXTERNAL_DETAIL)
+            return "needs_manual", "candidature externe, documents prêts"
     if channel in res.blocked:
         return "skipped", f"{res.blocked[channel]} (sera retentée)"
     return _submit(ctx, job, channel, res)

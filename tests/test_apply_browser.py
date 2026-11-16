@@ -17,6 +17,7 @@ from playwright.sync_api import sync_playwright
 
 from jobbot import clock
 from jobbot.apply import assisted, browser, formfill, hellowork, linkedin
+from jobbot.apply.external import ExternalApplier, supported_url
 from jobbot.apply.answers import FormAnswerer
 from jobbot.config import Limits
 from jobbot.llm import FakeLLM
@@ -130,6 +131,79 @@ def live(ctx):
 def has_shot(detail: str) -> bool:
     m = re.search(r"Capture : (\S+\.png)", detail)
     return bool(m) and Path(m.group(1)).is_file()
+
+
+@pytest.mark.browser
+def test_external_application_submits_and_requires_confirmation(ctx, bctx, server, make_job, docs):
+    url = "https://jobs.lever.co/acme/123/apply"
+    html = """<form id="application-form">
+      <label>Full name<input name="name" required></label>
+      <label>Email<input type="email" name="email" required></label>
+      <label>CV<input type="file" name="resume" required></label>
+      <button type="submit">Submit application</button>
+    </form><script>document.querySelector('form').onsubmit = e => { e.preventDefault();
+      document.body.innerHTML = '<p>Thank you for your application</p>'; };</script>"""
+    server.page(r"^https://jobs\.lever\.co/acme/123/apply$", body=html)
+    job = make_job(url=url, apply_url=url, apply_method=ApplyMethod.EXTERNAL)
+    result = ExternalApplier(live(ctx), bctx, factory(ctx)).apply(job, docs)
+    assert result.status == JobStatus.APPLIED
+
+
+@pytest.mark.browser
+def test_greenhouse_application_submits(ctx, bctx, server, make_job, docs):
+    url = "https://boards.greenhouse.io/acme/jobs/123"
+    server.page(r"^https://boards\.greenhouse\.io/acme/jobs/123$", body="""<form>
+      <label>First name<input id="first_name" required></label>
+      <label>Last name<input id="last_name" required></label>
+      <label>Email<input id="email" type="email" required></label>
+      <label>Resume<input type="file" name="resume" required></label>
+      <input id="submit_app" type="submit" value="Submit application"></form>
+      <script>document.querySelector('form').onsubmit = e => { e.preventDefault();
+      document.body.innerHTML = '<p>Your application has been received</p>'; };</script>""")
+    job = make_job(url=url, apply_url=url, apply_method=ApplyMethod.EXTERNAL)
+    result = ExternalApplier(live(ctx), bctx, factory(ctx)).apply(job, docs)
+    assert result.status == JobStatus.APPLIED
+
+
+@pytest.mark.browser
+def test_external_dry_run_does_not_submit(ctx, bctx, server, make_job, docs):
+    url = "https://jobs.lever.co/acme/123/apply"
+    server.page(r"^https://jobs\.lever\.co/acme/123/apply$", body="""<form>
+      <label>Full name<input name="name" required></label>
+      <label>Email<input type="email" name="email" required></label>
+      <label>CV<input type="file" name="resume" required></label>
+      <button type="submit">Submit application</button></form>""")
+    job = make_job(url=url, apply_url=url, apply_method=ApplyMethod.EXTERNAL)
+    result = ExternalApplier(ctx, bctx, factory(ctx)).apply(job, docs)
+    assert result.ok and result.status == JobStatus.SKIPPED
+    assert not supported_url("https://jobs.lever.co.example.com/acme")
+
+
+@pytest.mark.browser
+def test_external_required_checkbox_stays_for_user(ctx, bctx, server, make_job, docs):
+    url = "https://jobs.lever.co/acme/123/apply"
+    server.page(r"^https://jobs\.lever\.co/acme/123/apply$", body="""<form>
+      <label>Email<input type="email" name="email" required></label>
+      <label>CV<input type="file" name="resume" required></label>
+      <label>Consent<input type="checkbox" name="consent" required></label>
+      <button type="submit">Submit application</button></form>""")
+    job = make_job(url=url, apply_url=url, apply_method=ApplyMethod.EXTERNAL)
+    result = ExternalApplier(live(ctx), bctx, factory(ctx)).apply(job, docs)
+    assert result.status == JobStatus.NEEDS_MANUAL and "case obligatoire" in result.detail
+
+
+@pytest.mark.browser
+def test_external_unconfirmed_submission_is_not_reported_as_sent(ctx, bctx, server, make_job, docs):
+    url = "https://jobs.lever.co/acme/123/apply"
+    server.page(r"^https://jobs\.lever\.co/acme/123/apply$", body="""<form>
+      <label>Full name<input name="name" required></label>
+      <label>Email<input type="email" name="email" required></label>
+      <label>CV<input type="file" name="resume" required></label>
+      <button type="submit">Submit application</button></form>
+      <script>document.querySelector('form').onsubmit=e=>e.preventDefault()</script>""")
+    job = make_job(url=url, apply_url=url, apply_method=ApplyMethod.EXTERNAL)
+    result = ExternalApplier(live(ctx), bctx, factory(ctx)).apply(job, docs)
+    assert result.status == JobStatus.NEEDS_MANUAL and "confirmation absente" in result.detail
 
 
 # --------------------------------------------------------------------------- LinkedIn

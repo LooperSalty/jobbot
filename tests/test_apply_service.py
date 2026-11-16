@@ -105,6 +105,31 @@ def test_apply_routes_records_and_reviews(ctx, make_job):
     assert ctx.repo.get_job(low.id).status == JobStatus.PENDING_REVIEW
 
 
+def test_supported_external_offer_is_recorded_and_obeys_quota(ctx, make_job):
+    url = "https://jobs.lever.co/company/123/apply"
+    first = store_job(ctx, _job(make_job, 1, url=url, apply_url=url, apply_method=ApplyMethod.EXTERNAL), score=90)
+    second = store_job(ctx, _job(make_job, 2, url=url, apply_url=url, apply_method=ApplyMethod.EXTERNAL), score=80)
+    fake = FakeApplier("external", [applied(ApplyMethod.EXTERNAL)])
+    report = _run(with_limits(ctx, external_per_day=1), {"external": fake})
+    assert report.applied == 1 and report.skipped == 1
+    assert ctx.repo.application_for_job(first.id) is not None
+    assert ctx.repo.get_job(second.id).status == JobStatus.DOCS_READY
+
+
+def test_only_unattempted_manual_external_offers_are_retried(ctx, make_job):
+    url = "https://jobs.lever.co/company/123/apply"
+    one = store_job(ctx, _job(make_job, 1, url=url, apply_url=url, apply_method=ApplyMethod.EXTERNAL),
+                    status=JobStatus.NEEDS_MANUAL, score=90)
+    two = store_job(ctx, _job(make_job, 2, url=url, apply_url=url, apply_method=ApplyMethod.EXTERNAL),
+                    status=JobStatus.NEEDS_MANUAL, score=90)
+    service.set_job_status(ctx, one, JobStatus.NEEDS_MANUAL, service.EXTERNAL_DETAIL)
+    service.set_job_status(ctx, two, JobStatus.NEEDS_MANUAL, "Envoi tenté mais confirmation absente")
+    fake = FakeApplier("external", [applied(ApplyMethod.EXTERNAL)])
+    report = _run(ctx, {"external": fake})
+    assert report.applied == 1 and fake.calls == [one.id]
+    assert ctx.repo.get_job(two.id).status == JobStatus.NEEDS_MANUAL
+
+
 def _run(ctx, appliers, **kw):
     mp = pytest.MonkeyPatch()
     try:
